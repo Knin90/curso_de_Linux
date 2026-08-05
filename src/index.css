@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@layer base {
+  body {
+    @apply bg-terminal-bg text-terminal-text font-sans;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(63,185,80,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(88,196,221,0.03) 0%, transparent 50%);
+  }
+
+  pre {
+    @apply overflow-x-auto;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #21262d;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #30363d;
+  }
+}
+
+@layer components {
+  .glow-green {
+    box-shadow: 0 0 20px rgba(63,185,80,0.15);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(88,196,221,0.15);
+  }
+
+  .gradient-text {
+    background: linear-gradient(to right, #3fb950, #58c4dd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .prose-terminal {
+    @apply text-terminal-text leading-relaxed;
+  }
+
+  .prose-terminal h1 {
+    @apply text-2xl font-bold text-terminal-green mb-4 mt-8 font-mono;
+  }
+
+  .prose-terminal h2 {
+    @apply text-xl font-semibold text-terminal-cyan mb-3 mt-6 border-b border-terminal-border pb-2;
+  }
+
+  .prose-terminal h3 {
+    @apply text-lg font-semibold text-terminal-text mb-2 mt-5;
+  }
+
+  .prose-terminal p {
+    @apply mb-4 text-terminal-text/90;
+  }
+
+  .prose-terminal ul {
+    @apply list-disc pl-6 mb-4 space-y-1;
+  }
+
+  .prose-terminal ol {
+    @apply list-decimal pl-6 mb-4 space-y-1;
+  }
+
+  .prose-terminal li {
+    @apply text-terminal-text/90;
+  }
+
+  .prose-terminal code:not(pre code) {
+    @apply bg-terminal-border text-terminal-yellow px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose-terminal pre {
+    @apply border border-terminal-border rounded-lg p-4 mb-4 overflow-x-auto;
+    background: linear-gradient(135deg, #0d1117 0%, #0a0e14 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+
+  .prose-terminal pre code {
+    @apply text-sm font-mono text-terminal-text/95;
+  }
+
+  .prose-terminal blockquote {
+    @apply border-l-4 border-terminal-green pl-4 italic text-terminal-muted mb-4;
+  }
+
+  .prose-terminal table {
+    @apply w-full border-collapse mb-4 text-sm;
+  }
+
+  .prose-terminal th {
+    @apply bg-terminal-surface border border-terminal-border px-3 py-2 text-left font-semibold text-terminal-cyan;
+  }
+
+  .prose-terminal td {
+    @apply border border-terminal-border px-3 py-2 text-terminal-text/90;
+  }
+
+  .prose-terminal tr:nth-child(even) td {
+    @apply bg-terminal-surface/50;
+  }
+
+  .prose-terminal strong {
+    @apply font-semibold text-terminal-text;
+  }
+
+  .prose-terminal a {
+    @apply text-terminal-cyan underline;
+  }
+
+  .prose-terminal hr {
+    @apply border-terminal-border my-6;
+  }
+}
+
+/* ---------- Theme toggle (compartido landing + niveles) ---------- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.2s ease;
+}
+.theme-toggle:hover { border-color: var(--fg); }
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.theme-toggle .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }

@@ -1,0 +1,812 @@
+/* ============================================================
+   Landing — diseño aplicado por el usuario (scoped .landing)
+   ============================================================ */
+
+.landing {
+  --bg:      oklch(99% 0.002 240);
+  --surface: oklch(100% 0 0);
+  --fg:      oklch(18% 0.012 250);
+  --muted:   oklch(54% 0.012 250);
+  --border:  oklch(92% 0.005 250);
+  --accent:  oklch(58% 0.18 255);
+  --accent-ink: oklch(45% 0.17 255);
+  --accent-soft: oklch(96.5% 0.02 255);
+  --success: oklch(55% 0.13 155);
+  --warn:    oklch(58% 0.14 75);
+
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius: 12px;
+  --maxw: 1080px;
+  --nav-h: 64px;
+
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* -------- Modo oscuro (tokens derivados en OKLCh, mismos valores que las páginas de nivel) -------- */
+[data-theme="dark"] .landing {
+  color-scheme: dark;
+  --bg:         oklch(15.5% 0.01 250);
+  --surface:    oklch(19.5% 0.012 250);
+  --fg:         oklch(93% 0.004 250);
+  --muted:      oklch(63% 0.01 250);
+  --border:     oklch(100% 0 0 / 0.1);
+  --accent:     oklch(66% 0.17 255);
+  --accent-ink: oklch(80% 0.12 255);
+  --accent-soft: oklch(24% 0.04 255);
+  --success:    oklch(72% 0.12 155);
+  --warn:       oklch(72% 0.12 75);
+}
+
+.landing *,
+.landing *::before,
+.landing *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.landing ::selection {
+  background: var(--accent-soft);
+}
+
+.landing .container {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.landing a {
+  color: var(--fg);
+}
+
+/* ---------- Nav ---------- */
+.landing .nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.landing .nav-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.landing .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.landing .brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--fg);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+.landing .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.landing .nav-links a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.01em;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  cursor: pointer;
+}
+.landing .nav-links a:hover {
+  color: var(--fg);
+  background: var(--surface);
+}
+.landing .nav-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.landing .nav-cta {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 9px 16px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  cursor: pointer;
+}
+.landing .nav-cta:hover {
+  background: var(--accent-ink);
+}
+.landing .nav-cta:active {
+  transform: translateY(1px);
+}
+.landing .nav-cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Hero ---------- */
+.landing .hero {
+  padding: 88px 0 72px;
+}
+.landing .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 22%, var(--border));
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+.landing .hero h1 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(40px, 6vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  margin: 24px 0 20px;
+  max-width: 17ch;
+}
+.landing .hero-sub {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 60ch;
+}
+.landing .hero-sub strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.landing .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.landing .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  min-height: 48px;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  cursor: pointer;
+}
+.landing .btn-primary:hover {
+  background: var(--accent-ink);
+}
+.landing .btn-primary:active {
+  transform: translateY(1px);
+}
+.landing .btn-primary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.landing .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+  min-height: 48px;
+  padding: 0 4px;
+  border-bottom: 1.5px solid var(--border);
+  transition: border-color 0.15s ease;
+  cursor: pointer;
+}
+.landing .btn-secondary:hover {
+  border-color: var(--fg);
+}
+.landing .btn-secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Stat strip ---------- */
+.landing .stat-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.landing .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.landing .stat {
+  padding: 28px 24px;
+  border-right: 1px solid var(--border);
+}
+.landing .stat:last-child {
+  border-right: none;
+}
+.landing .stat-value {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.landing .stat-value small {
+  font-size: 22px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.landing .stat-label {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Sections ---------- */
+.landing .section {
+  padding: 84px 0;
+}
+.landing .section-head {
+  margin-bottom: 40px;
+  max-width: 70ch;
+}
+.landing .section-kicker {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.landing .section-head h2 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(30px, 4vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.landing .section-head p {
+  margin-top: 14px;
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- What's new ---------- */
+.landing .new-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.landing .new-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.landing .new-card:hover {
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+  transform: translateY(-2px);
+}
+.landing .new-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.landing .new-card h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.landing .badge-new {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--border));
+  padding: 4px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.landing .new-card p {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.landing .new-card .tools {
+  margin-top: auto;
+  padding-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-variant-numeric: tabular-nums;
+}
+.landing .new-card .tools span {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-right: 8px;
+}
+.landing .new-note {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+  padding: 4px 0 4px 16px;
+}
+.landing .new-note strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.landing .new-note .mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---------- Structure / stages ---------- */
+.landing .stage {
+  border-top: 1px solid var(--border);
+  padding: 36px 0 28px;
+}
+.landing .stage:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.landing .stage-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.landing .stage-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.landing .stage-head h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 24px;
+  letter-spacing: -0.015em;
+}
+.landing .stage-count {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.landing .level-list {
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.landing .level {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.landing .level:last-child {
+  border-bottom: none;
+}
+.landing .level:hover {
+  background: var(--bg);
+}
+.landing .level-num {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.landing .level-title {
+  font-size: 15.5px;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  color: var(--fg);
+  transition: color 0.15s ease;
+}
+.landing a.level-title:hover {
+  color: var(--accent-ink);
+}
+.landing .level-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.landing .tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.landing .tag-new {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--border));
+}
+.landing .tag-ext {
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.landing .tag-exists {
+  color: var(--muted);
+  border: 1px solid transparent;
+}
+
+/* ---------- Evaluation ---------- */
+.landing .eval-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.landing .eval-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+}
+.landing .eval-index {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.landing .eval-card h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  margin: 10px 0 8px;
+}
+.landing .eval-card p {
+  font-size: 14.5px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.landing .eval-card .meta {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing .cert-wrap {
+  margin-top: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.landing .cert-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.landing .cert-head h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.landing .cert-head span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.landing .cert-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  align-items: baseline;
+}
+.landing .cert-row:last-child {
+  border-bottom: none;
+}
+.landing .cert-stage {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.landing .cert-certs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.landing .cert-certs .tag {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 13.5px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+}
+.landing .cert-certs .tag.main {
+  background: var(--accent-soft);
+  border-color: color-mix(in oklab, var(--accent) 26%, var(--border));
+  color: var(--accent-ink);
+}
+
+/* ---------- Project diagram ---------- */
+.landing .diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  max-width: 720px;
+}
+.landing .diagram-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.landing .node {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  padding: 14px 16px;
+}
+.landing .node .ic {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.landing .node.accent .ic {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.landing .node-label {
+  font-size: 14.5px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+.landing .node-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.landing .edge {
+  align-self: center;
+  width: 1px;
+  height: 26px;
+  background: var(--border);
+}
+.landing .branch {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding-left: 44px;
+  position: relative;
+}
+.landing .branch::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.landing .branch .node {
+  border-style: dashed;
+}
+.landing .diagram-foot {
+  margin-top: 22px;
+  font-size: 14px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  max-width: 58ch;
+}
+.landing .diagram-foot strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ---------- Footer CTA ---------- */
+.landing .final-cta {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 72px 0 80px;
+  text-align: center;
+}
+.landing .final-cta h2 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(28px, 3.6vw, 38px);
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+.landing .final-cta p {
+  margin: 14px auto 28px;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: 16px;
+}
+.landing .footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  background: var(--bg);
+}
+.landing .footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .landing .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing .stat {
+    border-bottom: 1px solid var(--border);
+  }
+  .landing .stat:nth-child(2n) {
+    border-right: none;
+  }
+  .landing .stat:nth-child(n+3) {
+    border-bottom: none;
+  }
+  .landing .new-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing .eval-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing .cert-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .landing .nav-links {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .landing .hero {
+    padding: 56px 0 48px;
+  }
+  .landing .section {
+    padding: 60px 0;
+  }
+  .landing .level {
+    grid-template-columns: 44px 1fr;
+  }
+  .landing .level-tags {
+    grid-column: 2;
+    justify-content: flex-start;
+    margin-top: -6px;
+  }
+  .landing .branch {
+    padding-left: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing {
+    scroll-behavior: auto;
+  }
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    transition: none !important;
+  }
+}
