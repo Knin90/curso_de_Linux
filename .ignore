@@ -1,0 +1,70 @@
+# .ignore — para ripgrep (rg), the_silver_searcher (ag) y otras herramientas de búsqueda.
+#
+# Este archivo excluye archivos y carpetas de las búsquedas, EN CUALQUIER CONTEXTO
+# (no solo dentro de un repo git). Tiene prioridad sobre .gitignore.
+#
+# Nota: ripgrep/ag YA respetan .gitignore automáticamente; aquí se ignoran además
+# cosas que viven en el repo pero ensucian los resultados de búsqueda.
+
+# Dependencias y build
+node_modules/
+dist/
+build/
+.pnp/
+
+# Control de versiones y metadatos
+.git/
+.gitignore
+.ignore
+
+# Caches y herramientas locales de IA (contenido ajeno al código fuente)
+.vite/
+.cache/
+.pnpm-store/
+.claude/
+.agents/
+.codex/
+.codegraph/
+.impeccable/
+.atl/
+.skill-registry.cache.json
+
+# Lockfiles (no aportan a la búsqueda de código)
+pnpm-lock.yaml
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+
+# Logs y temporales
+logs/
+*.log
+*.tmp
+*.swp
+
+# Entorno y secretos
+.env
+.env.*
+
+# Compressed / binarios / medios
+*.min.js
+*.min.css
+*.map
+*.tgz
+*.gz
+*.zip
+*.tar
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Informes de cobertura
+coverage/
+*.lcov

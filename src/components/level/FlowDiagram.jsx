@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import Inline from './InlineText'
+import useReveal from '../../hooks/useReveal'
 
 // Detects whether a fenced "text" block is a simple vertical flow diagram
 // (vs. a boxed ASCII diagram or a plain text table).
@@ -16,6 +18,9 @@ export function looksLikeFlow(code) {
 const CONNECTOR_RE = /^[\s│▼├└─v|^►]+$/
 
 export default function FlowDiagram({ code }) {
+  // Reveal animado: los nodos y conectores entran en cascada cuando el
+  // diagrama aparece en pantalla (una sola vez).
+  const { ref, inView } = useReveal(0.25)
   const nodes = []
   for (const raw of code.split('\n')) {
     const t = raw.trim()
@@ -39,12 +44,12 @@ export default function FlowDiagram({ code }) {
   }
 
   return (
-    <div className="flow">
+    <div ref={ref} className={`flow${inView ? ' in' : ''}`}>
       {nodes.map((n, i) =>
         n.kind === 'edge' ? (
-          <div key={i} className="fedge" />
+          <div key={i} className="fedge" style={{ '--i': i }} />
         ) : (
-          <div key={i} className="fnode">
+          <div key={i} className="fnode" style={{ '--i': i }}>
             <div>
               <div className="fn-label">{Inline(n.label)}</div>
               {n.meta && <div className="fn-meta">{Inline(n.meta)}</div>}

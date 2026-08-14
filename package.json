@@ -1,20 +1,18 @@
 {
-  "name": "linux-mastery",
+  "name": "curso-de-linux",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:exports": "node scripts/audit-exports.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "react-markdown": "^9.0.1",
-    "remark-gfm": "^4.0.0",
-    "rehype-highlight": "^7.0.0"
+    "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.2",

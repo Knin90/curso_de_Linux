@@ -3,28 +3,33 @@
    ============================================================ */
 
 .level-page {
-  --bg:        oklch(99% 0.002 240);
-  --surface:   oklch(100% 0 0);
-  --fg:        oklch(18% 0.012 250);
-  --muted:     oklch(54% 0.012 250);
-  --border:    oklch(92% 0.005 250);
-  --accent:    oklch(58% 0.18 255);
-  --accent-ink: oklch(45% 0.17 255);
-  --accent-soft: oklch(96.5% 0.02 255);
-  --warn:      oklch(58% 0.14 75);
-  --warn-soft: oklch(97% 0.012 75);
-  --ok:        oklch(55% 0.13 155);
-  --ok-soft:   oklch(96.5% 0.012 155);
-  --code-bg:   oklch(20% 0.012 250);
-  --code-fg:   oklch(92% 0.004 250);
-  --code-mut:  oklch(66% 0.012 250);
+  /* Paleta Ansible: #03624C (verde profundo) · #030F0F (dark) · #00DF82 (acento) */
+  --bg:        #F6F9F7;
+  --surface:   #FFFFFF;
+  --fg:        #0C1F18;
+  --muted:     #3E524A;
+  --border:    #B5C9BE;
+  --accent:    #03624C;
+  --accent-ink: #02483A;
+  --accent-soft: #E6F2EC;
+  --warn:      #8A5A00;
+  --warn-soft: #FBF3E4;
+  --ok:        #03624C;
+  --ok-soft:   #E6F2EC;
+  --code-bg:   #030F0F;
+  --code-fg:   #DCECE4;
+  --code-mut:  #8FA89C;
 
-  --font-display: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-body:    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-body:    'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   --radius: 12px;
   --nav-h: 60px;
+
+  /* Emil Kowalski: curvas custom — los easings por defecto son demasiado débiles */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   color-scheme: light;
   background: var(--bg);
@@ -38,45 +43,40 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* -------- Modo oscuro (tokens derivados en OKLCh, aplicado desde <html data-theme="dark">) -------- */
+/* -------- Modo oscuro (paleta Ansible: #030F0F / #00DF82 / #03624C) -------- */
 [data-theme="dark"] .level-page {
   color-scheme: dark;
-  --bg:         oklch(15.5% 0.01 250);
-  --surface:    oklch(19.5% 0.012 250);
-  --fg:         oklch(93% 0.004 250);
-  --muted:      oklch(63% 0.01 250);
-  --border:     oklch(100% 0 0 / 0.1);
-  --accent:     oklch(66% 0.17 255);
-  --accent-ink: oklch(80% 0.12 255);
-  --accent-soft: oklch(24% 0.04 255);
-  --warn:       oklch(72% 0.12 75);
-  --warn-soft:  oklch(22% 0.02 75);
-  --ok:         oklch(72% 0.12 155);
-  --ok-soft:    oklch(21% 0.02 155);
-  --code-bg:    oklch(12.5% 0.01 250);
-  --code-fg:    oklch(94% 0.004 250);
-  --code-mut:   oklch(56% 0.01 250);
+  --bg:         #030F0F;
+  --surface:    #0A1613;
+  --fg:         #DCECE4;
+  --muted:      #9CB4A9;
+  --border:     rgba(255,255,255,0.1);
+  --accent:     #00DF82;
+  --accent-ink: #7DF5BC;
+  --accent-soft: rgba(0,223,130,0.12);
+  --warn:       #FBBF24;
+  --warn-soft:  rgba(251,191,36,0.1);
+  --ok:         #00DF82;
+  --ok-soft:    rgba(0,223,130,0.12);
+  --code-bg:    #020A09;
+  --code-fg:    #DCECE4;
+  --code-mut:   #6E8A7E;
 }
 
 /* Transiciones suaves al cambiar de tema (specificity 0, no pisan transiciones propias) */
 :where(
   .level-page .nav,
-  .level-page .toc-strip,
-  .level-page .toc-chip,
   .level-page .chip,
   .level-page .nav-level,
   .level-page .card,
   .level-page .card-analogy,
   .level-page .card-warn,
   .level-page .card-result,
-  .level-page .close-card,
-  .level-page .next-link,
   .level-page .next-level,
   .level-page .footer,
   .level-page .tbl-wrap,
   .level-page .code-block,
   .level-page .note,
-  .level-page .rail a,
   .level-page .fnode,
   .level-page .module-num,
   .level-page .def-row,
@@ -127,7 +127,13 @@
   letter-spacing: -0.01em;
   text-decoration: none;
   white-space: nowrap;
+  transition: color 0.15s ease, transform 160ms var(--ease-out);
+  will-change: transform;
 }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .brand:hover { color: var(--accent-ink); }
+}
+.level-page .brand:active { transform: scale(0.97); }
 .level-page .brand-mark {
   width: 28px;
   height: 28px;
@@ -160,11 +166,14 @@
   padding: 8px 14px;
   border-radius: 8px;
   white-space: nowrap;
-  transition: background-color 0.15s ease, transform 0.05s ease;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out);
   cursor: pointer;
+  will-change: transform;
 }
-.level-page .nav-cta:hover { background: var(--accent-ink); }
-.level-page .nav-cta:active { transform: translateY(1px); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .nav-cta:hover { background: var(--accent-ink); }
+}
+.level-page .nav-cta:active { transform: scale(0.97); }
 .level-page .nav-cta:focus-visible,
 .level-page .brand:focus-visible {
   outline: 2px solid var(--accent);
@@ -183,8 +192,16 @@
   color: var(--muted);
   margin-bottom: 18px;
 }
-.level-page .crumbs a { color: var(--muted); text-decoration: none; }
-.level-page .crumbs a:hover { color: var(--fg); }
+.level-page .crumbs a {
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-block;
+  transition: color 0.15s ease, transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .crumbs a:hover { color: var(--fg); }
+}
+.level-page .crumbs a:active { transform: scale(0.97); }
 .level-page .crumbs .sep { color: var(--border); }
 .level-page .crumbs .cur { color: var(--fg); font-weight: 600; }
 .level-page .hero h1 {
@@ -231,120 +248,49 @@
 }
 .level-page .chip b { font-weight: 650; }
 
-/* ---------- Module chips (mobile TOC) ---------- */
-.level-page .toc-strip {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  padding: 14px 0;
-}
-.level-page .toc-strip-inner {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.level-page .toc-strip-inner::-webkit-scrollbar { display: none; }
-.level-page .toc-chip {
+/* Botón de estado en la cabecera de cada módulo */
+.level-page .module-done {
+  margin-left: auto;
   flex-shrink: 0;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 550;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  border-radius: 999px;
-  padding: 7px 13px;
-  white-space: nowrap;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-.level-page .toc-chip:hover { color: var(--fg); border-color: var(--fg); }
-.level-page .toc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.level-page .toc-chip .n {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  margin-right: 6px;
-  opacity: 0.7;
-}
-
-/* ---------- Layout: rail + content ---------- */
-.level-page .layout {
-  display: grid;
-  grid-template-columns: 230px minmax(0, 1fr);
-  gap: 44px;
-  padding: 48px 0 72px;
-}
-.level-page .rail { position: sticky; top: calc(var(--nav-h) + 20px); align-self: start; }
-.level-page .rail-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-family: var(--font-mono);
   font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 12px;
-  padding-left: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.2s ease, transform 160ms var(--ease-out);
+  will-change: transform;
 }
-.level-page .rail ol { list-style: none; display: flex; flex-direction: column; }
-.level-page .rail a {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.35;
-  font-weight: 500;
-  padding: 7px 12px;
-  border-left: 2px solid var(--border);
-  transition: color 0.15s ease, border-color 0.15s ease;
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-done:hover { color: var(--fg); border-color: var(--fg); }
 }
-.level-page .rail a .rn {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-.level-page .rail a:hover { color: var(--fg); }
-.level-page .rail a.active {
-  color: var(--accent-ink);
-  border-left-color: var(--accent);
-  font-weight: 600;
-}
-.level-page .rail a:focus-visible {
+.level-page .module-done:active { transform: scale(0.96); }
+.level-page .module-done:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
-.level-page .rail-foot {
-  margin-top: 18px;
-  padding-left: 12px;
-  font-size: 12.5px;
-  color: var(--muted);
-  line-height: 1.5;
+.level-page .module-done .md-icon { font-size: 12px; line-height: 1; }
+.level-page .module-done.done {
+  color: var(--ok);
+  border-color: color-mix(in oklab, var(--ok) 40%, var(--border));
+  background: var(--ok-soft);
 }
-.level-page .rail-foot a {
-  color: var(--fg);
-  font-weight: 600;
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
-}
-.level-page .rail-foot a:hover { border-color: var(--fg); }
-.level-page .content { min-width: 0; }
 
-/* ---------- Module ---------- */
-.level-page .module { scroll-margin-top: calc(var(--nav-h) + 24px); }
-.level-page .module-head {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 26px 0 20px;
-  margin-bottom: 8px;
+/* Chip de progreso del hero */
+.level-page .chip.chip-done {
+  color: var(--ok);
+  border-color: color-mix(in oklab, var(--ok) 40%, var(--border));
+  background: var(--ok-soft);
 }
-.level-page .module:not(:first-child) .module-head {
-  border-top: 1px solid var(--border);
-  margin-top: 40px;
-}
+
 .level-page .module-num {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -356,13 +302,6 @@
   border-radius: 10px;
   padding: 8px 12px;
   flex-shrink: 0;
-}
-.level-page .module-head h2 {
-  font-family: var(--font-display);
-  font-weight: 650;
-  font-size: clamp(24px, 3vw, 30px);
-  letter-spacing: -0.018em;
-  line-height: 1.15;
 }
 
 /* ---------- Blocks ---------- */
@@ -604,13 +543,18 @@
   border-radius: 6px;
   padding: 4px 10px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out), color 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
 }
-.level-page .copy-btn:hover { background: color-mix(in oklab, white 10%, transparent); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .copy-btn:hover { background: color-mix(in oklab, white 10%, transparent); }
+}
+.level-page .copy-btn:active { transform: scale(0.93); }
 .level-page .copy-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .level-page .copy-btn.done {
   color: var(--ok);
   border-color: color-mix(in oklab, var(--ok) 50%, transparent);
+  transform: scale(1.03);
 }
 .level-page pre {
   padding: 16px;
@@ -681,82 +625,7 @@
 }
 .level-page .note p { font-size: 14.5px; line-height: 1.6; color: var(--fg); }
 .level-page .example-intro { margin-top: 10px; font-size: 14.5px; color: var(--muted); line-height: 1.6; max-width: 68ch; }
-.level-page .list-ans { list-style: decimal; padding-left: 22px; }
-.level-page .list-ans li {
-  font-size: 14.5px;
-  line-height: 1.6;
-  padding-bottom: 10px;
-  color: var(--fg);
-}
-.level-page .list-ans li::marker {
-  color: var(--accent-ink);
-  font-weight: 700;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-}
 
-/* ---------- Next link ---------- */
-.level-page .next-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 18px;
-  text-decoration: none;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-.level-page .next-link:hover {
-  border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
-  transform: translateY(-1px);
-}
-.level-page .next-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.level-page .next-link .nl-label {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-.level-page .next-link .nl-title {
-  font-family: var(--font-display);
-  font-weight: 650;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  color: var(--fg);
-}
-.level-page .next-link .nl-arrow { font-size: 20px; color: var(--accent); }
-
-/* ---------- Close + next level ---------- */
-.level-page .close-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 30px 30px 26px;
-  margin-top: 8px;
-}
-.level-page .close-card .kicker { margin-bottom: 14px; }
-.level-page .list-close { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 28px; }
-.level-page .list-close li {
-  position: relative;
-  padding-left: 26px;
-  font-size: 15px;
-  line-height: 1.5;
-}
-.level-page .list-close li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--ok);
-  font-weight: 700;
-  font-size: 14px;
-}
 .level-page .next-level {
   margin-top: 28px;
   display: flex;
@@ -768,9 +637,13 @@
   border-radius: var(--radius);
   padding: 28px 30px;
   text-decoration: none;
-  transition: transform 0.15s ease;
+  transition: transform 200ms var(--ease-out);
+  will-change: transform;
 }
-.level-page .next-level:hover { transform: translateY(-2px); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .next-level:hover { transform: translateY(-2px); }
+}
+.level-page .next-level:active { transform: scale(0.99); }
 .level-page .next-level:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -800,6 +673,21 @@
 }
 .level-page .next-level .nl-go { font-size: 26px; color: var(--bg); flex-shrink: 0; }
 
+/* ---------- Barra de progreso de scroll ---------- */
+.level-page .scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  z-index: 80;
+  pointer-events: none;
+  will-change: transform;
+}
+
 /* ---------- Footer ---------- */
 .level-page .footer { border-top: 1px solid var(--border); padding: 24px 0; }
 .level-page .footer-inner {
@@ -811,8 +699,17 @@
   font-size: 13px;
   color: var(--muted);
 }
-.level-page .footer a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--border); }
-.level-page .footer a:hover { border-color: var(--fg); }
+.level-page .footer a {
+  color: var(--fg);
+  text-decoration: none;
+  display: inline-block;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.15s ease, transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .footer a:hover { border-color: var(--fg); }
+}
+.level-page .footer a:active { transform: translateY(1px); }
 
 /* ---------- Quiz reveal ---------- */
 .level-page .list-quiz {
@@ -828,10 +725,18 @@
   border-radius: var(--radius);
   cursor: pointer;
   user-select: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s ease, transform 160ms var(--ease-out);
   overflow: hidden;
+  will-change: transform;
 }
-.level-page .quiz-item:hover { border-color: var(--accent); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .quiz-item:hover { border-color: var(--accent); }
+}
+.level-page .quiz-item:active { transform: scale(0.985); }
+.level-page .quiz-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .level-page .quiz-item.quiz-open { border-color: var(--accent); }
 .level-page .quiz-question {
   display: flex;
@@ -849,8 +754,27 @@
   font-size: 11px;
   color: var(--muted);
   margin-top: 3px;
+  transition: transform 200ms var(--ease-out);
 }
+.level-page .quiz-item.quiz-open .quiz-toggle-icon {
+  transform: rotate(180deg);
+}
+/* Reveal animado: grid-template-rows 0fr→1fr (interrumpible, solo GPU) */
 .level-page .quiz-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 240ms var(--ease-out), opacity 180ms ease;
+}
+.level-page .quiz-item.quiz-open .quiz-answer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.level-page .quiz-answer-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.level-page .quiz-answer-inner > div {
   padding: 10px 16px 14px;
   font-size: 14px;
   line-height: 1.6;
@@ -860,27 +784,546 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .level-page .layout { grid-template-columns: 1fr; }
-  .level-page .rail { display: none; }
-}
 @media (max-width: 640px) {
   .level-page .hero { padding: 44px 0 36px; }
   .level-page .two-col { grid-template-columns: 1fr; }
-  .level-page .list-close { grid-template-columns: 1fr; }
   .level-page .def-row { grid-template-columns: 1fr; gap: 2px; }
-  .level-page .module-head { align-items: flex-start; flex-direction: column; gap: 10px; }
   .level-page .next-level { flex-direction: column; align-items: flex-start; }
   .level-page td:first-child { white-space: normal; }
   .level-page .nav-level { display: none; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .level-page {
-    scroll-behavior: auto;
+/* ============================================================
+   Portada del nivel — módulos en tarjetas (páginas separadas)
+   ============================================================ */
+.level-page .level-progress {
+  margin-top: 6px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.level-page .level-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.level-page .level-progress-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.level-page .level-progress-count {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.level-page .level-progress-count.done { color: var(--ok); }
+.level-page .level-progress-track {
+  margin-top: 12px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.level-page .level-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  width: 0;
+  transition: width 500ms var(--ease-out);
+}
+.level-page .level-progress-fill.full { background: var(--ok); }
+
+.level-page .level-modules-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 56px;
+}
+.level-page .level-modules-title {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: -0.018em;
+}
+.level-page .level-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-cta:hover { background: var(--accent-ink); }
+}
+.level-page .level-cta:active { transform: scale(0.97); }
+.level-page .level-cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .level-cta .btn-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-cta:hover .btn-arrow { transform: translateX(4px); }
+}
+
+/* Rejilla de tarjetas de módulos */
+.level-page .level-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 24px 0 8px;
+}
+.level-page .level-module-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-decoration: none;
+  color: var(--fg);
+  transition: border-color 0.15s ease, transform 200ms var(--ease-out), background-color 0.2s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-module-card:hover {
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    transform: translateY(-2px);
   }
-  .level-page *,
-  .level-page *::before,
-  .level-page *::after {
-    transition: none !important;
+}
+.level-page .level-module-card:active { transform: scale(0.98); }
+.level-page .level-module-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .level-module-card.done {
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--border));
+}
+.level-page .lmc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.level-page .lmc-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.level-page .lmc-state {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--accent);
+  transition: color 0.2s ease;
+}
+.level-page .level-module-card.done .lmc-state { color: var(--ok); }
+.level-page .lmc-title {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 16.5px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Mini-barra de % de lectura por módulo */
+.level-page .lmc-reading {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 4px;
+}
+.level-page .lmc-reading-track {
+  flex: 1;
+  min-width: 0;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.level-page .lmc-reading-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transition: width 400ms var(--ease-out);
+}
+.level-page .level-module-card.done .lmc-reading-fill { background: var(--ok); }
+.level-page .lmc-reading-pct {
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.level-page .level-module-card.done .lmc-reading-pct { color: var(--ok); }
+.level-page .lmc-foot {
+  margin-top: 8px;
+  padding-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.level-page .lmc-done { color: var(--ok); }
+.level-page .lmc-pending { color: var(--muted); }
+
+/* ---------- Reveal on scroll (portada) ---------- */
+.level-page [data-reveal]:not(.in) {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.level-page [data-reveal].in {
+  animation: level-rise 460ms var(--ease-out) backwards;
+  animation-delay: min(calc(var(--i, 0) * 60ms), 240ms);
+}
+@keyframes level-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   Página de módulo (lector de un solo módulo)
+   ============================================================ */
+.level-page .module-hero { padding: 40px 0 8px; }
+.level-page .module-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.level-page .module-hero h1 {
+  margin-top: 14px;
+  font-size: clamp(28px, 3.6vw, 40px);
+  max-width: 24ch;
+}
+
+/* Stepper de módulos */
+.level-page .module-stepper {
+  display: flex;
+  gap: 8px;
+  margin-top: 26px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.level-page .module-stepper::-webkit-scrollbar { display: none; }
+.level-page .ms-chip {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 40px;
+  height: 34px;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.2s ease, transform 160ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .ms-chip:hover { color: var(--fg); border-color: var(--fg); }
+}
+.level-page .ms-chip:active { transform: scale(0.94); }
+.level-page .ms-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .ms-chip.active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Halo de «radar» del módulo en curso: anillo que se expande y se desvanece
+   (pseudo-elemento con scale/opacity — compositor-friendly, sin box-shadow) */
+.level-page .ms-chip.active::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1.5px solid var(--accent);
+  border-radius: 11px;
+  opacity: 0;
+  pointer-events: none;
+  animation: ms-active-breath 2.2s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes ms-active-breath {
+  0%   { transform: scale(0.9);  opacity: 0.65; }
+  55%  { transform: scale(1.08); opacity: 0; }
+  100% { transform: scale(1.08); opacity: 0; }
+}
+
+/* Punto pulsante del módulo en curso (dentro del chip activo) */
+.level-page .ms-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ms-pulse 1.5s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes ms-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.95; }
+  50%      { transform: scale(0.55); opacity: 0.45; }
+}
+
+/* Check dibujado (trazo animado) en los módulos completados.
+   El retardo escalonado (--i) se topa a 280ms para que completar un módulo
+   en vivo se sienta ágil, aunque la cascada inicial siga viéndose. */
+.level-page .ms-check {
+  display: block;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.level-page .ms-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ms-check-draw 360ms var(--ease-out) both;
+  animation-delay: min(calc(var(--i, 0) * 70ms), 280ms);
+}
+@keyframes ms-check-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-page .ms-chip.active::after,
+  .level-page .ms-pulse,
+  .level-page .ms-check path {
+    animation: none;
+  }
+  .level-page .ms-pulse { display: none; }
+  .level-page .ms-check path { stroke-dashoffset: 0; }
+}
+
+/* Contenido del módulo (columna de lectura) */
+.level-page .module-body {
+  max-width: 880px;
+  padding-top: 26px;
+}
+.level-page .module-end {
+  height: 1px;
+  pointer-events: none;
+}
+
+/* Entradas animadas del contenido (fallback sin View Transitions) */
+.level-page .module-enter-fade { animation: module-fade-in 340ms var(--ease-out) both; }
+.level-page .module-enter-next { animation: module-in-right 400ms var(--ease-out) both; }
+.level-page .module-enter-prev { animation: module-in-left 400ms var(--ease-out) both; }
+@keyframes module-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes module-in-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes module-in-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Navegación entre módulos */
+.level-page .module-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 14px;
+  padding-top: 12px;
+  padding-bottom: 72px;
+}
+.level-page .module-nav-prev,
+.level-page .module-nav-next {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: border-color 0.15s ease, transform 200ms var(--ease-out), background-color 0.2s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-prev:hover,
+  .level-page .module-nav-next:hover {
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    transform: translateY(-1px);
+  }
+}
+.level-page .module-nav-prev:active,
+.level-page .module-nav-next:active { transform: scale(0.99); }
+.level-page .module-nav-prev:focus-visible,
+.level-page .module-nav-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .module-nav-next { justify-content: space-between; }
+.level-page .module-nav-prev.is-empty { visibility: hidden; }
+.level-page .mn-arrow {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-prev:hover .mn-arrow { transform: translateX(-3px); }
+  .level-page .module-nav-next:hover .mn-arrow { transform: translateX(3px); }
+}
+.level-page .mn-k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.level-page .mn-t {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--fg);
+}
+.level-page .module-nav-next.close-level {
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--border));
+  background: var(--ok-soft);
+}
+.level-page .module-nav-next.close-level .mn-arrow { color: var(--ok); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-next.close-level:hover { border-color: var(--ok); }
+}
+
+/* ============================================================
+   Animación de diagramas y secuencias explicativas
+   ============================================================ */
+/* Flujo: nodos y conectores entran en cascada cuando el diagrama aparece */
+.level-page .flow .fnode,
+.level-page .flow .fedge { opacity: 0; }
+.level-page .flow.in .fnode {
+  animation: flow-node-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.level-page .flow.in .fedge {
+  animation: flow-edge-in 280ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+@keyframes flow-node-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes flow-edge-in {
+  from { opacity: 0; transform: scaleY(0); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+/* Secuencias (listas numeradas): los pasos entran en cascada */
+.level-page .list-steps li { opacity: 0; }
+.level-page .list-steps.in li {
+  animation: step-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   View Transitions (cambio de página completa entre módulos)
+   ============================================================ */
+::view-transition-old(root) { animation: vt-fade-out 240ms var(--ease-out); }
+::view-transition-new(root) { animation: vt-fade-in 240ms var(--ease-out); }
+.vt-next::view-transition-old(root) { animation: vt-out-left 280ms var(--ease-out); }
+.vt-next::view-transition-new(root) { animation: vt-in-right 280ms var(--ease-out); }
+.vt-prev::view-transition-old(root) { animation: vt-out-right 280ms var(--ease-out); }
+.vt-prev::view-transition-new(root) { animation: vt-in-left 280ms var(--ease-out); }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-out-left  { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes vt-in-right  { from { opacity: 0; transform: translateX(24px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(24px); } }
+@keyframes vt-in-left   { from { opacity: 0; transform: translateX(-24px); } }
+
+/* ---------- Responsive (portada + módulo) ---------- */
+@media (max-width: 900px) {
+  .level-page .level-modules { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .level-page .module-nav { grid-template-columns: 1fr; }
+  .level-page .module-nav-prev.is-empty { display: none; }
+  .level-page .level-modules { grid-template-columns: 1fr; }
+  .level-page .module-hero { padding: 34px 0 6px; }
+}
+
+/* ---------- Preferencias de movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .level-page [data-reveal]:not(.in) {
+    opacity: 1;
+    transform: none;
+  }
+  .level-page .flow .fnode,
+  .level-page .flow .fedge,
+  .level-page .list-steps li {
+    opacity: 1 !important;
+  }
+  .level-page .module-enter-fade,
+  .level-page .module-enter-next,
+  .level-page .module-enter-prev {
+    animation: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
   }
 }

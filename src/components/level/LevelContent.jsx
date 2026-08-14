@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CodeBlock from './CodeBlock'
 import FlowDiagram, { looksLikeFlow } from './FlowDiagram'
 import Inline from './InlineText'
+import useReveal from '../../hooks/useReveal'
 
 /* ============================================================
    Convierte el markdown de un módulo en las secciones y bloques
@@ -230,6 +231,19 @@ export function getCloseItems(md) {
 
 /* ---------- Bloques ---------- */
 
+// Secuencia explicativa (lista numerada): los pasos entran en cascada cuando
+// la lista aparece en pantalla (una sola vez).
+function StepsList({ items }) {
+  const { ref, inView } = useReveal(0.08)
+  return (
+    <ol ref={ref} className={`list-steps${inView ? ' in' : ''}`}>
+      {items.map((it, j) => (
+        <li key={j} style={{ '--i': j }}>{Inline(it)}</li>
+      ))}
+    </ol>
+  )
+}
+
 function renderBlock(b, key) {
   switch (b.type) {
     case 'para':
@@ -243,13 +257,7 @@ function renderBlock(b, key) {
         </ul>
       )
     case 'ordered':
-      return (
-        <ol key={key} className="list-steps">
-          {b.items.map((it, j) => (
-            <li key={j}>{Inline(it)}</li>
-          ))}
-        </ol>
-      )
+      return <StepsList key={key} items={b.items} />
     case 'table':
       return (
         <div key={key} className="b tbl-wrap">
@@ -356,15 +364,7 @@ function SectionBlocks({ section }) {
       <div className="b card">
         <span className="kicker">{kicker}</span>
         {blocks.map((b, i) =>
-          b.type === 'ordered' ? (
-            <ol key={i} className="list-steps">
-              {b.items.map((it, j) => (
-                <li key={j}>{Inline(it)}</li>
-              ))}
-            </ol>
-          ) : (
-            renderBlock(b, i)
-          )
+          b.type === 'ordered' ? <StepsList key={i} items={b.items} /> : renderBlock(b, i)
         )}
       </div>
     )
@@ -455,19 +455,35 @@ function SectionBlocks({ section }) {
 function QuizSection({ kicker, questions, answers }) {
   const [revealed, setRevealed] = useState({})
   const toggle = i => setRevealed(prev => ({ ...prev, [i]: !prev[i] }))
+  const onKeyDown = (e, i) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      toggle(i)
+    }
+  }
   return (
     <div className="b card">
       <span className="kicker">{kicker}</span>
       <ol className="list-quiz">
         {questions.map((q, i) => (
-          <li key={i} className={`quiz-item${revealed[i] ? ' quiz-open' : ''}`} onClick={() => toggle(i)}>
+          <li
+            key={i}
+            className={`quiz-item${revealed[i] ? ' quiz-open' : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-expanded={Boolean(revealed[i])}
+            onClick={() => toggle(i)}
+            onKeyDown={e => onKeyDown(e, i)}
+          >
             <div className="quiz-question">
               <span className="quiz-q-text">{Inline(q)}</span>
-              <span className="quiz-toggle-icon">{revealed[i] ? '▲' : '▼'}</span>
+              <span className="quiz-toggle-icon" aria-hidden="true">▼</span>
             </div>
-            {revealed[i] && answers[i] && (
-              <div className="quiz-answer">{Inline(answers[i])}</div>
-            )}
+            <div className="quiz-answer" aria-hidden={!revealed[i]}>
+              <div className="quiz-answer-inner">
+                {answers[i] && <div>{Inline(answers[i])}</div>}
+              </div>
+            </div>
           </li>
         ))}
       </ol>

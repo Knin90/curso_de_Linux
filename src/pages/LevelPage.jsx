@@ -1,28 +1,46 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getLevel, levels, stages } from '../registry'
 import { contentRegistry } from '../content/contentRegistry'
-import ModuleContent, { getCloseItems } from '../components/level/LevelContent'
-import Inline from '../components/level/InlineText'
 import ThemeToggle from '../components/ThemeToggle'
+import ReadingProgress from '../components/ReadingProgress'
+import useLevelProgress from '../hooks/useLevelProgress'
+import useScrollMemory from '../hooks/useScrollMemory'
+import useRevealOnScroll from '../hooks/useRevealOnScroll'
+import { readLevelReading } from '../hooks/progressStorage'
 import './level.css'
 
 const pad = n => String(n).padStart(2, '0')
-const norm = s =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+
+const stateLevelRef = { current: null }
 
 export default function LevelPage() {
   const { levelId } = useParams()
+  useScrollMemory()
+  const pageRef = useRef(null)
+  useRevealOnScroll(pageRef)
+
   const level = getLevel(levelId)
   const levelContent = contentRegistry[Number(levelId)]
-
-  const [active, setActive] = useState(null)
-  const sectionRefs = useRef({})
-
   const isValid = Boolean(level && level.status === 'available' && levelContent)
+
+  const { meta, modules } = isValid ? levelContent : { meta: null, modules: [] }
+  const moduleIds = useMemo(() => modules.map(m => m.id), [modules])
+  const { count, total, isDone } = useLevelProgress(levelId, moduleIds)
+  const pct = total ? Math.round((count / total) * 100) : 0
+  const allDone = total > 0 && count >= total
+
+  // % de lectura por módulo (od-reading), releído al montar o cambiar de nivel.
+  const [reading, setReading] = useState(() => readLevelReading(levelId))
+  if (stateLevelRef.current !== levelId) {
+    stateLevelRef.current = levelId
+    setReading(readLevelReading(levelId))
+  }
+  const readingPct = mid => {
+    if (isDone(mid)) return 100 // completado ⇒ 100% aunque se haya desmarcado
+    const p = reading[mid]
+    return typeof p === 'number' ? p : 0
+  }
 
   const nextLevel = useMemo(() => {
     if (!isValid || !level) return null
@@ -34,36 +52,14 @@ export default function LevelPage() {
     return null
   }, [isValid, level])
 
-  const { meta, modules, contentMap } = isValid
-    ? levelContent
-    : { meta: null, modules: [], contentMap: {} }
-  const nextContent = nextLevel ? contentRegistry[nextLevel.id] : null
+  // Primer módulo sin completar: destino del CTA principal
+  const firstPending = modules.find(m => !isDone(m.id)) || null
+  const startTo = firstPending
+    ? `/nivel/${level.id}/modulo/${firstPending.id}`
+    : nextLevel
+      ? `/nivel/${nextLevel.id}`
+      : '/'
 
-  const closeItems = useMemo(() => {
-    if (!isValid || !modules.length) return []
-    const lastModule = modules[modules.length - 1]
-    const parsed = getCloseItems(contentMap[lastModule.id] || '')
-    return parsed.length ? parsed : modules.map(m => m.title)
-  }, [isValid, modules, contentMap])
-
-  // ================= Scrollspy =================
-  useEffect(() => {
-    if (!isValid || !modules.length) return
-    const onScroll = () => {
-      const pos = window.scrollY + 150
-      let current = modules[0]?.id ?? null
-      modules.forEach(m => {
-        const el = sectionRefs.current[m.id]
-        if (el && el.offsetTop <= pos) current = m.id
-      })
-      setActive(current)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [isValid, modules])
-
-  // ================= Estados vacíos =================
   if (!level) {
     return (
       <div className="level-page">
@@ -88,10 +84,15 @@ export default function LevelPage() {
   }
 
   const stage = stages.find(s => s.id === meta.stage)
-  const hasLab = modules.some(m => norm(m.title).includes('laboratorio'))
+  const ctaLabel = allDone
+    ? (nextLevel ? 'Ir al siguiente nivel' : 'Nivel completado')
+    : count > 0
+      ? 'Continuar el nivel'
+      : 'Comenzar el nivel'
 
   return (
-    <div className="level-page">
+    <div className="level-page" ref={pageRef}>
+      <ReadingProgress />
       <header className="nav">
         <div className="container nav-inner">
           <Link className="brand" to="/">
@@ -100,16 +101,16 @@ export default function LevelPage() {
           </Link>
           <span className="nav-level">Nivel {level.id} · {meta.title}</span>
           <ThemeToggle />
-          <a className="nav-cta" href="#modulos">Ir a los módulos</a>
+          <Link className="nav-cta" to={startTo}>{ctaLabel}</Link>
         </div>
       </header>
 
-      <main id="top">
+      <main>
         {/* ---------- HERO ---------- */}
         <section className="hero">
           <div className="container">
             <nav className="crumbs" aria-label="Ruta">
-              <a href="/#estructura">Índice general</a>
+              <Link to="/#estructura">Índice general</Link>
               <span className="sep">/</span>
               <span>Etapa {stage?.id} · {stage?.title}</span>
               <span className="sep">/</span>
@@ -122,113 +123,100 @@ export default function LevelPage() {
               <span className="chip">Siguiente: <b>&nbsp;{meta.next}</b></span>
               <span className="chip">
                 Contenido: <b>&nbsp;{modules.length} módulos</b>
-                {hasLab ? ' + laboratorio integrador' : ''}
+              </span>
+              <span className={`chip${allDone ? ' chip-done' : ''}`}>
+                {allDone ? 'Nivel completado' : 'Progreso:'} <b>&nbsp;{count}/{total}</b>
               </span>
             </div>
           </div>
         </section>
 
-        {/* ---------- MODULE CHIPS (mobile TOC) ---------- */}
-        <section className="toc-strip" id="modulos" aria-label="Módulos del nivel">
-          <div className="container toc-strip-inner">
-            {modules.map(m => (
-              <a key={m.id} className="toc-chip" href={`#m${m.id}`}>
-                <span className="n">{pad(m.id)}</span>{m.title}
-              </a>
+        {/* ---------- PROGRESO ---------- */}
+        <section className="container">
+          <div className="level-progress" data-reveal>
+            <div className="level-progress-top">
+              <span className="level-progress-label">Tu avance en este nivel</span>
+              <span className={`level-progress-count${allDone ? ' done' : ''}`}>
+                {count}/{total} módulos{allDone ? ' · ✓ completado' : ''}
+              </span>
+            </div>
+            <div className="level-progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={count}>
+              <div className={`level-progress-fill${allDone ? ' full' : ''}`} style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- MÓDULOS ---------- */}
+        <section className="container" id="modulos">
+          <div className="level-modules-head" data-reveal>
+            <div>
+              <span className="kicker">Contenido del nivel</span>
+              <h2 className="level-modules-title">Módulos</h2>
+            </div>
+            <Link className="level-cta" to={startTo}>
+              {ctaLabel} <span className="btn-arrow" aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className="level-modules">
+            {modules.map((m, idx) => (
+              <Link
+                key={m.id}
+                className={`level-module-card${isDone(m.id) ? ' done' : ''}`}
+                to={`/nivel/${level.id}/modulo/${m.id}`}
+                data-reveal
+                style={{ '--i': idx }}
+              >
+                <span className="lmc-top">
+                  <span className="lmc-num">MÓDULO {pad(m.id)}</span>
+                  <span className="lmc-state" aria-hidden="true">{isDone(m.id) ? '✓' : '→'}</span>
+                </span>
+                <span className="lmc-title">{m.title}</span>
+                <span className="lmc-reading">
+                  <span className="lmc-reading-track" aria-hidden="true">
+                    <span className="lmc-reading-fill" style={{ width: `${readingPct(m.id)}%` }} />
+                  </span>
+                  <span className="lmc-reading-pct">{readingPct(m.id)}%</span>
+                </span>
+                <span className="lmc-foot">
+                  {isDone(m.id)
+                    ? <span className="lmc-done">Completado</span>
+                    : <span className="lmc-pending">
+                        {readingPct(m.id) > 0 ? 'En curso' : 'Pendiente'}
+                      </span>}
+                </span>
+              </Link>
             ))}
           </div>
         </section>
 
-        <div className="container layout">
-          {/* ---------- RAIL ---------- */}
-          <aside className="rail">
-            <div className="rail-label">Módulos</div>
-            <ol>
-              {modules.map(m => (
-                <li key={m.id}>
-                  <a href={`#m${m.id}`} className={active === m.id ? 'active' : ''}>
-                    <span className="rn">{pad(m.id)}</span>{m.title}
-                  </a>
-                </li>
-              ))}
-            </ol>
-            <div className="rail-foot">
-              {modules.length} módulos{hasLab ? ' · 1 laboratorio real' : ''}<br />
-              <a href="/#estructura">← Volver a la estructura</a>
-            </div>
-          </aside>
-
-          {/* ---------- CONTENT ---------- */}
-          <article className="content">
-            {modules.map((m, idx) => {
-              const nextMod = modules[idx + 1]
-              return (
-                <section key={m.id} className="module" id={`m${m.id}`} ref={el => { sectionRefs.current[m.id] = el }}>
-                  <header className="module-head">
-                    <span className="module-num">MÓDULO {pad(m.id)}</span>
-                    <h2>{m.title}</h2>
-                  </header>
-
-                  {contentMap[m.id] ? (
-                    <ModuleContent content={contentMap[m.id]} />
-                  ) : (
-                    <div className="b card">
-                      <span className="kicker">Próximamente</span>
-                      <p>Este módulo está en desarrollo.</p>
-                    </div>
-                  )}
-
-                  {nextMod && (
-                    <a className="next-link" href={`#m${nextMod.id}`}>
-                      <span>
-                        <div className="nl-label">Siguiente</div>
-                        <div className="nl-title">Módulo {pad(nextMod.id)} — {nextMod.title}</div>
-                      </span>
-                      <span className="nl-arrow">→</span>
-                    </a>
-                  )}
-                </section>
-              )
-            })}
-
-            {/* ---------- CIERRE ---------- */}
-            <section className="close-card">
-              <span className="kicker">Cierre del nivel</span>
-              <ul className="list-close">
-                {closeItems.map((item, i) => (
-                  <li key={i}>{Inline(item)}</li>
-                ))}
-              </ul>
-            </section>
-
-            {/* ---------- NEXT LEVEL ---------- */}
-            {nextLevel && nextContent ? (
-              <Link className="next-level" to={`/nivel/${nextLevel.id}`}>
-                <span>
-                  <div className="nl-k">Siguiente nivel</div>
-                  <div className="nl-t">Nivel {nextLevel.id} — {nextContent.meta.title}</div>
-                  <div className="nl-d">{nextContent.meta.description}</div>
-                </span>
-                <span className="nl-go">→</span>
-              </Link>
-            ) : (
-              <a className="next-level" href="/#estructura">
-                <span>
-                  <div className="nl-k">Fin del recorrido</div>
-                  <div className="nl-t">Volver al índice general</div>
-                  <div className="nl-d">Has completado todos los niveles disponibles del curso.</div>
-                </span>
-                <span className="nl-go">→</span>
-              </a>
-            )}
-          </article>
-        </div>
+        {/* ---------- SIGUIENTE NIVEL ---------- */}
+        <section className="container" style={{ paddingTop: 8, paddingBottom: 72 }}>
+          {nextLevel ? (
+            <Link className="next-level" to={`/nivel/${nextLevel.id}`} data-reveal>
+              <span>
+                <div className="nl-k">Siguiente nivel</div>
+                <div className="nl-t">Nivel {nextLevel.id} — {contentRegistry[nextLevel.id].meta.title}</div>
+                <div className="nl-d">{contentRegistry[nextLevel.id].meta.description}</div>
+              </span>
+              <span className="nl-go">→</span>
+            </Link>
+          ) : (
+            <a className="next-level" href="/#estructura" data-reveal>
+              <span>
+                <div className="nl-k">Fin del recorrido</div>
+                <div className="nl-t">Volver al índice general</div>
+                <div className="nl-d">Has completado todos los niveles disponibles del curso.</div>
+              </span>
+              <span className="nl-go">→</span>
+            </a>
+          )}
+        </section>
       </main>
 
       <footer className="footer">
         <div className="container footer-inner">
           <span>Curso de Linux · Nivel {level.id} — {meta.title}</span>
-          <span><a href="/#estructura">Estructura del curso</a> · Etapa {stage?.id} de {stages.length}</span>
+          <span><Link to="/#estructura">Estructura del curso</Link> · Etapa {stage?.id} de {stages.length}</span>
         </div>
       </footer>
     </div>

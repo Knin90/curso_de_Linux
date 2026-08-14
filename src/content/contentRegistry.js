@@ -1,3 +1,9 @@
+import * as level0 from './level-0/index.js'
+import m1l0 from './level-0/modules/m1.js'
+import m2l0 from './level-0/modules/m2.js'
+import m3l0 from './level-0/modules/m3.js'
+import m4l0 from './level-0/modules/m4.js'
+
 import * as level1 from './level-1/index.js'
 import m1l1 from './level-1/modules/m1.js'
 import m2l1 from './level-1/modules/m2.js'
@@ -359,6 +365,11 @@ import m7l36 from './level-36/modules/m7.js'
 import m8l36 from './level-36/modules/m8.js'
 
 export const contentRegistry = {
+  0: {
+    meta: level0.meta,
+    modules: level0.modules,
+    contentMap: { 1: m1l0, 2: m2l0, 3: m3l0, 4: m4l0 },
+  },
   1: {
     meta: level1.meta,
     modules: level1.modules,

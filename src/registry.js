@@ -10,7 +10,7 @@ export const stages = [
 
 export const levels = [
   // Etapa 1 — Fundamentos
-  { id: 0, stage: 1, title: 'Introducción al mundo Linux', status: 'available', moduleCount: 0 },
+  { id: 0, stage: 1, title: 'Introducción al mundo Linux', status: 'available', moduleCount: 4 },
   { id: 1, stage: 1, title: 'Instalación', status: 'available', moduleCount: 8 },
   { id: 2, stage: 1, title: 'Arranque del sistema (Boot Process)', status: 'available', moduleCount: 8 },
   { id: 3, stage: 1, title: 'Terminal (+ multiplexores)', status: 'available', moduleCount: 8 },
@@ -53,10 +53,6 @@ export const levels = [
   { id: 35, stage: 6, title: 'Monitoreo con Prometheus y Grafana', status: 'available', moduleCount: 8 },
   { id: 36, stage: 6, title: 'Backup y Recuperación de Desastres', status: 'available', moduleCount: 8 },
 ]
-
-export function getLevelsByStage(stageId) {
-  return levels.filter(l => l.stage === stageId)
-}
 
 export function getLevel(id) {
   return levels.find(l => l.id === Number(id))

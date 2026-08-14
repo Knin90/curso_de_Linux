@@ -1,288 +1,285 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { levels, stages } from '../registry'
-import { contentRegistry } from '../content/contentRegistry'
+import { metaRegistry } from '../content/metaRegistry'
 import ThemeToggle from '../components/ThemeToggle'
+import CountUp from '../components/CountUp'
+import useRevealOnScroll from '../hooks/useRevealOnScroll'
+import useCourseProgress from '../hooks/useCourseProgress'
 import './landing.css'
 
 const pad = n => String(n).padStart(2, '0')
 
-const featuredIds = [1, 3, 12, 20, 29, 35]
+// Colores funcionales de las etapas (paleta terminal)
+const stageColor = {
+  green: '#00DF82',
+  cyan: '#2EC4A0',
+  yellow: '#f0e68c',
+  red: '#f85149',
+}
 
 export default function Home() {
-  const totalLevels = levels.length
-  const available = levels.filter(l => l.status === 'available')
-  const comingSoon = levels.filter(l => l.status === 'coming-soon')
-  const availableCount = available.length
-  const comingSoonCount = comingSoon.length
-  const stagesWithLevels = stages.filter(s => levels.some(l => l.stage === s.id))
-  const firstAvailable = available.find(l => contentRegistry[l.id]) || available[0]
+  const landingRef = useRef(null)
+  const location = useLocation()
+  const [showTop, setShowTop] = useState(false)
+  const [activeStage, setActiveStage] = useState('all')
+  // Evita animar los nodos en la carga inicial: solo al filtrar
+  const [filterTouched, setFilterTouched] = useState(false)
+  const progressRef = useRef(null)
+  // Progreso global del curso (suma de módulos leídos en od-progress)
+  const course = useCourseProgress()
 
-  const stageTitle = id => {
-    const s = stages.find(x => x.id === id)
-    return s ? s.title : ''
+  const norm = s =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+
+  // Al volver a la landing (p. ej. al terminar el último nivel), arrancar
+  // desde arriba. Si el enlace trae ancla, ir a ella.
+  useLayoutEffect(() => {
+    const target = location.hash ? document.getElementById(location.hash.slice(1)) : null
+    if (target) target.scrollIntoView({ block: 'start' })
+    else window.scrollTo(0, 0)
+  }, [location.hash])
+
+  // Volver arriba — visible tras ~600px de scroll
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 600)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Barra de progreso de scroll — actualiza el DOM directo, sin re-render
+  useEffect(() => {
+    const onScroll = () => {
+      const el = progressRef.current
+      if (!el) return
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0
+      el.style.transform = `scaleX(${p})`
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+
+  // Cascada de entrada cuando cada [data-reveal] entra en viewport
+  useRevealOnScroll(landingRef)
+
+  const totalLevels = levels.length
+  const totalModules = Object.values(metaRegistry).reduce((s, r) => s + (r.modules?.length || 0), 0)
+  const totalLabs = Object.values(metaRegistry).filter(r =>
+    (r.modules || []).some(m => norm(m.title).includes('laboratorio'))
+  ).length
+  const courseDone = course.total > 0 && course.done >= course.total
+
+  // Primer nivel disponible con contenido (para «empezar desde el principio»)
+  const firstAvailable = levels.find(l => l.status === 'available' && metaRegistry[l.id]) || levels[0]
+  // Primer nivel con progreso incompleto (para «continuar donde lo dejaste»)
+  const firstIncomplete =
+    levels.find(l => {
+      const p = course.byLevel[l.id]
+      return p && p.total > 0 && p.done < p.total
+    }) || null
+
+  const firstPendingModule = lvl => {
+    const reg = metaRegistry[lvl.id]
+    const done = new Set(course.byLevel[lvl.id]?.doneIds || [])
+    return reg?.modules?.find(m => !done.has(m.id))?.id ?? 1
+  }
+
+  const startTo =
+    firstAvailable && metaRegistry[firstAvailable.id]
+      ? `/nivel/${firstAvailable.id}/modulo/${firstPendingModule(firstAvailable)}`
+      : '/nivel/0'
+  const continueTo = firstIncomplete ? `/nivel/${firstIncomplete.id}/modulo/${firstPendingModule(firstIncomplete)}` : '/'
+
+  // Nivel actual para el texto de progreso: el incompleto, el último con avance, o el 1
+  const withProgress = levels.filter(l => (course.byLevel[l.id]?.done || 0) > 0)
+  const currentLevel =
+    firstIncomplete?.id ?? (withProgress.length ? withProgress[withProgress.length - 1].id : 1)
+
+  // Estado de progreso de un nivel en el mapa: null si no aplica
+  const levelState = level => {
+    const p = course.byLevel[level.id]
+    if (!p || p.total === 0) return null
+    if (p.done >= p.total) return 'done'
+    if (p.done > 0) return 'partial'
+    return null
+  }
+
+  const nodeTo = level =>
+    metaRegistry[level.id] ? `/nivel/${level.id}/modulo/${firstPendingModule(level)}` : `/nivel/${level.id}`
+
+  const stageOf = id => stages.find(s => s.id === id)
+
+  // Niveles visibles según el filtro de etapa activo
+  const visibleLevels = activeStage === 'all' ? levels : levels.filter(l => l.stage === activeStage)
+  const stageCounts = Object.fromEntries(stages.map(s => [s.id, levels.filter(l => l.stage === s.id).length]))
+
+  const selectStage = id => {
+    setActiveStage(id)
+    setFilterTouched(true)
   }
 
   return (
-    <div className="landing">
+    <div className="landing" ref={landingRef}>
+      {/* Barra de progreso de lectura */}
+      <div className="scroll-progress" ref={progressRef} aria-hidden="true" />
       <header className="nav">
         <div className="container nav-inner">
           <a className="brand" href="#top">
             <span className="brand-mark">&gt;_</span>
             Curso de Linux
           </a>
-          <nav className="nav-links" aria-label="Navegación">
-            <a href="#destacados">Destacados</a>
-            <a href="#estructura">Estructura</a>
-            <a href="#evaluacion">Evaluación</a>
-            <a href="#proyecto">Proyecto final</a>
-          </nav>
           <ThemeToggle />
-          <a className="nav-cta" href="#estructura">Ver estructura</a>
         </div>
       </header>
 
       <main id="top">
-        {/* ---------- HERO ---------- */}
-        <section className="hero">
-          <div className="container">
-            <span className="eyebrow">De cero a administrador profesional</span>
-            <h1>Linux, nivel a nivel</h1>
-            <p className="hero-sub">
-              Un recorrido de <strong>{stagesWithLevels.length} etapas y {totalLevels} niveles</strong> para
-              convertirte en administrador de sistemas: fundamentos, administración, redes, seguridad,
-              automatización e infraestructura. Con laboratorios reales y un proyecto final integrador.
-            </p>
-            <div className="hero-actions">
-              <a className="btn-primary" href="#estructura">Explorar la estructura</a>
-              <a className="btn-secondary" href="#evaluacion">Sistema de evaluación →</a>
+        <div className="welcome-screen" data-reveal>
+          <h2>
+            Bienvenido al Curso Completo de <span>Linux</span>
+          </h2>
+          <p className="welcome-intro">
+            Este curso está diseñado para llevarte desde los fundamentos del sistema operativo hasta la
+            administración profesional de servidores: terminal, usuarios, redes, seguridad, automatización e
+            infraestructura, siguiendo una ruta de aprendizaje progresiva y orientada a la práctica.
+          </p>
+          <p>
+            {totalLevels} niveles en {stages.length} etapas, decenas de módulos con ejemplos reales y
+            laboratorios, más un proyecto final integrador que te deja preparado para certificaciones de la
+            industria.
+          </p>
+          <div className="welcome-stats-card">
+            <div className="wsc-item">
+              <span className="wsc-icon">📚</span>
+              <CountUp className="wsc-val" value={totalLevels} />
+              <span className="wsc-label">Niveles</span>
+            </div>
+            <div className="wsc-item">
+              <span className="wsc-icon">🗺️</span>
+              <CountUp className="wsc-val" value={stages.length} />
+              <span className="wsc-label">Etapas</span>
+            </div>
+            <div className="wsc-item">
+              <span className="wsc-icon">🧩</span>
+              <CountUp className="wsc-val" value={totalModules} />
+              <span className="wsc-label">Módulos</span>
+            </div>
+            <div className="wsc-item">
+              <span className="wsc-icon">🧪</span>
+              <CountUp className="wsc-val" value={totalLabs} />
+              <span className="wsc-label">Laboratorios</span>
+            </div>
+            <div className="wsc-item">
+              <span className="wsc-icon">📈</span>
+              <span className="wsc-val">De cero a pro</span>
+              <span className="wsc-label">Nivel</span>
             </div>
           </div>
-        </section>
+          <p>Seleccioná un nivel en el mapa para comenzar, o empezá desde el principio.</p>
+          <Link className="start-btn" to={startTo}>
+            Comenzar desde el principio <span aria-hidden="true">→</span>
+          </Link>
 
-        {/* ---------- STATS ---------- */}
-        <section className="stat-strip">
-          <div className="container">
-            <div className="stat-grid">
-              <div className="stat">
-                <div className="stat-value">{totalLevels}</div>
-                <div className="stat-label">Niveles (0–{totalLevels - 1})</div>
+          {!courseDone && course.done > 0 && firstIncomplete && (
+            <Link className="beginner-card continue-card" to={continueTo}>
+              <span className="beginner-mark" aria-hidden="true">→</span>
+              <span className="beginner-body">
+                <strong>Continuar donde lo dejaste</strong>
+                <span className="beginner-sub" aria-hidden="true">Nivel {firstIncomplete.id} — {firstIncomplete.title}</span>
+                <span className="beginner-cta">Seguir en el nivel {firstIncomplete.id} <span className="btn-arrow" aria-hidden="true">→</span></span>
+              </span>
+            </Link>
+          )}
+
+          <div className="learning-path">
+            <div className="lp-progress">
+              <div className="lp-progress-label">Tu progreso</div>
+              <div
+                className="lp-progress-bar-track"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={course.total}
+                aria-valuenow={course.done}
+                aria-valuetext={`${course.pct}% completado`}
+                aria-label="Progreso general del curso"
+              >
+                <div className={`lp-progress-bar-fill${courseDone ? ' full' : ''}`} style={{ width: `${course.pct}%` }} />
               </div>
-              <div className="stat">
-                <div className="stat-value">{stages.length}</div>
-                <div className="stat-label">Etapas de aprendizaje</div>
-              </div>
-              <div className="stat">
-                <div className="stat-value">{availableCount}</div>
-                <div className="stat-label">Niveles disponibles</div>
-              </div>
-              <div className="stat">
-                <div className="stat-value">{comingSoonCount}</div>
-                <div className="stat-label">Niveles en preparación</div>
+              <div className="lp-progress-text">
+                Nivel {currentLevel} de {totalLevels} · {course.done} de {course.total} módulos
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ---------- DESTACADOS ---------- */}
-        <section className="section" id="destacados">
-          <div className="container">
-            <div className="section-head">
-              <div className="section-kicker">Contenido destacado</div>
-              <h2>Lo esencial, listo para estudiar</h2>
-              <p>
-                Cada nivel disponible incluye módulos guiados, ejemplos de terminal y un laboratorio
-                integrador. Estos son algunos de los niveles más representativos del curso.
-              </p>
-            </div>
-            <div className="new-grid">
-              {featuredIds.map(id => {
-                const level = levels.find(l => l.id === id)
-                if (!level) return null
-                const meta = contentRegistry[id]?.meta
-                const moduleCount = level.moduleCount || meta?.modules?.length || 0
+            <div className="learning-path-title">Mapa del curso</div>
+            <div className="lp-map">
+              <aside className="lp-panel">
+                <div className="lp-panel-label">Filtrar por etapa</div>
+                <div className="lp-filters" role="group" aria-label="Filtrar el mapa por etapa">
+                  <button
+                    type="button"
+                    className={`lp-filter${activeStage === 'all' ? ' active' : ''}`}
+                    aria-pressed={activeStage === 'all'}
+                    onClick={() => selectStage('all')}
+                  >
+                    Todas
+                    <span className="lp-filter-count">{totalLevels}</span>
+                  </button>
+                  {stages.map(s => (
+                    <button
+                      type="button"
+                      key={s.id}
+                      className={`lp-filter${activeStage === s.id ? ' active' : ''}`}
+                      aria-pressed={activeStage === s.id}
+                      onClick={() => selectStage(s.id)}
+                    >
+                      <span className="lp-filter-dot" style={{ background: stageColor[s.color] }} aria-hidden="true" />
+                      {s.title}
+                      <span className="lp-filter-count">{stageCounts[s.id]}</span>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+              <div className="lp-grid-col">
+                <div className="lp-filter-summary" role="status">
+                  {activeStage === 'all'
+                    ? `${totalLevels} niveles`
+                    : `${visibleLevels.length} niveles · ${stageOf(activeStage)?.title}`}
+                </div>
+                <div className={`learning-path-grid${filterTouched ? ' filter-anim' : ''}`} key={activeStage}>
+              {visibleLevels.map((level, idx) => {
+                const st = stageOf(level.stage)
+                const color = stageColor[st?.color] || '#2EC4A0'
+                const state = levelState(level)
                 return (
-                  <article className="new-card" key={id}>
-                    <div className="new-card-top">
-                      <h3>Nivel {id} · {level.title}</h3>
-                      <span className="badge-new">{moduleCount} módulos</span>
-                    </div>
-                    <p>
-                      {meta?.description || 'Nivel completo con módulos guiados y laboratorio integrador.'}
-                    </p>
-                    <div className="tools"><span>Etapa</span> {stageTitle(level.stage)}</div>
-                    <Link className="btn-secondary" style={{ fontSize: 14 }} to={`/nivel/${id}`}>
-                      Entrar al nivel →
-                    </Link>
-                  </article>
+                  <Link
+                    className={`lp-node${state ? ` lp-node--${state}` : ''}`}
+                    to={nodeTo(level)}
+                    key={level.id}
+                    style={{ '--i': idx }}
+                  >
+                    <div className="lp-node-num">Nivel {pad(level.id)}</div>
+                    <div className="lp-node-title">{level.title}</div>
+                    <span className="lp-node-badge">
+                      <span className="lp-node-badge-dot" style={{ background: color }} aria-hidden="true" />
+                      Etapa {level.stage}
+                    </span>
+                  </Link>
                 )
               })}
-            </div>
-            <p className="new-note">
-              <strong>Y lo que viene:</strong>{' '}
-              <span className="mono">{comingSoon.map(l => `N${l.id} ${l.title}`).join(' · ')}</span>
-            </p>
-          </div>
-        </section>
-
-        {/* ---------- ESTRUCTURA ---------- */}
-        <section className="section" id="estructura">
-          <div className="container">
-            <div className="section-head">
-              <div className="section-kicker">Índice general</div>
-              <h2>Las etapas, nivel a nivel</h2>
-              <p>
-                {totalLevels} niveles numerados del 0 al {totalLevels - 1}, organizados en una
-                progresión que va de los fundamentos hasta el perfil profesional.
-              </p>
-            </div>
-
-            {stages.map(stage => {
-              const stageLevels = levels.filter(l => l.stage === stage.id)
-              if (stageLevels.length === 0) return null
-              const firstId = stageLevels[0].id
-              const lastId = stageLevels[stageLevels.length - 1].id
-              return (
-                <section className="stage" key={stage.id}>
-                  <div className="stage-head">
-                    <span className="stage-num">ETAPA {stage.id}</span>
-                    <h3>{stage.title}</h3>
-                    <span className="stage-count">Niveles {firstId}–{lastId} · {stageLevels.length}</span>
-                  </div>
-                  <ul className="level-list">
-                    {stageLevels.map(level => (
-                      <li className="level" key={level.id}>
-                        <span className="level-num">{pad(level.id)}</span>
-                        {level.status === 'available' ? (
-                          <Link className="level-title" to={`/nivel/${level.id}`}>{level.title}</Link>
-                        ) : (
-                          <span className="level-title">{level.title}</span>
-                        )}
-                        <span className="level-tags">
-                          {level.status === 'available' ? (
-                            <span className="tag tag-new">Disponible</span>
-                          ) : (
-                            <span className="tag tag-ext">Próximamente</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* ---------- EVALUACION ---------- */}
-        <section className="section" id="evaluacion">
-          <div className="container">
-            <div className="section-head">
-              <div className="section-kicker">Sistema de evaluación</div>
-              <h2>Mide tu progreso en cada paso</h2>
-              <p>
-                Evaluación continua por nivel, exámenes por etapa y un mapeo directo a
-                certificaciones reales del sector.
-              </p>
-            </div>
-
-            <div className="eval-grid">
-              <article className="eval-card">
-                <div className="eval-index">01</div>
-                <h3>Quiz por nivel</h3>
-                <p>Al cerrar cada nivel, un cuestionario corto confirma que los conceptos quedaron
-                asentados antes de avanzar.</p>
-                <div className="meta">8–10 preguntas · {totalLevels} niveles</div>
-              </article>
-              <article className="eval-card">
-                <div className="eval-index">02</div>
-                <h3>Examen de etapa</h3>
-                <p>Al cierre de cada etapa: preguntas más un laboratorio evaluado que pone a prueba
-                los conocimientos acumulados de forma práctica.</p>
-                <div className="meta">30 preguntas + 1 laboratorio · {stages.length} etapas</div>
-              </article>
-              <article className="eval-card">
-                <div className="eval-index">03</div>
-                <h3>Mapeo a certificaciones</h3>
-                <p>Cada etapa se alinea con certificaciones reconocidas de la industria, para dar un
-                valor comercial claro a lo aprendido.</p>
-                <div className="meta">CompTIA · LPIC · RHCSA · RHCE · CKA</div>
-              </article>
-            </div>
-
-            <div className="cert-wrap">
-              <div className="cert-head">
-                <h3>Ruta de certificación</h3>
-                <span>— de la base hasta el perfil DevOps / Cloud</span>
-              </div>
-              <div className="cert-row">
-                <span className="cert-stage">Etapas 1–2</span>
-                <div className="cert-certs"><span className="tag main">CompTIA Linux+</span><span className="tag main">LPIC-1</span></div>
-              </div>
-              <div className="cert-row">
-                <span className="cert-stage">Etapas 3–4</span>
-                <div className="cert-certs"><span className="tag">LPIC-2</span><span className="tag">RHCSA</span></div>
-              </div>
-              <div className="cert-row">
-                <span className="cert-stage">Etapas 5–6</span>
-                <div className="cert-certs"><span className="tag">RHCE</span><span className="tag">CKA (Kubernetes)</span><span className="tag">Rutas DevOps / Cloud</span></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- PROYECTO ---------- */}
-        <section className="section" id="proyecto">
-          <div className="container">
-            <div className="section-head">
-              <div className="section-kicker">Proyecto final integrador</div>
-              <h2>Un servidor real, de Internet a la nube</h2>
-              <p>El alumno instala, configura, asegura, automatiza y respalda un entorno completo.
-              Todo lo aprendido converge en este diagrama.</p>
-            </div>
-
-            <div className="diagram">
-              <div className="diagram-flow">
-                <div className="node accent"><span className="ic">IN</span><div><div className="node-label">Internet</div><div className="node-meta">tráfico externo</div></div></div>
-                <div className="edge"></div>
-                <div className="node"><span className="ic">FW</span><div><div className="node-label">Firewall</div><div className="node-meta">nftables / firewalld</div></div></div>
-                <div className="edge"></div>
-                <div className="node"><span className="ic">SV</span><div><div className="node-label">Servidor Linux</div><div className="node-meta">usuarios SSH · Nginx (proxy + TLS) · Docker</div></div></div>
-                <div className="edge"></div>
-                <div className="node"><span className="ic">AU</span><div><div className="node-label">Automatización</div><div className="node-meta">Bash + procesamiento de texto</div></div></div>
-                <div className="edge"></div>
-                <div className="branch">
-                  <div className="node"><span className="ic">BK</span><div><div className="node-label">Backups</div><div className="node-meta">tar / rsync</div></div></div>
-                  <div className="node"><span className="ic">MO</span><div><div className="node-label">Monitorización</div><div className="node-meta">estado y alertas</div></div></div>
-                  <div className="node"><span className="ic">LG</span><div><div className="node-label">Logs y Auditoría</div><div className="node-meta">registro y trazabilidad</div></div></div>
                 </div>
-                <div className="edge"></div>
-                <div className="node"><span className="ic">IA</span><div><div className="node-label">Ansible + Terraform</div><div className="node-meta">configuración + aprovisionamiento</div></div></div>
-                <div className="edge"></div>
-                <div className="node"><span className="ic">CL</span><div><div className="node-label">Despliegue automático en la nube</div><div className="node-meta">entorno productivo</div></div></div>
               </div>
-              <p className="diagram-foot">
-                <strong>Novedad clave:</strong> el paso de backup real — respaldar y verificar la
-                restauración de todo el entorno.
-              </p>
             </div>
           </div>
-        </section>
-
-        {/* ---------- CTA FINAL ---------- */}
-        <section className="final-cta">
-          <div className="container">
-            <h2>¿Listo para administrar tu primer servidor?</h2>
-            <p>
-              {totalLevels} niveles, {stages.length} etapas y un proyecto final que te deja preparado
-              para certificaciones Linux de la industria.
-            </p>
-            {firstAvailable && (
-              <Link className="btn-primary" to={`/nivel/${firstAvailable.id}`}>
-                Empezar por el nivel {firstAvailable.id}
-              </Link>
-            )}
-          </div>
-        </section>
+        </div>
       </main>
 
       <footer className="footer">
@@ -291,6 +288,16 @@ export default function Home() {
           <span>{totalLevels} niveles · {stages.length} etapas · proyecto final integrador</span>
         </div>
       </footer>
+
+      {/* Volver arriba */}
+      <button
+        className={`back-to-top${showTop ? ' visible' : ''}`}
+        type="button"
+        aria-label="Volver arriba"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        ↑
+      </button>
     </div>
   )
 }
