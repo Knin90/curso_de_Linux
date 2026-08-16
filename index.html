@@ -11,6 +11,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   </head>
   <body>
+    <!-- Fondo fijo: video de server room (Cloudinary) detrás del tinte de body::before.
+         Muted + playsinline obligatorios para autoplay; poster = la foto estática que
+         se usaba antes (fallback visual mientras carga / si el vídeo no puede reproducirse). -->
+    <video id="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1" disablepictureinpicture poster="/linux-bg.jpg">
+      <source src="https://res.cloudinary.com/ci4td70y/video/upload/277097.mp4" type="video/mp4" />
+    </video>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

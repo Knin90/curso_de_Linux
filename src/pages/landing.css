@@ -7,7 +7,7 @@
   --bg:      #F6F9F7;
   --surface: #FFFFFF;
   --fg:      #0C1F18;
-  --muted:   #3E524A;
+  --muted:   #374940;
   --border:  #B5C9BE;
   --accent:  #03624C;
   --accent-ink: #02483A;
@@ -29,7 +29,7 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   color-scheme: light;
-  background: var(--bg);
+  background: transparent; /* el fondo lo pone #bg-video + tinte de body::before */
   color: var(--fg);
   font-family: var(--font-body);
   font-size: 16px;
@@ -82,9 +82,9 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in oklab, var(--bg) 82%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
 }
 .landing .nav-inner {
@@ -168,7 +168,9 @@
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  background: var(--surface);
+  background: color-mix(in oklab, var(--surface) 65%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0.6rem 0.95rem;
@@ -213,7 +215,9 @@
   margin-top: 22px;
   max-width: 620px;
   padding: 14px 18px;
-  background: var(--surface);
+  background: color-mix(in oklab, var(--surface) 45%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   text-decoration: none;
@@ -273,7 +277,7 @@
 }
 /* Variante «Continuar donde lo dejaste»: realza la tarjeta cuando ya hay progreso */
 .landing .beginner-card.continue-card {
-  background: var(--accent-soft);
+  background: color-mix(in oklab, var(--accent-soft) 75%, transparent);
   border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
 }
 @media (hover: hover) and (pointer: fine) {
@@ -333,7 +337,7 @@
 }
 .landing .lp-progress-bar-track {
   height: 6px;
-  background: var(--surface);
+  background: color-mix(in oklab, var(--bg) 60%, transparent);
   border: 1px solid var(--border);
   border-radius: 99px;
   overflow: hidden;
@@ -364,7 +368,9 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: var(--surface);
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0.7rem 0.9rem;
@@ -413,7 +419,9 @@
   border: 1px solid var(--border);
   border-radius: 99px;
   color: var(--muted);
-  background: var(--bg);
+  background: color-mix(in oklab, var(--bg) 60%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   white-space: nowrap;
 }
 .landing .lp-node-badge-dot {
@@ -444,6 +452,12 @@
 .landing .lp-panel {
   position: sticky;
   top: calc(var(--nav-h) + 20px);
+  padding: 14px;
+  background: color-mix(in oklab, var(--surface) 35%, transparent);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 .landing .lp-panel-label {
   font-family: var(--font-mono);
@@ -474,7 +488,9 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
-  background: var(--surface);
+  background: color-mix(in oklab, var(--surface) 65%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
@@ -496,7 +512,7 @@
 .landing .lp-filter.active {
   color: var(--accent-ink);
   border-color: var(--accent);
-  background: var(--accent-soft);
+  background: color-mix(in oklab, var(--accent-soft) 75%, transparent);
 }
 .landing .lp-filter-dot {
   width: 7px;
@@ -618,7 +634,9 @@
 .landing .footer {
   border-top: 1px solid var(--border);
   padding: 24px 0;
-  background: var(--bg);
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 .landing .footer-inner {
   display: flex;

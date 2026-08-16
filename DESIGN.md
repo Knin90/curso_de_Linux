@@ -8,7 +8,7 @@ colors:
   neutral-bg: "#F6F9F7"
   neutral-surface: "#FFFFFF"
   neutral-fg: "#0C1F18"
-  neutral-muted: "#3E524A"
+  neutral-muted: "#374940"
   neutral-border: "#B5C9BE"
   success: "#03624C"
   warning: "#8A5A00"
@@ -119,7 +119,7 @@ Paleta de terminal disciplinada (Ansible): neutros verde-tinta en papel y superf
 - **Papel** (#F6F9F7): fondo del modo claro; casi blanco con un susurro verde.
 - **Superficie** (#FFFFFF): tarjetas, nav, strips; blanco puro sobre el papel.
 - **Tinta** (#0C1F18): texto principal; casi negro con matiz verde.
-- **Muted** (#3E524A): texto secundario, kickers, metadatos.
+- **Muted** (#374940): texto secundario, kickers, metadatos. Ligeramente más oscuro que el papel para garantizar ≥4.5:1 también sobre las zonas oscuras del vídeo de fondo en modo claro.
 - **Borde** (#B5C9BE): separadores y bordes; en oscuro, blanco al 10%.
 - **Terminal** (#030F0F): fondo de bloques de código, presentes en ambos temas.
 
@@ -156,7 +156,13 @@ El espaciado obedece a una regla simple: más espacio sobre un encabezado que de
 
 ## Elevation & Depth
 
-El sistema es **plano por defecto** — no hay sombras en reposo. La profundidad se comunica por capas tonales: superficie (blanco/tarjeta) sobre fondo (papel), y el bloque de código como pozo oscuro. La única respuesta de elevación es el hover: `translateY(-1px a -2px)` con `--ease-out` en tarjetas y enlaces "siguiente", gated detrás de `@media (hover: hover) and (pointer: fine)`. El nav usa `backdrop-filter: blur(14px)` con fondo al 82% para el efecto de vidrio deslizante.
+El sistema es **plano por defecto** — no hay sombras en reposo. La profundidad se comunica por capas:
+
+1. **Vídeo de fondo fijo** — un `<video id="bg-video">` en `index.html` reproduce en bucle el server room (Cloudinary `277097.mp4`, 1920×1080 @30fps, ~18s) con `autoplay muted loop playsinline`, `object-fit: cover`, `pointer-events: none` y `z-index: -2`, fijo detrás de todo el contenido. Lleva `poster="/linux-bg.jpg"` y el mismo JPG como `background` CSS: si el vídeo no carga o el usuario tiene `prefers-reduced-motion`, se ve la foto estática (en ese caso `#bg-video` se oculta y `body::before` restaura el JPG bajo el tinte).
+2. **Tinte por tema** — `body::before` (`z-index: -1`) pinta un **foco radial concentrado en ambos temas**, fuerte en la columna de lectura (donde vive el texto) y cayendo rápido hacia los bordes para que el vídeo se vea vivo en los márgenes. En claro, blanco 0.48 → 0.12: el centro mantiene ≥4.5:1 para `--muted` (#374940) incluso en el tramo más oscuro del bucle (luma 112, segundos 15–17). En oscuro, velo casi-negro 0.70 → 0.42: el centro compensa el tramo más brillante (luma 178, inicio del bucle) y los bordes siguen oscureciendo lo justo para el texto claro. Los tintes se midieron contra la luma real del vídeo en 7 puntos del bucle.
+3. **Vidrio esmerilado** sobre esas capas — superficies de lectura con `background: color-mix(in oklab, var(--surface) 45–50%, transparent)` + `backdrop-filter: blur(16–24px)`. El bloque de código sigue siendo el pozo oscuro sólido (`--code-bg`), el único elemento sin vidrio, y los intro de ejemplo (`.example-intro`, texto muted sobre fondo crudo) llevan su propia tira de vidrio para leer sobre las zonas oscuras del rack.
+
+La respuesta de elevación se mantiene en hover: `translateY(-1px a -2px)` con `--ease-out`, gated detrás de `@media (hover: hover) and (pointer: fine)`. El nav sticky usa `blur(20px)` con superficie al 60%.
 
 ### Named Rules
 **La Regla Plana.** Superficies planas en reposo. El movimiento de elevación existe solo como respuesta a hover, nunca como decoración permanente.
@@ -178,7 +184,7 @@ Radios contenidos de 10–12px en tarjetas y contenedores; 6–8px en controles 
 
 ### Cards / Containers
 - **Corner Style:** radius 12px.
-- **Background:** superficie sobre papel; variantes semánticas con fondos tintados: warning (ámbar al 97% de L), result (verde al 96.5% de L), analogy (papel con comilla serif del acento).
+- **Background:** vidrio esmerilado — superficie translúcida al 50% con `backdrop-filter: blur(24px)` sobre el vídeo de fondo fijo; las variantes semánticas (warning ámbar, result verde, analogy papel) son tintes translúcidos al 70–75% sobre el mismo vidrio.
 - **Border:** 1px borde neutro; hover tintado con color-mix del acento al 40%.
 - **Internal Padding:** 20–24px.
 - **Shadow Strategy:** ninguno (ver Elevation).
@@ -187,7 +193,7 @@ Radios contenidos de 10–12px en tarjetas y contenedores; 6–8px en controles 
 - Ítems como tarjetas apiladas con borde 1px, radius 12px. **Press:** scale(0.985). Al abrir: la respuesta se revela con `grid-template-rows: 0fr → 1fr` + opacity (240ms `--ease-out`), y el chevron `▼` rota 180°. Accesible por teclado: `role="button"`, `aria-expanded`, Enter/Espacio.
 
 ### Navigation
-- **Nav sticky** con blur(14px) y borde inferior 1px. Brand: marca `>_` en caja tinta (papel el glifo) + «Curso de Linux». La barra es deliberadamente mínima: solo brand + theme toggle en la landing; en los niveles se añade un chip con el nivel actual (`nav-level`). Theme toggle 34px con `:active scale(0.92)`.
+- **Nav sticky** de vidrio (`blur(18px)`, superficie al 55%) y borde inferior 1px. Brand: marca `>_` en caja tinta (papel el glifo) + «Curso de Linux». La barra es deliberadamente mínima: solo brand + theme toggle en la landing; en los niveles se añade un chip con el nivel actual (`nav-level`). Theme toggle 34px con `:active scale(0.92)`.
 
 ### Module Stepper (módulos)
 - Tira horizontal de chips numerados bajo el hero de la página de módulo; el chip activo usa acento en borde y tinta, los leídos muestran un check SVG y el pendiente actual un pulso sutil. **Hover:** sube el acento del borde; stagger de entrada con `--i`.
@@ -203,7 +209,7 @@ Radios contenidos de 10–12px en tarjetas y contenedores; 6–8px en controles 
 - **Do** usar press states `scale(0.97–0.93)` en todo elemento pulsable, con `transition: transform 160ms var(--ease-out)`.
 - **Do** gatear los hovers con movimiento detrás de `@media (hover: hover) and (pointer: fine)`.
 - **Do** usar la monoespaciada solo para números, comandos, etiquetas y metadatos.
-- **Do** respetar `prefers-reduced-motion`: sin transform-based motion, solo fades/opacity.
+- **Do** respetar `prefers-reduced-motion`: sin transform-based motion, solo fades/opacity, y sin vídeo de fondo en bucle — `#bg-video` se oculta y se restaura la foto estática bajo el tinte.
 
 ### Don't:
 - **Don't** usar sombras duras ni elevation en reposo; el sistema es plano por capas tonales.
