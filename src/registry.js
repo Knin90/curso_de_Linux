@@ -52,6 +52,10 @@ export const levels = [
   { id: 34, stage: 6, title: 'Redis y Caché en Producción', status: 'available', moduleCount: 8 },
   { id: 35, stage: 6, title: 'Monitoreo con Prometheus y Grafana', status: 'available', moduleCount: 8 },
   { id: 36, stage: 6, title: 'Backup y Recuperación de Desastres', status: 'available', moduleCount: 8 },
+  // Etapa 7 — Proyecto Final
+  { id: 37, stage: 7, title: 'Troubleshooting Profesional', status: 'available', moduleCount: 8 },
+  { id: 38, stage: 7, title: 'Proyecto de Administración Integrador', status: 'available', moduleCount: 8 },
+  { id: 39, stage: 7, title: 'Evaluación Profesional', status: 'available', moduleCount: 8 },
 ]
 
 export function getLevel(id) {

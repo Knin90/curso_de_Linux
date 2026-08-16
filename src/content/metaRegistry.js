@@ -39,6 +39,9 @@ import * as level33 from './level-33/index.js'
 import * as level34 from './level-34/index.js'
 import * as level35 from './level-35/index.js'
 import * as level36 from './level-36/index.js'
+import * as level37 from './level-37/index.js'
+import * as level38 from './level-38/index.js'
+import * as level39 from './level-39/index.js'
 
 export const metaRegistry = {
   1: { meta: level1.meta, modules: level1.modules },
@@ -77,4 +80,7 @@ export const metaRegistry = {
   34: { meta: level34.meta, modules: level34.modules },
   35: { meta: level35.meta, modules: level35.modules },
   36: { meta: level36.meta, modules: level36.modules },
+  37: { meta: level37.meta, modules: level37.modules },
+  38: { meta: level38.meta, modules: level38.modules },
+  39: { meta: level39.meta, modules: level39.modules },
 }

@@ -4,7 +4,7 @@ export const meta = {
   stage: 6,
   description: 'RPO y RTO como métricas de diseño, tipos de backup (completo/incremental/diferencial), rsync para backup local y remoto, BorgBackup para backups deduplicados y cifrados, automatización con cron y systemd timers, testing de restauración como proceso crítico, y planificación de Disaster Recovery.',
   prerequisite: 'Nivel 35 — Monitoreo con Prometheus y Grafana',
-  next: null,
+  next: 'Nivel 37 — Troubleshooting Profesional',
 }
 
 export const modules = [

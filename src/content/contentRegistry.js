@@ -364,6 +364,36 @@ import m6l36 from './level-36/modules/m6.js'
 import m7l36 from './level-36/modules/m7.js'
 import m8l36 from './level-36/modules/m8.js'
 
+import * as level37 from './level-37/index.js'
+import m1l37 from './level-37/modules/m1.js'
+import m2l37 from './level-37/modules/m2.js'
+import m3l37 from './level-37/modules/m3.js'
+import m4l37 from './level-37/modules/m4.js'
+import m5l37 from './level-37/modules/m5.js'
+import m6l37 from './level-37/modules/m6.js'
+import m7l37 from './level-37/modules/m7.js'
+import m8l37 from './level-37/modules/m8.js'
+
+import * as level38 from './level-38/index.js'
+import m1l38 from './level-38/modules/m1.js'
+import m2l38 from './level-38/modules/m2.js'
+import m3l38 from './level-38/modules/m3.js'
+import m4l38 from './level-38/modules/m4.js'
+import m5l38 from './level-38/modules/m5.js'
+import m6l38 from './level-38/modules/m6.js'
+import m7l38 from './level-38/modules/m7.js'
+import m8l38 from './level-38/modules/m8.js'
+
+import * as level39 from './level-39/index.js'
+import m1l39 from './level-39/modules/m1.js'
+import m2l39 from './level-39/modules/m2.js'
+import m3l39 from './level-39/modules/m3.js'
+import m4l39 from './level-39/modules/m4.js'
+import m5l39 from './level-39/modules/m5.js'
+import m6l39 from './level-39/modules/m6.js'
+import m7l39 from './level-39/modules/m7.js'
+import m8l39 from './level-39/modules/m8.js'
+
 export const contentRegistry = {
   0: {
     meta: level0.meta,
@@ -549,5 +579,20 @@ export const contentRegistry = {
     meta: level36.meta,
     modules: level36.modules,
     contentMap: { 1: m1l36, 2: m2l36, 3: m3l36, 4: m4l36, 5: m5l36, 6: m6l36, 7: m7l36, 8: m8l36 },
+  },
+  37: {
+    meta: level37.meta,
+    modules: level37.modules,
+    contentMap: { 1: m1l37, 2: m2l37, 3: m3l37, 4: m4l37, 5: m5l37, 6: m6l37, 7: m7l37, 8: m8l37 },
+  },
+  38: {
+    meta: level38.meta,
+    modules: level38.modules,
+    contentMap: { 1: m1l38, 2: m2l38, 3: m3l38, 4: m4l38, 5: m5l38, 6: m6l38, 7: m7l38, 8: m8l38 },
+  },
+  39: {
+    meta: level39.meta,
+    modules: level39.modules,
+    contentMap: { 1: m1l39, 2: m2l39, 3: m3l39, 4: m4l39, 5: m5l39, 6: m6l39, 7: m7l39, 8: m8l39 },
   },
 }
