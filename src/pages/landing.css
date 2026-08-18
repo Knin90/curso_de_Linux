@@ -4,14 +4,14 @@
 
 .landing {
   /* Paleta Ansible: #03624C (verde profundo) · #030F0F (dark) · #00DF82 (acento) */
-  --bg:      #F6F9F7;
+  --bg:      #FAF7EF;
   --surface: #FFFFFF;
   --fg:      #0C1F18;
-  --muted:   #24352D;
-  --border:  #C3D6CB;
+  --muted:   #4A4130;
+  --border:  #E4DCC7;
   --accent:  #03624C;
   --accent-ink: #01382A;
-  --accent-soft: #E6F2EC;
+  --accent-soft: #EAF1E5;
   --success: #03624C;
   --warn:    #B45309;
 
