@@ -7,13 +7,13 @@
   --bg:      #F6F9F7;
   --surface: #FFFFFF;
   --fg:      #0C1F18;
-  --muted:   #374940;
-  --border:  #B5C9BE;
+  --muted:   #24352D;
+  --border:  #C3D6CB;
   --accent:  #03624C;
-  --accent-ink: #02483A;
+  --accent-ink: #01382A;
   --accent-soft: #E6F2EC;
   --success: #03624C;
-  --warn:    #8A5A00;
+  --warn:    #B45309;
 
   --font-display: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
   --font-body:    'Archivo', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
@@ -29,7 +29,7 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   color-scheme: light;
-  background: transparent; /* el fondo lo pone #bg-video + tinte de body::before */
+  background: transparent; /* el fondo lo pone .bg-fx + tinte de body::before */
   color: var(--fg);
   font-family: var(--font-body);
   font-size: 16px;
@@ -46,7 +46,7 @@
   --bg:         #030F0F;
   --surface:    #0A1613;
   --fg:         #DCECE4;
-  --muted:      #9CB4A9;
+  --muted:      #B4CCC0;
   --border:     rgba(255,255,255,0.1);
   --accent:     #00DF82;
   --accent-ink: #7DF5BC;
