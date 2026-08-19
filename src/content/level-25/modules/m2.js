@@ -15,25 +15,8 @@ Los logs de SSH muestran miles de intentos de login fallidos desde IPs de todo e
 
 ### 📖 Arquitectura de fail2ban
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────────┐
-│                         FAIL2BAN                           │
-│                                                             │
-│  ┌─────────────┐   ┌──────────────┐   ┌─────────────────┐ │
-│  │   JAIL       │   │   FILTER     │   │    ACTION       │ │
-│  │             │   │              │   │                 │ │
-│  │ - logpath   │──▶│ - failregex  │──▶│ - iptables      │ │
-│  │ - bantime   │   │ - ignoreregex│   │ - ufw           │ │
-│  │ - findtime  │   │ (en filter.d)│   │ - firewalld     │ │
-│  │ - maxretry  │   └──────────────┘   │ - sendmail      │ │
-│  └─────────────┘                      └─────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼ Lee logs de
-    /var/log/auth.log
-    /var/log/nginx/access.log
-    /var/log/apache2/access.log
-    (configurable)
+\`\`\`diagram
+{"type":"nested","container":{"title":"FAIL2BAN"},"items":[{"name":"JAIL","meta":"logpath, bantime, findtime, maxretry","icon":"lock"},{"name":"FILTER","meta":"failregex, ignoreregex (en filter.d)","icon":"search"},{"name":"ACTION","meta":"iptables, ufw, firewalld, sendmail","icon":"firewall"}],"external":[{"name":"Logs","meta":"auth.log, nginx/access.log, apache2/access.log…","icon":"log","side":"left"}]}
 \`\`\`
 
 **Componentes clave:**

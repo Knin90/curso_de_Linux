@@ -21,19 +21,8 @@ automático cada noche. Este laboratorio te lleva paso a paso hasta ese objetivo
 
 ### 📖 Arquitectura del laboratorio
 
-\`\`\`
-db-primary (192.168.10.10)          db-replica (192.168.10.11)
-┌─────────────────────────┐         ┌─────────────────────────┐
-│  PostgreSQL 15 PRIMARY  │ ──WAL──▶│  PostgreSQL 15 REPLICA  │
-│  Puerto: 5432           │ stream  │  Puerto: 5432 (read-only)│
-│  App user: appuser      │         │  hot standby: on         │
-│  App DB: myapp          │         └─────────────────────────┘
-│  Replication: replicator│
-└─────────────────────────┘
-         │ archive_command
-         ▼
-/backup/wal/  (WAL archive — PITR)
-/backup/daily/ (pg_dump diario)
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"db-primary (192.168.10.10)","icon":"database","rows":["PostgreSQL 15 PRIMARY","Puerto: 5432","App user: appuser","App DB: myapp","Replication: replicator","archive_command → /backup/wal/, /backup/daily/"],"focal":true},{"title":"db-replica (192.168.10.11)","icon":"database","rows":["PostgreSQL 15 REPLICA","Puerto: 5432 (read-only)","hot standby: on","Recibe WAL vía streaming replication"]}],"vsLabel":"WAL streaming"}
 \`\`\`
 
 ### 📖 Paso 1 — Instalar PostgreSQL en ambos servidores

@@ -16,29 +16,8 @@ El modelo pull tiene una ventaja enorme: si un servicio muere, Prometheus lo det
 
 ### 📖 Componentes del ecosistema
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────────────┐
-│                         PROMETHEUS                              │
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
-│  │  Scrape      │    │    TSDB      │    │  HTTP API /      │  │
-│  │  Engine      │───▶│  (storage)   │───▶│  Query Engine    │  │
-│  └──────────────┘    └──────────────┘    └──────────────────┘  │
-│         │                                         │             │
-│         ▼                                         ▼             │
-│  ┌──────────────┐                       ┌──────────────────┐   │
-│  │  Service     │                       │  Alerting Rules  │   │
-│  │  Discovery   │                       │  + Alertmanager  │   │
-│  └──────────────┘                       └──────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-         │
-         ▼ (pull HTTP)
-┌────────────────────────────────────────┐
-│  Targets: exporters / app endpoints    │
-│  node_exporter :9100  /metrics         │
-│  app_service   :8080  /metrics         │
-│  postgres_exp  :9187  /metrics         │
-└────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"PROMETHEUS","meta":"servidor"},"items":[{"name":"Service Discovery","icon":"search"},{"name":"Scrape Engine","icon":"sync","focal":true},{"name":"TSDB (storage)","icon":"database"},{"name":"HTTP API / Query Engine","icon":"server"},{"name":"Alerting Rules + Alertmanager","icon":"alert"}],"external":[{"name":"Targets","meta":"node_exporter, app_service, postgres_exp…","icon":"network","side":"left"}]}
 \`\`\`
 
 **Componentes principales:**
@@ -64,15 +43,8 @@ node_cpu_seconds_total{cpu="0", mode="user"}
 
 **Cómo funciona el almacenamiento:**
 
-\`\`\`text
-data/
-├── 01BX3PK5P50AH.../ ← bloque de 2 horas (inmutable una vez completado)
-│   ├── chunks/        ← datos comprimidos (Gorilla compression)
-│   ├── index          ← índice invertido de labels
-│   └── meta.json      ← metadatos del bloque
-├── 01BX3PK6M40ZZ.../
-├── wal/               ← Write-Ahead Log (datos recientes, no compactados)
-└── lock
+\`\`\`diagram
+{"type":"tree","root":{"name":"data/","meta":"directorio de almacenamiento TSDB"},"children":[{"name":"01BX3PK5P50AH.../","meta":"bloque de 2 horas (inmutable)","children":[{"name":"chunks/","meta":"Gorilla compression"},{"name":"index","meta":"índice invertido de labels"},{"name":"meta.json","meta":"metadatos del bloque"}]},{"name":"01BX3PK6M40ZZ.../","meta":"otro bloque de 2 horas"},{"name":"wal/","meta":"Write-Ahead Log, datos recientes"},{"name":"lock","meta":"archivo de bloqueo"}]}
 \`\`\`
 
 **Retención:** por defecto 15 días. Configurable con \`--storage.tsdb.retention.time\`.

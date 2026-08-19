@@ -16,21 +16,8 @@ Tienes un servidor con una sola interfaz física que necesita conectarse a tres 
 
 Una VLAN (Virtual LAN) segmenta una red física en múltiples redes lógicas. El estándar IEEE 802.1Q define cómo se etiquetan los frames Ethernet:
 
-\`\`\`text
-Frame Ethernet normal:
-┌────────────┬────────────┬──────┬─────────────────┬─────┐
-│  DST MAC   │  SRC MAC   │ Type │     Payload     │ FCS │
-│  (6 bytes) │  (6 bytes) │  2B  │  (46-1500 B)   │ 4B  │
-└────────────┴────────────┴──────┴─────────────────┴─────┘
-
-Frame 802.1Q (con tag VLAN):
-┌────────────┬────────────┬──────┬──────┬──────┴─────────────────┬─────┐
-│  DST MAC   │  SRC MAC   │ 0x81 │ TCI  │ Type │     Payload     │ FCS │
-│  (6 bytes) │  (6 bytes) │  00  │  2B  │  2B  │  (46-1500 B)   │ 4B  │
-└────────────┴────────────┴──────┴──────┴──────┴─────────────────┴─────┘
-                                  │
-                          TCI: 3 bits PCP + 1 bit DEI + 12 bits VLAN ID
-                          VLAN ID: 1-4094 (0 y 4095 reservados)
+\`\`\`diagram
+{"type":"table-like","title":"Frame Ethernet: normal vs 802.1Q","rows":[{"key":"Normal","value":"DST MAC (6B) | SRC MAC (6B) | Type (2B) | Payload (46-1500B) | FCS (4B)"},{"key":"802.1Q (VLAN)","value":"DST MAC (6B) | SRC MAC (6B) | 0x8100 | TCI (2B: 3 bits PCP + 1 bit DEI + 12 bits VLAN ID) | Type (2B) | Payload (46-1500B) | FCS (4B)"}]}
 \`\`\`
 
 **Tipos de puertos en un switch:**

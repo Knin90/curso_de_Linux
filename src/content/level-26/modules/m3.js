@@ -16,18 +16,8 @@ const content = `
 
 Greenbone Vulnerability Manager (GVM) es la plataforma open source detrás de OpenVAS:
 
-\`\`\`text
-┌─────────────────────────────────────────────────┐
-│              Greenbone Security Manager         │
-├─────────────────────────────────────────────────┤
-│  GSA (Web UI)  │  gvm-cli  │  OpenVAS Scanner   │
-│  puerto 9392   │  GMP API  │  (motor de checks) │
-├─────────────────────────────────────────────────┤
-│         Feed: 70,000+ NVTs (plugins)            │
-│    Greenbone Community Feed (actualización diaria)│
-└─────────────────────────────────────────────────┘
-
-NVT = Network Vulnerability Test — cada plugin verifica una vulnerabilidad específica
+\`\`\`diagram
+{"type":"table-like","title":"Greenbone Security Manager","rows":[{"key":"GSA (Web UI)","value":"puerto 9392"},{"key":"gvm-cli","value":"GMP API"},{"key":"OpenVAS Scanner","value":"motor de checks"},{"key":"Feed","value":"70,000+ NVTs (plugins) · Greenbone Community Feed, actualización diaria"},{"value":"NVT = Network Vulnerability Test — cada plugin verifica una vulnerabilidad específica"}]}
 \`\`\`
 
 ### 📖 Instalación de Greenbone/OpenVAS

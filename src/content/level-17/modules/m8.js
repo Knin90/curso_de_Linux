@@ -14,25 +14,8 @@ Este laboratorio simula el entorno de red de un servidor de producción moderno:
 
 ### 📖 Topología del laboratorio
 
-\`\`\`text
-Topología objetivo:
-
-  ┌─────────────────────────────────────────────────────┐
-  │                   HOST (servidor)                   │
-  │                                                     │
-  │  eth0 (trunk)                                       │
-  │   ├── eth0.10  (10.10.0.1/24)  VLAN Producción      │
-  │   └── eth0.20  (10.20.0.1/24)  VLAN Gestión         │
-  │                                                     │
-  │  br-prod (bridge)                                   │
-  │   ├── eth0.10 (puerto)                              │
-  │   ├── veth-app0 → ns-app0 (10.10.0.10/24)          │
-  │   └── veth-app1 → ns-app1 (10.10.0.11/24)          │
-  │                                                     │
-  │  Policy routing:                                    │
-  │   - tráfico desde 10.20.0.0/24 → tabla mgmt        │
-  │   - tráfico desde 10.10.0.0/24 → tabla prod        │
-  └─────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"HOST (servidor)","meta":"eth0 (trunk)"},"items":[{"name":"eth0.10","meta":"10.10.0.1/24 · VLAN Producción"},{"name":"eth0.20","meta":"10.20.0.1/24 · VLAN Gestión"},{"name":"br-prod (bridge)","meta":"puerto: eth0.10"},{"name":"veth-app0 → ns-app0","meta":"10.10.0.10/24"},{"name":"veth-app1 → ns-app1","meta":"10.10.0.11/24"}],"external":[{"name":"Policy routing","meta":"10.10.0.0/24 → tabla prod","side":"right"},{"name":"Policy routing","meta":"10.20.0.0/24 → tabla mgmt","side":"right"}]}
 \`\`\`
 
 ### 📖 Fase 1: VLANs y bridge de producción

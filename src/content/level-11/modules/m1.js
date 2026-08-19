@@ -33,29 +33,8 @@ HISTORIA DEL LOGGING EN LINUX
 
 En un sistema moderno con systemd, los dos trabajan juntos:
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────────┐
-│                        PROCESO / KERNEL                     │
-│   stdout/stderr   │   syslog()   │   journald API           │
-└──────────┬────────┴───────┬──────┴──────────┬──────────────┘
-           │                │                 │
-           └────────────────┴─────────────────┘
-                            │
-                            ▼
-                   ┌────────────────┐
-                   │  systemd-      │   ← recibe TODO primero
-                   │  journald      │   ← almacena en /run/log/journal
-                   └────────┬───────┘     o /var/log/journal
-                            │
-                     (socket /run/systemd/journal/syslog)
-                            │
-                            ▼
-                   ┌────────────────┐
-                   │    rsyslog     │   ← lee desde journald
-                   └────────┬───────┘   ← escribe a archivos de texto
-                            │             /var/log/syslog, auth.log, etc.
-                            ▼           ← puede reenviar a servidor remoto
-                   /var/log/*.log
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Proceso / Kernel","meta":"stdout/stderr · syslog() · journald API"},{"name":"systemd-journald","meta":"Recibe TODO primero · almacena en /run/log/journal o /var/log/journal","focal":true,"chip":"journald"},{"name":"rsyslog","meta":"Lee desde journald · escribe archivos de texto · puede reenviar remoto"},{"name":"/var/log/*.log","meta":"syslog, auth.log, etc."}],"edges":[{"label":"emite log"},{"label":"consume journal"},{"label":"escribe archivo"}]}
 \`\`\`
 
 **journald** captura primero — incluso antes de que el sistema de archivos esté montado al arranque. **rsyslog** lee de journald y escribe los archivos de texto clásicos.

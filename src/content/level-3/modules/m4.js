@@ -17,25 +17,8 @@ Usar \`tmux\` es como poner **pausa en una consola de videojuegos y apagar el te
 
 ### 📖 Explicación técnica: La arquitectura Cliente-Servidor de tmux
 
-\`\`\`text
-                  CONEXIÓN SSH / CLIENTE (Remoto)
-             ┌──────────────────────────────────────┐
-             │ Cliente tmux (Proceso de pantalla)   │
-             └──────────────────┬───────────────────┘
-                                │
-               [Desconexión de red / SSH cae]
-                                │ (Se rompe el enlace)
-                                ▼
-                  SERVIDOR TMUX (Persistente en RAM)
-             ┌──────────────────────────────────────┐
-             │ Servidor tmux (Socket /tmp/tmux-*)   │
-             ├──────────────────────────────────────┤
-             │  ┌──────────────┐  ┌──────────────┐  │
-             │  │ Sesión 1     │  │ Sesión 2     │  │
-             │  │ ├─ Ventana 1 │  │ ├─ Ventana 1 │  │
-             │  │ └─ Panel A/B │  │ └─ Panel A   │  │
-             │  └──────────────┘  └──────────────┘  │
-             └──────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"Servidor tmux","meta":"proceso demonio persistente, socket /tmp/tmux-*"},"items":[{"name":"Sesión 1","meta":"Ventana 1 · Panel A/B","icon":"terminal"},{"name":"Sesión 2","meta":"Ventana 1 · Panel A","icon":"terminal"}],"external":[{"name":"Cliente tmux (SSH)","meta":"se desconecta sin afectar al servidor","icon":"desktop","side":"left"}]}
 \`\`\`
 
 1. **El Servidor tmux:** Corre como demonio en el servidor de destino. Mantiene vivas las PTYs, buffers de texto y aplicaciones.
@@ -43,13 +26,9 @@ Usar \`tmux\` es como poner **pausa en una consola de videojuegos y apagar el te
 
 ### 📊 Comparativa: Job Control básico vs. Multiplexor tmux
 
-| Característica | \`nohup\` / \`bg\` | \`tmux\` / \`screen\` |
-| --- | --- | --- |
-| **Sobrevive al cierre de SSH** | Sí | Sí |
-| **Mantiene viva la salida interactiva** | No (archivo estático) | **Sí (terminal interactiva real)** |
-| **Permite dividir pantalla (Paneles)** | No | **Sí** |
-| **Permite reconexión desde otro PC** | No | **Sí (\`tmux attach\`)** |
-| **Colaboración multiusuario en vivo** | No | **Sí** |
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"nohup / bg","icon":"terminal","rows":["Sobrevive al cierre de SSH: Sí","Mantiene viva la salida interactiva: No (archivo estático)","Permite dividir pantalla: No","Permite reconexión desde otro PC: No","Colaboración multiusuario en vivo: No"]},{"title":"tmux / screen","icon":"terminal","focal":true,"rows":["Sobrevive al cierre de SSH: Sí","Mantiene viva la salida interactiva: Sí (terminal interactiva real)","Permite dividir pantalla: Sí","Permite reconexión desde otro PC: Sí (tmux attach)","Colaboración multiusuario en vivo: Sí"]}]}
+\`\`\`
 
 ### 📋 Lo que debes recordar
 

@@ -16,9 +16,8 @@ Tu empresa requiere cifrado en tránsito en todos los segmentos de red, incluso 
 
 El patrón más común: el cliente habla HTTPS con nginx, y nginx habla HTTP plano con el backend en la red interna:
 
-\`\`\`text
-Cliente ──HTTPS──→ nginx ──HTTP──→ Backend (red interna)
-         (443)            (3000)
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Cliente","icon":"desktop"},{"name":"nginx","meta":"termina TLS · :443","icon":"gateway","focal":true},{"name":"Backend","meta":"red interna · :3000","icon":"server"}],"edges":[{"label":"HTTPS","accent":true},{"label":"HTTP"}]}
 \`\`\`
 
 \`\`\`nginx
@@ -55,9 +54,8 @@ server {
 
 nginx habla HTTPS tanto con el cliente como con el backend:
 
-\`\`\`text
-Cliente ──HTTPS──→ nginx ──HTTPS──→ Backend
-         (443)            (3443)
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Cliente","icon":"desktop"},{"name":"nginx","meta":"proxy TLS · :443","icon":"gateway","focal":true},{"name":"Backend","meta":":3443","icon":"server"}],"edges":[{"label":"HTTPS","accent":true},{"label":"HTTPS","accent":true}]}
 \`\`\`
 
 \`\`\`nginx
@@ -128,16 +126,8 @@ cp ca-interna.crt /etc/nginx/certs/ca-interna.pem
 
 ### 📖 Comparativa: terminación SSL vs re-cifrado
 
-\`\`\`text
-CARACTERÍSTICA           TERMINACIÓN SSL         RE-CIFRADO
-─────────────────────────────────────────────────────────────
-Cifrado externo          Sí (HTTPS cliente)      Sí
-Cifrado interno          No (HTTP plano)         Sí (HTTPS backend)
-Complejidad              Baja                    Alta
-Rendimiento              Mayor (menos cifrado)   Menor (doble cifrado)
-Requisito regulatorio    PCI-DSS nivel bajo      PCI-DSS, HIPAA, PII
-Gestión certificados     1 cert (externo)        2+ certs (+ CA interna)
-Ideal para               La mayoría de apps      Datos sensibles, compliance
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Terminación SSL","icon":"lock","rows":["Cifrado externo: sí (HTTPS cliente)","Cifrado interno: no (HTTP plano)","Complejidad: baja","Rendimiento: mayor (menos cifrado)","Requisito regulatorio: PCI-DSS nivel bajo","Gestión certificados: 1 cert (externo)","Ideal para: la mayoría de apps"]},{"title":"Re-cifrado","icon":"lock","focal":true,"rows":["Cifrado externo: sí (HTTPS cliente)","Cifrado interno: sí (HTTPS backend)","Complejidad: alta","Rendimiento: menor (doble cifrado)","Requisito regulatorio: PCI-DSS, HIPAA, PII","Gestión certificados: 2+ certs (+ CA interna)","Ideal para: datos sensibles, compliance"]}]}
 \`\`\`
 
 ### 📋 Lo que debes recordar

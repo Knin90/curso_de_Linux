@@ -14,8 +14,8 @@ Cuando un equipo falla al encender, el mensaje de error o el estado de la pantal
 
 ### 🗺️ Visión global del proceso
 
-\`\`\`text
-[Botón ON] ──► [1. POST/Firmware] ──► [2. GRUB2] ──► [3. Kernel + initramfs] ──► [4. pivot_root] ──► [5. systemd (PID 1)] ──► [Login]
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"icon":"desktop","name":"Botón de encendido"},{"tag":"L1","icon":"chip","name":"POST / Firmware","meta":"BIOS o UEFI"},{"tag":"L2","icon":"disk","name":"GRUB2","meta":"Bootloader"},{"tag":"L3","icon":"package","name":"Kernel + initramfs","meta":"Carga en RAM"},{"tag":"L4","icon":"sync","name":"pivot_root","meta":"Cambio de raíz"},{"tag":"L5","icon":"server","name":"systemd (PID 1)","meta":"Espacio de usuario","focal":true},{"icon":"user","name":"Login"}],"edges":[{"label":"POST"},{"label":"carga GRUB"},{"label":"carga kernel"},{"label":"pivot_root"},{"label":"exec init"},{"label":"login"}]}
 \`\`\`
 
 ### 👑 Tabla de control: ¿Quién gobierna la máquina en cada etapa?
@@ -42,15 +42,8 @@ Si el testigo se cae en cualquier relevo, la misión se aborta.
 
 ### 📦 BIOS vs. UEFI: La primera bifurcación del camino
 
-\`\`\`text
-┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
-│            SISTEMA BIOS              │     │             SISTEMA UEFI             │
-├──────────────────────────────────────┤     ├──────────────────────────────────────┤
-│ 1. Ejecuta POST desde el chip ROM.   │     │ 1. Ejecuta POST desde chip NVRAM.    │
-│ 2. Lee el sector MBR (primeros 512   │     │ 2. Lee la partición ESP (VFAT).      │
-│    bytes del disco).                 │     │ 3. Ejecuta directamente el binario   │
-│ 3. Carga el Bootloader (GRUB).       │     │    EFI (ej. /EFI/boot/bootx64.efi).  │
-└──────────────────────────────────────┘     └──────────────────────────────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Sistema BIOS","rows":["Ejecuta POST desde el chip ROM","Lee el sector MBR (primeros 512 bytes del disco)","Carga el Bootloader (GRUB)"]},{"title":"Sistema UEFI","rows":["Ejecuta POST desde chip NVRAM","Lee la partición ESP (VFAT)","Ejecuta directamente el binario EFI (ej. /EFI/boot/bootx64.efi)"]}],"vsLabel":"VS"}
 \`\`\`
 
 ### 🔗 Hilo narrativo: El flujo de traspasos (*Handoffs*)

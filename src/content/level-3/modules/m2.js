@@ -15,23 +15,8 @@ Al ejecutar un script de automatización que procesa miles de archivos, los mens
 
 En Unix/Linux, **todo es un archivo**. Cuando la Shell ejecuta un comando, abre automáticamente tres flujos de datos identificados con números enteros:
 
-\`\`\`text
-                  ┌────────────────────────┐
-                  │   Entrada Estándar     │
-                  │   stdin (FD 0)         │
-                  └───────────┬────────────┘
-                              │
-                              ▼
-                     ┌──────────────────┐
-                     │ COMANDO / PROCESO│
-                     └────────┬─────────┘
-                              │
-             ┌────────────────┴────────────────┐
-             ▼                                 ▼
-┌────────────────────────┐        ┌────────────────────────┐
-│    Salida Estándar     │        │    Error Estándar      │
-│    stdout (FD 1)       │        │    stderr (FD 2)       │
-└────────────────────────┘        └────────────────────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"stdin (FD 0)","meta":"entrada estándar - teclado"},"children":[{"name":"COMANDO / PROCESO","edgeLabel":"entrada","focal":true,"children":[{"name":"stdout (FD 1)","meta":"salida estándar - resultados","edgeLabel":"resultado"},{"name":"stderr (FD 2)","meta":"salida de errores","edgeLabel":"error"}]}]}
 \`\`\`
 
 | Descriptor | Nombre técnico | ID numérico | Dispositivo por defecto | Propósito |

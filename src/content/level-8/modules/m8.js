@@ -11,34 +11,8 @@ const content = `
 
 Ante cualquier problema de almacenamiento, sigue siempre de **abajo hacia arriba**:
 
-\`\`\`text
-¿El disco aparece?
-      │
-      ▼ lsblk
-   ┌──┴──┐
-  Sí    No → Verificar hardware/consola cloud
-   │
-   ▼ ¿Tiene partición?
-   │ sudo fdisk -l /dev/sdb
-   ┌──┴──┐
-  Sí    No → fdisk: g → n → w
-   │
-   ▼ ¿Tiene filesystem?
-   │ lsblk -f /dev/sdb
-   ┌──┴──┐
-  Sí    No → mkfs.ext4 o mkfs.xfs
-   │
-   ▼ ¿Está montado?
-   │ findmnt
-   ┌──┴──┐
-  Sí    No → mount /dev/sdb1 /mnt/punto
-   │
-   ▼ ¿Está en fstab?
-   │ grep /mnt/punto /etc/fstab
-   ┌──┴──┐
-  Sí    No → Añadir entrada con UUID y validar con mount -a
-   │
-   ▼ Todo correcto
+\`\`\`diagram
+{"type":"tree","root":{"name":"¿El disco aparece?","meta":"lsblk · si no: verificar hardware/consola cloud"},"children":[{"name":"¿Tiene partición?","meta":"sudo fdisk -l /dev/sdb · si no: fdisk → g → n → w","edgeLabel":"sí","children":[{"name":"¿Tiene filesystem?","meta":"lsblk -f /dev/sdb · si no: mkfs.ext4 o mkfs.xfs","edgeLabel":"sí","children":[{"name":"¿Está montado?","meta":"findmnt · si no: mount /dev/sdb1 /mnt/punto","edgeLabel":"sí","children":[{"name":"¿Está en fstab?","meta":"grep /etc/fstab · si no: añadir entrada UUID y mount -a","edgeLabel":"sí","children":[{"name":"Todo correcto","edgeLabel":"sí"}]}]}]}]}]}
 \`\`\`
 
 ### 💻 Herramientas de auditoría de espacio

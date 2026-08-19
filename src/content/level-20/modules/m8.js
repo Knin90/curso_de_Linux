@@ -14,19 +14,8 @@ Es hora de construir la configuración completa. La arquitectura objetivo: tres 
 
 ### 📖 Arquitectura objetivo
 
-\`\`\`text
-Internet
-   │ HTTPS (443)
-   ▼
-┌─────────────────────────────────────────────────────┐
-│                    nginx                            │
-│   SSL termination, cache, headers, rate limiting    │
-└──────────────┬──────────────────────────────────────┘
-               │ HTTP interno
-       ┌───────┴────────────────┐
-       ▼          ▼             ▼
-  backend1:3001  backend2:3002  backend3:3003
-  (Node.js API)  (Node.js API)  (Node.js API — backup)
+\`\`\`diagram
+{"type":"tree","root":{"name":"nginx","meta":"HTTPS :443 · SSL termination, cache, headers, rate limiting","icon":"gateway","focal":true},"children":[{"name":"backend1:3001","meta":"Node.js API","edgeLabel":"HTTP interno","icon":"server"},{"name":"backend2:3002","meta":"Node.js API","icon":"server"},{"name":"backend3:3003","meta":"Node.js API — backup","icon":"server","standby":true}]}
 \`\`\`
 
 ### 📖 Paso 1: Preparar la estructura de directorios

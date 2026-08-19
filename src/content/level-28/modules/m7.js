@@ -252,11 +252,13 @@ trivy image mi-imagen:latest
 
 # Salida típica:
 # Total: 23 (HIGH: 5, MEDIUM: 12, LOW: 6)
-# ┌────────────────┬───────────────┬──────────┬──────────────────────────┐
-# │    Library     │ Vulnerability │ Severity │         Fix Version      │
-# ├────────────────┼───────────────┼──────────┼──────────────────────────┤
-# │ libssl1.1      │ CVE-2023-1234 │ HIGH     │ 1.1.1t-r0                │
+\`\`\`
 
+\`\`\`diagram
+{"type":"table-like","title":"trivy image mi-imagen:latest","rows":[{"key":"libssl1.1","value":"CVE-2023-1234 · Severity: HIGH · Fix: 1.1.1t-r0"}]}
+\`\`\`
+
+\`\`\`bash
 # Docker Scout (integrado en Docker Desktop)
 docker scout cves mi-imagen:latest
 docker scout recommendations mi-imagen:latest

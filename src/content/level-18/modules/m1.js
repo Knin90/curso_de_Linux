@@ -15,16 +15,8 @@ Tu equipo acaba de migrar la infraestructura de un datacenter a otro. Los regist
 
 DNS es un sistema distribuido de nombres organizado como un árbol invertido. Cada nodo del árbol es una zona DNS administrada de forma independiente.
 
-\`\`\`
-                        . (raíz)
-                        |
-          ┌─────────────┼─────────────┐
-         com           net           org
-          |
-    ┌─────┴─────┐
-  example     google
-      |
-     www
+\`\`\`diagram
+{"type":"tree","root":{"name":". (raíz)","meta":"13 clústeres de root name servers"},"children":[{"name":"com","meta":"gTLD","children":[{"name":"example","meta":"ej: www.example.com"},{"name":"google"}]},{"name":"net"},{"name":"org"}]}
 \`\`\`
 
 **Niveles de la jerarquía:**
@@ -41,8 +33,8 @@ DNS es un sistema distribuido de nombres organizado como un árbol invertido. Ca
 
 **Resolución iterativa** — El resolver hace todo el trabajo. El cliente pregunta al resolver, y el resolver consulta servidor por servidor siguiendo la jerarquía.
 
-\`\`\`
-Cliente → Resolver recursivo → Root NS → TLD NS → Autoritativo → Resolver → Cliente
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Cliente","icon":"desktop"},{"name":"Resolver recursivo","icon":"server","focal":true},{"name":"Root NS","icon":"network"},{"name":"TLD NS","icon":"network"},{"name":"Autoritativo","icon":"database"},{"name":"Resolver recursivo","icon":"server","focal":true},{"name":"Cliente","icon":"desktop"}],"edges":[{"label":"pregunta"},{"label":"consulta","accent":true},{"label":"referencia"},{"label":"referencia"},{"label":"respuesta"},{"label":"responde"}]}
 \`\`\`
 
 Paso a paso para \`www.example.com\`:
@@ -98,23 +90,8 @@ dig ANY example.com | grep "flags:"
 
 Un mensaje DNS tiene cuatro secciones:
 
-\`\`\`
-┌─────────────────────────────────────┐
-│ HEADER (12 bytes fijos)             │
-│  ID, QR, OPCODE, AA, TC, RD, RA,   │
-│  RCODE, QDCOUNT, ANCOUNT,          │
-│  NSCOUNT, ARCOUNT                   │
-├─────────────────────────────────────┤
-│ QUESTION — qué se pregunta          │
-│  QNAME, QTYPE (A/MX/etc), QCLASS   │
-├─────────────────────────────────────┤
-│ ANSWER — respuestas directas        │
-│  NAME, TYPE, CLASS, TTL, RDATA     │
-├─────────────────────────────────────┤
-│ AUTHORITY — NS referidos            │
-├─────────────────────────────────────┤
-│ ADDITIONAL — IPs de los NS referidos│
-└─────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Mensaje DNS","rows":[{"key":"HEADER","value":"12 bytes fijos — ID, QR, OPCODE, AA, TC, RD, RA, RCODE, QDCOUNT, ANCOUNT, NSCOUNT, ARCOUNT"},{"key":"QUESTION","value":"qué se pregunta — QNAME, QTYPE (A/MX/etc), QCLASS"},{"key":"ANSWER","value":"respuestas directas — NAME, TYPE, CLASS, TTL, RDATA"},{"key":"AUTHORITY","value":"NS referidos"},{"key":"ADDITIONAL","value":"IPs de los NS referidos"}]}
 \`\`\`
 
 **Flags importantes en el header:**

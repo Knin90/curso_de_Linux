@@ -17,19 +17,8 @@ Una **TTY nativa** es como una línea telefónica fija directa conectada con un 
 
 ### 📖 Explicación técnica: La arquitectura TTY vs. PTY
 
-\`\`\`text
-  ┌──────────────────────────────────────────────────────────────┐
-  │ CONSOLA VIRTUAL NATIVA (TTY)                                 │
-  │ [Teclado Físico] ──► /dev/tty1 (Kernel) ──► /bin/bash        │
-  └──────────────────────────────────────────────────────────────┘
-
-  ┌──────────────────────────────────────────────────────────────┐
-  │ EMULACIÓN DE TERMINAL / SSH (PTY)                            │
-  │ [Cliente SSH / Terminal GUI]                                 │
-  │        │                                                     │
-  │        ▼                                                     │
-  │ /dev/ptmx (Master) ──► /dev/pts/0 (Slave) ──► /bin/bash      │
-  └──────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Consola virtual nativa (TTY)","icon":"desktop","rows":["Teclado físico → /dev/tty1 (kernel) → /bin/bash"]},{"title":"Emulación de terminal / SSH (PTY)","icon":"terminal","rows":["Cliente SSH / Terminal GUI → /dev/ptmx (master) → /dev/pts/0 (slave) → /bin/bash"],"focal":true}],"vsLabel":"VS"}
 \`\`\`
 
 1. **TTY Nativa (\`/dev/tty1\` a \`/dev/tty6\`):** Linux reserva habitualmente 6 consolas de texto puras gestionadas directamente por el kernel. Puedes acceder a ellas presionando \`Ctrl + Alt + F1\` hasta \`F6\`.

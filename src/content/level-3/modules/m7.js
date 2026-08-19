@@ -13,15 +13,8 @@ Un administrador sénior necesita guiar a un administrador júnior en otra ciuda
 
 ### 📖 Trabajo colaborativo vía Socket Compartido
 
-\`\`\`text
-  [SysAdmin 1 (Panamá)] ── SSH ──┐
-                                  ▼
-                         ┌─────────────────────────────────┐
-                         │ Sockets: /tmp/compartido_tmux   │
-                         │ Servidor tmux (Misma pantalla)  │
-                         └─────────────────────────────────┘
-                                  ▲
-  [SysAdmin 2 (España)] ── SSH ───┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"Servidor tmux","meta":"misma pantalla, ambos ven todo"},"items":[{"name":"Sesión compartida","meta":"socket: /tmp/compartido_tmux","icon":"terminal"}],"external":[{"name":"SysAdmin 1 (Panamá)","icon":"user","side":"left"},{"name":"SysAdmin 2 (España)","icon":"user","side":"right"}]}
 \`\`\`
 
 ### 💻 Crear una sesión colaborativa en tmux

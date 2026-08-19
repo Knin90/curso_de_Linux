@@ -10,13 +10,8 @@ const content = `
 
 **Síntoma:** El sistema arranca pero se detiene en seco mostrando el mensaje \`Emergency mode\` debido a una ruta de disco inexistente en \`/etc/fstab\`.
 
-\`\`\`text
-               DIAGNÓSTICO Y SOLUCIÓN DE FSTAB
-
-  [Fallo de arranque] ──► Ingresar clave Root ──► journalctl -xb | grep -i failed
-                                                         │
-                                                         ▼
-  systemctl reboot ◄── Corregir error en /etc/fstab ◄── mount -o remount,rw /
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"icon":"alert","name":"Fallo de arranque"},{"name":"Ingresar clave Root"},{"icon":"log","name":"journalctl -xb | grep -i failed"},{"name":"mount -o remount,rw /"},{"icon":"file","name":"Corregir error en /etc/fstab","focal":true},{"icon":"sync","name":"systemctl reboot"}],"edges":[{"label":"detecta"},{"label":"revisa logs"},{"label":"remonta rw"},{"label":"edita"},{"label":"reinicia"}]}
 \`\`\`
 
 #### Procedimiento de reparación:
@@ -51,22 +46,8 @@ systemctl reboot
 
 **Síntoma:** El disco principal perdió el sector de arranque y el equipo muestra el mensaje \`grub rescue>\` o un error indicando que no hay dispositivo de arranque.
 
-\`\`\`text
-               TÉCNICA CHROOT DESDE LIVE USB
-
-  ┌─────────────────────────────────────────────────────────────┐
-  │ 1. Iniciar sistema desde un Live USB de Linux.              │
-  │ 2. Montar partición raíz del disco duro en /mnt.            │
-  │ 3. Enlazar pseudo-sistemas: /dev, /proc, /sys hacia /mnt.   │
-  │ 4. Ejecutar: chroot /mnt                                    │
-  └──────────────────────────────┬──────────────────────────────┘
-                                 │
-                                 ▼
-  ┌─────────────────────────────────────────────────────────────┐
-  │      ¡AHORA OPERAS DENTRO DEL DISCO DURO DAÑADO!            │
-  │  - Ejecutar: grub-install /dev/sda                          │
-  │  - Ejecutar: update-grub                                    │
-  └─────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"icon":"terminal","name":"Preparar el entorno chroot","meta":"1. Iniciar Live USB · 2. Montar raíz en /mnt · 3. Enlazar /dev, /proc, /sys · 4. chroot /mnt"},{"icon":"disk","name":"Operar dentro del disco dañado","meta":"grub-install /dev/sda · update-grub","focal":true}],"edges":[{"label":"chroot /mnt"}]}
 \`\`\`
 
 #### Guía paso a paso:

@@ -14,20 +14,8 @@ Tienes 3 servidores web corriendo la misma aplicación. Sin un load balancer, ne
 
 ### 📖 Arquitectura de HAProxy
 
-\`\`\`text
-                    ┌─────────────────────────────────────────┐
-  Cliente           │              HAProxy                    │
-    ──────────────► │  ┌──────────┐      ┌────────────────┐  │
-                    │  │ frontend │──────│    backend     │  │
-                    │  │ :80/:443 │      │  web1 :8080    │  │
-                    │  └──────────┘      │  web2 :8080    │  │
-                    │                    │  web3 :8080    │  │
-                    │                    └────────────────┘  │
-                    └─────────────────────────────────────────┘
-
-frontend: escucha conexiones entrantes (IP:puerto)
-backend:  define los servidores reales (pool)
-listen:   combinación de frontend + backend (atajo)
+\`\`\`diagram
+{"type":"nested","container":{"title":"HAProxy","meta":"frontend: escucha conexiones entrantes · backend: pool de servidores reales · listen: combinación de ambos (atajo)"},"items":[{"name":"frontend","meta":":80 / :443","icon":"gateway"},{"name":"backend","meta":"web1:8080 · web2:8080 · web3:8080","icon":"server","focal":true}],"external":[{"name":"Cliente","icon":"user","side":"left"}]}
 \`\`\`
 
 HAProxy opera en dos modos:

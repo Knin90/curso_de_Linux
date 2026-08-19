@@ -18,15 +18,8 @@ Una máquina virtual es como un **simulador de vuelo**: permite entrenar en situ
 
 Un **hipervisor** es la capa de software que administra la asignación de hardware (CPU, RAM, almacenamiento, red) entre el sistema anfitrión (*host*) y los sistemas invitados (*guest*).
 
-\`\`\`text
-   +-------------------------------------------------------+
-   |             Sistema Anfitrión (Host OS)               |
-   +-------------------------------------------------------+
-   |          Hipervisor (VirtualBox / VMware)             |
-   +-------------------------------------------------------+
-   |  Máquina Virtual 1 (Guest)  |  Máquina Virtual 2 (Guest)|
-   |  (Ubuntu - 2GB RAM / GPT)   |  (Fedora - 4GB RAM / GPT) |
-   +-------------------------------------------------------+
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Sistema Anfitrión","meta":"Host OS","icon":"desktop"},{"name":"Hipervisor","meta":"VirtualBox / VMware","icon":"server","focal":true},{"name":"Máquinas Virtuales","meta":"VM1: Ubuntu · 2GB RAM · GPT   —   VM2: Fedora · 4GB RAM · GPT","icon":"vm"}],"edges":[{"label":"ejecuta"},{"label":"aloja","accent":true}]}
 \`\`\`
 
 ### 💻 Ejemplo básico

@@ -143,13 +143,9 @@ def process_order(cart):
 
 ### 📖 Comparativa
 
-| Criterio | GitFlow | GitHub Flow | Trunk-Based |
-|----------|---------|-------------|-------------|
-| Complejidad | Alta | Baja | Muy baja |
-| Deploy frequency | Baja (por releases) | Alta | Muy alta |
-| Historial | Complejo | Limpio | Muy limpio |
-| Conflictos | Frecuentes (ramas largas) | Poco frecuentes | Mínimos |
-| Ideal para | Software versionado | Web apps | CI/CD maduro |
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"GitFlow","rows":["Complejidad: alta","Deploy frequency: baja (por releases)","Historial: complejo","Conflictos: frecuentes (ramas largas)","Ideal para: software versionado"]},{"title":"GitHub Flow","rows":["Complejidad: baja","Deploy frequency: alta","Historial: limpio","Conflictos: poco frecuentes","Ideal para: web apps"]},{"title":"Trunk-Based","focal":true,"rows":["Complejidad: muy baja","Deploy frequency: muy alta","Historial: muy limpio","Conflictos: mínimos","Ideal para: CI/CD maduro"]}]}
+\`\`\`
 
 ### 📖 Branch protection rules
 

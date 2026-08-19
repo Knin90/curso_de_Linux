@@ -16,14 +16,8 @@ Tu servidor de base de datos tiene una sola interfaz de red. Si el cable falla, 
 
 El bonding de Linux combina múltiples interfaces físicas en una interfaz lógica (\`bond0\`). Las interfaces físicas se llaman **esclavos** (slaves).
 
-\`\`\`text
-                    bond0 (IP: 192.168.1.100/24)
-                   /                    \\
-               eth0                    eth1
-               (activo)               (backup)
-                 │                      │
-            Puerto 1               Puerto 2
-           Switch A               Switch A/B
+\`\`\`diagram
+{"type":"tree","root":{"name":"bond0","meta":"IP: 192.168.1.100/24","icon":"network"},"children":[{"name":"eth0","meta":"activo · Puerto 1, Switch A","icon":"network"},{"name":"eth1","meta":"backup · Puerto 2, Switch A/B","icon":"network"}]}
 \`\`\`
 
 **Los modos más importantes:**

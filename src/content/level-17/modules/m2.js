@@ -69,25 +69,8 @@ El routing normal usa una sola tabla y solo mira el destino del paquete. Policy 
 - Marca (fwmark) del paquete
 - TOS/DSCP
 
-\`\`\`text
-Arquitectura de policy routing:
-
-Paquete entrante
-      │
-      ▼
-┌─────────────┐
-│ Reglas ip   │  ← ip rule list  (se evalúan en orden de prioridad)
-│ (ip rules)  │
-└─────┬───────┘
-      │ La primera regla que coincide selecciona la tabla
-      ▼
-┌─────────────┐
-│  Tabla N    │  ← ip route show table N
-│  de routing │
-└─────┬───────┘
-      │ Lookup en esa tabla (LPM normal)
-      ▼
-   Gateway / interfaz de salida
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Paquete entrante"},{"icon":"search","name":"Reglas ip (ip rule)","meta":"ip rule list · se evalúan en orden de prioridad"},{"icon":"database","name":"Tabla N de routing","meta":"ip route show table N"},{"icon":"gateway","name":"Gateway / interfaz de salida","focal":true}],"edges":[{"label":"primera regla que coincide"},{"label":"lookup (LPM)"},{"label":"selecciona salida"}]}
 \`\`\`
 
 ### 📖 Tablas de routing adicionales

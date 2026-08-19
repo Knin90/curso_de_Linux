@@ -16,21 +16,8 @@ Tienes dos instancias de HAProxy para eliminar el SPOF del load balancer. Pero a
 
 VRRP (Virtual Router Redundancy Protocol) es un protocolo estándar (RFC 5798) que permite que un grupo de routers/hosts compartan una IP virtual. Solo un nodo tiene la IP en un momento dado (el MASTER). Si el MASTER falla, los nodos BACKUP compiten por tomar la IP.
 
-\`\`\`text
-  CLIENTES
-     │
-     │  DNS apunta a 10.0.1.10 (VIP)
-     ▼
-  10.0.1.10 (VIP)
-  ┌──────────────────────────────────────┐
-  │   MASTER: HAProxy-1 (10.0.1.1)      │  ← tiene la VIP asignada
-  │   BACKUP: HAProxy-2 (10.0.1.2)      │  ← escucha heartbeats VRRP
-  └──────────────────────────────────────┘
-
-  Si HAProxy-1 cae:
-  → HAProxy-2 detecta pérdida de heartbeats VRRP
-  → HAProxy-2 asume la VIP 10.0.1.10
-  → Los clientes siguen conectándose a 10.0.1.10 sin cambios
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Estado normal","icon":"network","rows":["CLIENTES → DNS apunta a 10.0.1.10 (VIP)","MASTER: HAProxy-1 (10.0.1.1) — tiene la VIP asignada","BACKUP: HAProxy-2 (10.0.1.2) — escucha heartbeats VRRP"]},{"title":"Si HAProxy-1 cae","icon":"alert","rows":["HAProxy-2 detecta pérdida de heartbeats VRRP","HAProxy-2 asume la VIP 10.0.1.10","Los clientes siguen conectándose a 10.0.1.10 sin cambios"],"focal":true}],"vsLabel":"FAILOVER"}
 \`\`\`
 
 ### 📖 Instalación de keepalived

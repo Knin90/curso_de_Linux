@@ -11,28 +11,8 @@ const content = `
 
 Una partición recién creada es solo una secuencia de bloques vacíos numerados. No hay carpetas, no hay nombres, no hay permisos. \`mkfs\` escribe las estructuras que hacen posible todo eso:
 
-\`\`\`text
-  Bloques vacíos (partición sin formato)
-          │
-          ▼ mkfs.ext4 /dev/sdb1
-          │
-  ┌───────────────────────────────────────┐
-  │ Superblock                            │  ← Metadatos del FS: tamaño, estado,
-  │ (metadatos maestros del filesystem)   │    bloques totales/libres, magic number
-  ├───────────────────────────────────────┤
-  │ Group Descriptor Table                │  ← Mapa de grupos de bloques
-  ├───────────────────────────────────────┤
-  │ Bitmap de bloques                     │  ← Qué bloques están ocupados (1/0)
-  │ Bitmap de inodos                      │  ← Qué inodos están en uso (1/0)
-  ├───────────────────────────────────────┤
-  │ Tabla de inodos                       │  ← Reserva fija de inodos al crear
-  │ (cada inodo = 1 archivo o directorio) │    (crítico: ext4 no puede añadir más después)
-  ├───────────────────────────────────────┤
-  │ Journal                               │  ← Registro de transacciones para
-  │                                       │    recuperación tras corte de energía
-  ├───────────────────────────────────────┤
-  │ Bloques de datos                      │  ← Aquí viven los archivos realmente
-  └───────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"mkfs.ext4 /dev/sdb1 — estructuras creadas","rows":[{"key":"Superblock","value":"Metadatos maestros del filesystem: tamaño, estado, bloques totales/libres, magic number"},{"key":"Group Descriptor Table","value":"Mapa de grupos de bloques"},{"key":"Bitmap de bloques / inodos","value":"Qué bloques y qué inodos están ocupados (1/0)"},{"key":"Tabla de inodos","value":"Reserva fija de inodos al crear (crítico: ext4 no puede añadir más después)"},{"key":"Journal","value":"Registro de transacciones para recuperación tras corte de energía"},{"key":"Bloques de datos","value":"Aquí viven los archivos realmente"}]}
 \`\`\`
 
 ### 📖 Comparativa: ext4 vs xfs vs btrfs

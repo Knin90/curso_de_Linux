@@ -9,20 +9,8 @@ const content = `
 
 ### ❓ El dilema del kernel
 
-\`\`\`text
-               EL DILEMA DEL KERNEL
-┌─────────────────────────────────────────────────┐
-│ El Kernel necesita leer el disco duro para      │
-│ cargar los controladores (drivers)...           │
-│                                                 │
-│               PERO...                           │
-│                                                 │
-│ ¡No puede leer el disco duro porque AÚN NO TIENE │
-│ cargados los controladores (drivers)!           │
-└───────────────────────────────────────────────┬─┘
-                                                │
-                                                ▼
-                                    ¿CÓMO SALIR DEL BUCLE?
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"El dilema del kernel","meta":"Necesita drivers para leer el disco, pero necesita leer el disco para cargar los drivers","focal":true},{"name":"¿Cómo salir del bucle?"}],"edges":[{"label":"paradoja"}]}
 \`\`\`
 
 **La respuesta:** Necesitamos una "caja de herramientas intermedia" empaquetada junto con el kernel que se cargue directamente en memoria RAM: **\`initramfs\`**.
@@ -34,23 +22,8 @@ const content = `
 3. Se ejecuta el script \`/init\` dentro de la RAM, cargando los módulos de kernel específicos para el almacenamiento (drivers de controladoras RAID, descifrado LUKS, volúmenes LVM, etc.).
 4. Una vez detectado el disco duro real, se ejecuta **\`pivot_root\`**: el sistema intercambia el directorio raíz temporal en RAM por la partición raíz real montada desde el disco duro.
 
-\`\`\`text
-  ┌──────────────────────────────────────────────────────────────┐
-  │ 1. Carga initramfs en RAM (tmpfs)                            │
-  │    └─ /init -> carga módulos: [nvme.ko, dm-crypt.ko, ext4.ko] │
-  └──────────────────────────────┬───────────────────────────────┘
-                                 │
-                                 ▼
-  ┌──────────────────────────────────────────────────────────────┐
-  │ 2. Descubre y monta el disco real en /sysroot                │
-  └──────────────────────────────┬───────────────────────────────┘
-                                 │
-                                 ▼
-  ┌──────────────────────────────────────────────────────────────┐
-  │ 3. Transición: pivot_root /sysroot                           │
-  │    └─ La partición del disco duro pasa a ser la nueva /      │
-  │    └─ Se libera la memoria RAM ocupada por initramfs         │
-  └──────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"tag":"1","icon":"disk","name":"Carga initramfs en RAM (tmpfs)","meta":"/init carga módulos: nvme.ko, dm-crypt.ko, ext4.ko"},{"tag":"2","icon":"database","name":"Monta el disco real en /sysroot","meta":"Descubre el almacenamiento definitivo"},{"tag":"3","icon":"sync","name":"pivot_root /sysroot","meta":"La partición del disco pasa a ser la nueva / · se libera la RAM de initramfs","focal":true}],"edges":[{"label":"detecta discos"},{"label":"pivot_root"}]}
 \`\`\`
 
 ### 💻 Comandos de inspección y regeneración

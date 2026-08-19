@@ -8,17 +8,8 @@ const content = `
 
 ### 🧪 Escenario 1: Construcción del Dashboard de Operaciones
 
-\`\`\`text
-  ┌──────────────────────────────────────────────────────────────┐
-  │                        DASHBOARD DE RED                      │
-  ├──────────────────────────────┬───────────────────────────────┤
-  │ PANEL 1 (Izquierda - 50%)    │ PANEL 2 (Arriba Der - 25%)    │
-  │ Monitorización de Sistema    │ Tráfico de Red en Tiempo Real │
-  │                              ├───────────────────────────────┤
-  │ Command: htop / top          │ PANEL 3 (Abajo Der - 25%)     │
-  │                              │ Monitoreo de Logs en Vivo     │
-  │                              │ Command: tail -f              │
-  └──────────────────────────────┴───────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"DASHBOARD DE RED","rows":[{"key":"PANEL 1 (Izquierda - 50%)","value":"Monitorización de Sistema · Command: htop / top"},{"key":"PANEL 2 (Arriba Der - 25%)","value":"Tráfico de Red en Tiempo Real"},{"key":"PANEL 3 (Abajo Der - 25%)","value":"Monitoreo de Logs en Vivo · Command: tail -f"}]}
 \`\`\`
 
 #### Pasos de construcción:

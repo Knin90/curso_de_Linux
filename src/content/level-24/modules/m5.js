@@ -17,21 +17,11 @@ Tu servidor Ubuntu ejecuta nginx y varios scripts Python. Un auditor de segurida
 
 AppArmor opera como un módulo del kernel Linux Security Module (LSM). A diferencia de SELinux (que etiqueta inodos), AppArmor trabaja con rutas de archivo y nombres de programa.
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────┐
-│                      KERNEL                             │
-│                                                         │
-│  ┌─────────────┐    syscall    ┌────────────────────┐   │
-│  │   Proceso   │──────────────▶│   LSM Hook         │   │
-│  │  (nginx)    │               │   (AppArmor)        │   │
-│  └─────────────┘               └────────┬───────────┘   │
-│                                         │               │
-│                              ¿Existe perfil para nginx?  │
-│                              ¿La operación está permitida?│
-│                                         │               │
-│                              SÍ → allow │ NO → deny+log │
-└─────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"Kernel","meta":"El LSM hook intercepta la syscall antes de ejecutarla"},"items":[{"name":"Proceso (nginx)","icon":"server"},{"name":"LSM Hook (AppArmor)","meta":"¿Existe perfil para nginx? ¿La operación está permitida?","icon":"lock"}],"external":[{"name":"SÍ → allow","icon":"key","side":"right"},{"name":"NO → deny + log","icon":"alert","side":"right"}]}
+\`\`\`
 
+\`\`\`text
 Diferencias clave con SELinux:
   AppArmor: basado en RUTAS de archivo (path-based)
   SELinux:  basado en ETIQUETAS de inodo (label-based)

@@ -13,28 +13,8 @@ Lanzas un comando que tarda 45 minutos en procesar datos. De repente, necesitas 
 
 ### 📖 Explicación técnica: Estados de un proceso en la Shell
 
-\`\`\`text
-                  ┌───────────────────────────────┐
-                  │ PROCESO EN PRIMER PLANO       │
-                  │ (Foreground)                  │
-                  │ Bloquea la entrada de la shell│
-                  └──────────────┬────────────────┘
-                                 │
-                                 │ Presionar Ctrl + Z (SIGSTOP)
-                                 ▼
-                  ┌───────────────────────────────┐
-                  │ PROCESO DETENIDO / PAUSADO    │
-                  │ (Stopped Job)                 │
-                  └──────────────┬────────────────┘
-                                 │
-           ┌─────────────────────┴─────────────────────┐
-           │ Ejecutar 'bg'                             │ Ejecutar 'fg'
-           ▼                                           ▼
-┌───────────────────────────────┐           ┌───────────────────────────────┐
-│ PROCESO EN SEGUNDO PLANO      │           │ REGRESA A PRIMER PLANO        │
-│ (Background - corriendo)      │           │ (Foreground)                  │
-│ Libera el prompt de la shell  │           └───────────────────────────────┘
-└───────────────────────────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"Proceso en foreground","meta":"bloquea la entrada de la shell"},"children":[{"name":"Proceso detenido (Stopped Job)","edgeLabel":"Ctrl+Z (SIGSTOP)","focal":true,"children":[{"name":"Background (corriendo)","meta":"libera el prompt de la shell","edgeLabel":"bg"},{"name":"Regresa a foreground","edgeLabel":"fg"}]}]}
 \`\`\`
 
 ### 💻 Comandos y Atajos prácticos

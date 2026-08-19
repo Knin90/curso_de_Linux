@@ -139,14 +139,8 @@ location / {
 
 ### 📖 Comparativa de algoritmos
 
-\`\`\`text
-ALGORITMO     CASO DE USO                              AFINIDAD DE SESIÓN
-──────────────────────────────────────────────────────────────────────────
-round-robin   Peticiones uniformes, backends iguales   No
-least_conn    Tiempos de respuesta variables            No
-ip_hash       Sesiones en memoria, sin Redis            Sí (por IP)
-hash uri      Caché por URL distribuida                 Sí (por URI)
-random        Alta concurrencia, nginx 1.15+            No
+\`\`\`diagram
+{"type":"table-like","title":"Algoritmos de balanceo","rows":[{"key":"round-robin","value":"peticiones uniformes, backends iguales · sin afinidad de sesión"},{"key":"least_conn","value":"tiempos de respuesta variables · sin afinidad de sesión"},{"key":"ip_hash","value":"sesiones en memoria, sin Redis · afinidad por IP"},{"key":"hash uri","value":"caché por URL distribuida · afinidad por URI"},{"key":"random","value":"alta concurrencia, nginx 1.15+ · sin afinidad de sesión"}]}
 \`\`\`
 
 ### 📋 Lo que debes recordar

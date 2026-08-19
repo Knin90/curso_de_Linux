@@ -16,18 +16,11 @@ Necesitas que las VMs de KVM/QEMU tengan acceso directo a la red física del ser
 
 Un bridge Linux es un switch de nivel 2 implementado en software. Aprende direcciones MAC, reenvía frames y puede conectar interfaces físicas, VMs, contenedores y redes virtuales.
 
-\`\`\`text
-Red física (switch)
-        │
-       eth0 (interfaz física del servidor)
-        │
-      br0 (bridge)
-     /    \\    \\
-  vnet0  vnet1  vnet2
-  (VM1)  (VM2)  (VM3)
+\`\`\`diagram
+{"type":"tree","root":{"name":"Red física","meta":"switch","icon":"network"},"children":[{"name":"eth0","meta":"interfaz física del servidor","icon":"network","children":[{"name":"br0","meta":"bridge","icon":"network","children":[{"name":"vnet0","meta":"VM1"},{"name":"vnet1","meta":"VM2"},{"name":"vnet2","meta":"VM3"}]}]}]}
+\`\`\`
 
 Las VMs obtienen IPs de la misma red que el servidor físico.
-\`\`\`
 
 ### 📖 Crear un bridge para VMs
 

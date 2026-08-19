@@ -16,46 +16,16 @@ Instalas un servidor web. El proceso \`nginx\` escucha en el puerto 80. Pero tam
 
 Netfilter es el **framework del kernel Linux** que intercepta paquetes de red en puntos específicos del recorrido que hace cada paquete dentro del sistema operativo. No es un programa de usuario — vive en el espacio del kernel. iptables, nftables y ufw son herramientas de espacio de usuario que escriben reglas en Netfilter; el kernel ejecuta esas reglas a velocidad de hardware.
 
-\`\`\`text
-ESPACIO DE USUARIO          ESPACIO DE KERNEL
-┌─────────────────┐         ┌──────────────────────────────┐
-│    iptables     │──────▶  │                              │
-│    nftables     │──────▶  │       N E T F I L T E R      │
-│      ufw        │──────▶  │   (hooks en la pila de red)  │
-└─────────────────┘         └──────────────────────────────┘
-  Herramientas que             Framework del kernel que
-  escriben reglas              ejecuta las reglas
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Espacio de usuario","icon":"terminal","rows":["iptables","nftables","ufw","Herramientas que escriben reglas"]},{"title":"Espacio de kernel","icon":"chip","rows":["NETFILTER","hooks en la pila de red","Framework que ejecuta las reglas"]}],"vsLabel":"→"}
 \`\`\`
 
 ### 📖 Los 5 hooks de Netfilter
 
 Cada paquete que entra, sale o pasa por el sistema toca uno o más de estos puntos de intercepción:
 
-\`\`\`text
-                    ┌─────────────────────────────────────────────────────┐
-                    │                    KERNEL LINUX                     │
-                    │                                                     │
-  PAQUETE           │  ┌───────────┐                    ┌─────────────┐  │
-  ENTRANTE ────────▶│  │PREROUTING │                    │  OUTPUT     │  │
-                    │  └─────┬─────┘                    └──────┬──────┘  │
-                    │        │                                 │         │
-                    │        ▼                                 │         │
-                    │  ┌─────────────┐   ┌─────────┐          │         │
-                    │  │  Decisión   │   │ FORWARD │          │         │
-                    │  │  routing    │──▶│(no local)│         │         │
-                    │  └─────────────┘   └────┬────┘          │         │
-                    │        │                │               │         │
-                    │        ▼ (destinado     ▼               │         │
-                    │          a este host) ┌───────────────┐ │         │
-                    │  ┌──────────────┐     │ POSTROUTING   │◀┘         │
-                    │  │    INPUT     │     └───────┬───────┘           │
-                    │  └──────┬───────┘             │                   │
-                    │         │                     │  PAQUETE           │
-                    │         ▼                     │  SALIENTE ────────▶│
-                    │  [Proceso local]               │                   │
-                    │         │                     │                   │
-                    │         └──────▶ OUTPUT ───────┘                  │
-                    └─────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"KERNEL LINUX","meta":"Hooks de Netfilter"},"items":[{"name":"PREROUTING","meta":"Antes de decidir routing","icon":"network"},{"name":"INPUT","meta":"Paquete destinado al host local"},{"name":"FORWARD","meta":"Paquete que pasa a través (no es para este host)"},{"name":"OUTPUT","meta":"Paquete generado por el host local"},{"name":"POSTROUTING","meta":"Después de routing, antes de salir","focal":true}],"external":[{"name":"Paquete entrante","icon":"network","side":"left"},{"name":"Paquete saliente","icon":"network","side":"right"}]}
 \`\`\`
 
 | Hook | Cuándo se ejecuta | Uso típico |
@@ -70,20 +40,8 @@ Cada paquete que entra, sale o pasa por el sistema toca uno o más de estos punt
 
 Los tres usan Netfilter por debajo. La diferencia está en la interfaz:
 
-\`\`\`text
-┌─────────┬────────────────────┬────────────────────────────────────────┐
-│ Tool    │ Año / Origen       │ Características                        │
-├─────────┼────────────────────┼────────────────────────────────────────┤
-│iptables │ 1998, legado       │ Sintaxis clásica, ubiqua, aún muy      │
-│         │                    │ usada. Reglas separadas por tabla.     │
-├─────────┼────────────────────┼────────────────────────────────────────┤
-│nftables │ 2014, sucesor      │ Sintaxis unificada, mejor rendimiento, │
-│         │ oficial            │ sets y mapas nativos. Default en       │
-│         │                    │ Debian 10+, RHEL 8+, Ubuntu 20.04+.   │
-├─────────┼────────────────────┼────────────────────────────────────────┤
-│  ufw    │ 2008, Ubuntu       │ Frontend de alto nivel sobre iptables/ │
-│         │                    │ nftables. Ideal para casos simples.    │
-└─────────┴────────────────────┴────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"iptables vs nftables vs ufw","rows":[{"key":"iptables","value":"1998, legado. Sintaxis clásica, ubicua, aún muy usada. Reglas separadas por tabla."},{"key":"nftables","value":"2014, sucesor oficial. Sintaxis unificada, mejor rendimiento, sets y mapas nativos. Default en Debian 10+, RHEL 8+, Ubuntu 20.04+."},{"key":"ufw","value":"2008, Ubuntu. Frontend de alto nivel sobre iptables/nftables. Ideal para casos simples."}]}
 \`\`\`
 
 ### 📖 Stateless vs Stateful filtering: conntrack

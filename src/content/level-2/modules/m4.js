@@ -11,24 +11,8 @@ const content = `
 
 Tras completar \`pivot_root\`, el kernel invoca la ejecución del binario \`/sbin/init\`. En la gran mayoría de las distribuciones Linux modernas, \`/sbin/init\` es un enlace simbólico a **\`systemd\`**.
 
-\`\`\`text
-              PROCESO DE NACIMIENTO DEL USERSPACE
-
-    Kernel Space (Nivel de privilegio de Hardware)
-  ────────────────────────────────────────────────────────
-    1. Exec(/sbin/init) ──► Asigna Process ID = 1
-  ────────────────────────────────────────────────────────
-    Userspace (Nivel de aislamiento de aplicaciones)
-
-                        ┌──────────┐
-                        │ systemd  │ (PID 1)
-                        └────┬─────┘
-                             │
-            ┌────────────────┼────────────────┐
-            ▼                ▼                ▼
-     ┌────────────┐   ┌────────────┐   ┌────────────┐
-     │ sshd.d     │   │ networkd   │   │ udevd      │
-     └────────────┘   └────────────┘   └────────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"systemd","meta":"PID 1 — tras exec(/sbin/init) desde el kernel"},"children":[{"name":"sshd","meta":"servicio SSH"},{"name":"networkd","meta":"gestión de red"},{"name":"udevd","meta":"gestión de dispositivos"}]}
 \`\`\`
 
 * **PID 1:** Es el único proceso del sistema que no posee un proceso padre. Si \`systemd\` finaliza accidentalmente, el kernel se detendrá de inmediato (*Kernel Panic*).

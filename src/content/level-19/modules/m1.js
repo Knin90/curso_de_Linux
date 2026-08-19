@@ -16,24 +16,8 @@ Tienes un servidor con 4 CPUs y 8 GB de RAM sirviendo un sitio de alto tráfico.
 
 nginx corre con un proceso **master** y uno o más procesos **worker**. Esta separación es fundamental:
 
-\`\`\`text
-┌─────────────────────────────────────────────┐
-│  Proceso Master (root, PID en /run/nginx.pid)│
-│  - Lee y valida la configuración             │
-│  - Inicia/reinicia/termina workers           │
-│  - No procesa tráfico directamente           │
-│  - Gestiona señales (reload, stop, quit)     │
-└─────────────┬───────────────────────────────┘
-              │ fork()
-    ┌─────────┼─────────┐
-    ▼         ▼         ▼
-┌────────┐ ┌────────┐ ┌────────┐
-│Worker 1│ │Worker 2│ │Worker 3│
-│(no root│ │(no root│ │(no root│
-│ www-data)│ www-data)│ www-data)│
-│event   │ │event   │ │event   │
-│loop    │ │loop    │ │loop    │
-└────────┘ └────────┘ └────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"Proceso Master","meta":"root · lee config, gestiona workers y señales","icon":"server"},"children":[{"name":"Worker 1","meta":"www-data · epoll","icon":"chip","edgeLabel":"fork()"},{"name":"Worker 2","meta":"www-data · epoll","icon":"chip"},{"name":"Worker 3","meta":"www-data · epoll","icon":"chip"},{"name":"Worker N","meta":"= nproc por defecto","icon":"chip"}]}
 \`\`\`
 
 El master no toca el tráfico: solo gestiona workers. Si un worker falla, el master lo reinicia. Los workers corren con usuario sin privilegios (típicamente \`www-data\` o \`nginx\`), lo que limita el impacto de una vulnerabilidad.
@@ -42,15 +26,8 @@ El master no toca el tráfico: solo gestiona workers. Si un worker falla, el mas
 
 Cada worker usa un único hilo con un **event loop** que puede manejar miles de conexiones simultáneas. En Linux, nginx usa **epoll** como mecanismo de notificación de I/O:
 
-\`\`\`text
-Modelo tradicional (Apache prefork):
-  1 proceso = 1 conexión
-  500 conexiones → 500 procesos → ~500 MB solo en overhead de proceso
-
-Modelo nginx (event-driven):
-  1 worker = N conexiones (miles)
-  500 conexiones → 4 workers → ~4 MB de overhead de proceso
-  El worker espera eventos de I/O sin bloquearse (epoll_wait)
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Apache (prefork)","icon":"server","rows":["1 proceso = 1 conexión","500 conexiones → 500 procesos","~500 MB solo en overhead de proceso"]},{"title":"nginx (event-driven)","icon":"chip","focal":true,"rows":["1 worker = N conexiones (miles)","500 conexiones → 4 workers","~4 MB de overhead de proceso","espera I/O sin bloquearse (epoll_wait)"]}]}
 \`\`\`
 
 El worker hace \`epoll_wait()\` para saber qué sockets tienen datos listos. Cuando llegan datos, procesa esa conexión, emite la respuesta, y vuelve al loop. Nunca bloquea esperando a que lleguen datos en una conexión específica.

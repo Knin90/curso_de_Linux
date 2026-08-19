@@ -127,7 +127,7 @@ export default function ModulePage() {
   // Último módulo: cerrar el nivel (marcarlo completo) y encadenar al siguiente.
   const handleCloseLevel = () => {
     completeAll()
-    if (nextLevel) goTo(`/nivel/${nextLevel.id}`, 'next')
+    if (nextLevel) goTo(`/nivel/${nextLevel.id}/modulo/1`, 'next')
     else navigate('/')
   }
 
@@ -320,10 +320,10 @@ export default function ModulePage() {
           <section className="container" style={{ paddingBottom: 72 }}>
             <Link
               className="next-level"
-              to={`/nivel/${nextLevel.id}`}
+              to={`/nivel/${nextLevel.id}/modulo/1`}
               onClick={e => {
                 e.preventDefault()
-                goTo(`/nivel/${nextLevel.id}`, 'next')
+                goTo(`/nivel/${nextLevel.id}/modulo/1`, 'next')
               }}
             >
               <span>

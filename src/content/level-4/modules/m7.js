@@ -12,18 +12,8 @@ const content = `
 
 El sistema UGO tiene exactamente **3 ranuras** de permiso:
 
-\`\`\`text
-  Sistema UGO (rígido — solo 3 categorías)
-  ┌──────────┬──────────┬──────────┐
-  │  Dueño   │  Grupo   │  Otros   │
-  │  (User)  │ (Group)  │ (Others) │
-  └──────────┴──────────┴──────────┘
-
-  Sistema ACL (flexible — N entradas)
-  ┌──────────┬──────────┬──────────┬──────────────┬──────────────┐
-  │  Dueño   │  Grupo   │  Otros   │  usuario: X  │  grupo: Y    │
-  │  (User)  │ (Group)  │ (Others) │  (ACL entry) │  (ACL entry) │
-  └──────────┴──────────┴──────────┴──────────────┴──────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Sistema UGO (rígido)","rows":["Dueño (User)","Grupo (Group)","Otros (Others)"]},{"title":"Sistema ACL (flexible)","rows":["Dueño (User)","Grupo (Group)","Otros (Others)","usuario: X (ACL entry)","grupo: Y (ACL entry)"]}],"vsLabel":"VS"}
 \`\`\`
 
 **Escenario real:** El archivo \`balances_2026.csv\` pertenece al usuario \`finanzas\` y al grupo \`directores\`. El auditor externo necesita leerlo durante 3 días. No quieres añadirlo al grupo \`directores\` (tiene acceso a mucho más), ni cambiar el dueño del archivo. Con UGO estándar, no hay solución. Con ACL, sí.

@@ -15,20 +15,8 @@ Si necesitas modificar el comportamiento del sistema (desactivar la aceleración
 
 **GRUB2** (*GRand Unified Bootloader*) es un sistema operativo en miniatura: posee sus propios controladores de disco para leer ext4, XFS o Btrfs, entender tablas de particiones y cargar archivos desde el disco duro a la RAM.
 
-\`\`\`text
-                  ARCHIVOS DE ORIGEN (Editables)
-         ┌──────────────────────────────────────────────┐
-         │  /etc/default/grub (Configuración general)   │
-         │  /etc/grub.d/*     (Scripts de menú)         │
-         └──────────────────────┬───────────────────────┘
-                                │
-                                │  Ejecución de update-grub
-                                ▼
-                  ARCHIVO COMPILADO (¡NO EDITAR!)
-         ┌──────────────────────────────────────────────┐
-         │  /boot/grub/grub.cfg (Debian/Ubuntu)         │
-         │  /boot/grub2/grub.cfg (RHEL/Fedora)          │
-         └──────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Archivos de origen","meta":"/etc/default/grub · /etc/grub.d/*","chip":"EDITABLE"},{"name":"Archivo compilado","meta":"/boot/grub/grub.cfg (Debian/Ubuntu) · /boot/grub2/grub.cfg (RHEL/Fedora)","chip":"NO EDITAR","focal":true}],"edges":[{"label":"update-grub / grub2-mkconfig","accent":true}]}
 \`\`\`
 
 > **¡REGLA DE ORO!**
@@ -68,12 +56,8 @@ Cuando el menú de GRUB esté en pantalla:
 3. Añade al final de la línea el parámetro necesario (ejemplo: \`nomodeset\` para evitar fallos de video).
 4. Presiona **\`Ctrl + X\`** o **\`F10\`** para arrancar temporalmente con ese parámetro.
 
-\`\`\`text
-  ┌────────────────────────────────────────────────────────────────────────┐
-  │ linux /boot/vmlinuz-6.8.0-generic root=UUID=x-x-x ro quiet nomodeset   │
-  │                                                      ▲                 │
-  │                                      Parámetro añadido en caliente     │
-  └────────────────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Línea del kernel editada en caliente","rows":[{"value":"linux /boot/vmlinuz-6.8.0-generic root=UUID=x-x-x ro quiet nomodeset"},{"key":"nomodeset","value":"parámetro añadido en caliente"}]}
 \`\`\`
 
 ### 🏢 Caso de uso profesional

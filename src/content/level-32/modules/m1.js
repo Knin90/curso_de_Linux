@@ -88,30 +88,8 @@ Metodología para identificar SPOFs en tu arquitectura:
 
 ### 📖 Active-active vs. active-passive
 
-\`\`\`text
-ACTIVE-PASSIVE (failover)
-  ┌──────────┐    ┌──────────┐
-  │ Nodo A   │    │ Nodo B   │
-  │ (ACTIVO) │    │(STANDBY) │
-  └──────────┘    └──────────┘
-       │
-   Tráfico
-
-  Ventajas: simple, barato, fácil de operar
-  Desventajas: capacidad subutilizada, failover tarda segundos/minutos
-  Uso: bases de datos, load balancers
-
-ACTIVE-ACTIVE (balanceo real)
-  ┌──────────┐    ┌──────────┐
-  │ Nodo A   │    │ Nodo B   │
-  │ (ACTIVO) │    │ (ACTIVO) │
-  └──────────┘    └──────────┘
-        ↑               ↑
-        └───── LB ──────┘
-
-  Ventajas: mayor capacidad, failover transparente, mejor uso de recursos
-  Desventajas: complejidad en manejo de estado, consistencia de datos
-  Uso: servidores web stateless, APIs, microservicios
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Active-passive (failover)","icon":"server","rows":["Nodo A (ACTIVO) recibe el tráfico","Nodo B en STANDBY, sin tráfico","Ventaja: simple y barato de operar","Desventaja: capacidad subutilizada, failover tarda segundos o minutos","Uso: bases de datos, load balancers"]},{"title":"Active-active (balanceo real)","icon":"network","rows":["Nodo A y Nodo B ambos ACTIVOS, reciben tráfico vía LB","Ventaja: mayor capacidad y failover transparente","Desventaja: complejidad en manejo de estado y consistencia","Uso: servidores web stateless, APIs, microservicios"],"focal":true}],"vsLabel":"VS"}
 \`\`\`
 
 ### 📖 Cálculo del coste de downtime

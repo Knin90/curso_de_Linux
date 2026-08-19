@@ -39,17 +39,8 @@ Todo paquete en el kernel Linux vive en una estructura llamada **sk_buff** (sock
 - Metadatos: interfaz de entrada, marca de firewall, estado de conntrack.
 - Punteros a las cabeceras L2, L3 y L4 (calculados según avanza por el stack).
 
-\`\`\`text
-sk_buff
-┌─────────────────────────────────────────────────────┐
-│  head   data   tail   end                           │
-│  ┌──┐   ┌─────────────────────────┐   ┌──┐         │
-│  │  │──▶│ ETH HDR | IP HDR | TCP  │──▶│  │         │
-│  └──┘   │ HDR     | PAYLOAD      │   └──┘         │
-│         └─────────────────────────┘                 │
-│  dev: eth0   sk: socket del proceso receptor        │
-│  mark: 0x0   nfct: estado conntrack                 │
-└─────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"sk_buff","meta":"punteros head → data → tail → end (no se copian datos)"},"items":[{"name":"ETH HDR","meta":"cabecera Ethernet","icon":"network"},{"name":"IP HDR","meta":"cabecera IP"},{"name":"TCP HDR","meta":"cabecera TCP"},{"name":"PAYLOAD","meta":"datos de la aplicación"}],"external":[{"name":"dev: eth0","icon":"network","side":"left"},{"name":"sk: socket receptor","icon":"user","side":"right"}]}
 \`\`\`
 
 Cuando el kernel necesita "subir" o "bajar" una capa, no copia datos — ajusta el puntero \`data\` dentro del mismo buffer. Eso hace que el procesamiento de paquetes sea eficiente.
@@ -95,55 +86,8 @@ Los campos importantes:
 
 Este es el camino que sigue un paquete TCP cuando llega desde la red hasta que la aplicación lo lee:
 
-\`\`\`text
-  INTERNET
-     │
-     ▼
-┌─────────────┐
-│     NIC     │  Hardware recibe el frame Ethernet
-│  (driver)   │  Driver hace DMA al ring buffer en RAM
-└──────┬──────┘
-       │ IRQ / NAPI polling
-       ▼
-┌─────────────┐
-│  softirq    │  NET_RX_SOFTIRQ procesa el sk_buff
-│  NET_RX     │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  L2 / ETH   │  eth_type_trans() determina protocolo
-│  processing │  Si no es para nosotros → DROP
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────┐
-│  Netfilter: PREROUTING hook │  ← iptables/nftables puede actuar aquí
-│  ip_rcv() → ip_rcv_finish() │    (DNAT, connection tracking)
-└──────┬──────────────────────┘
-       │
-       ▼
-┌─────────────┐
-│  Routing    │  ip_route_input(): ¿es para nosotros o hay que forwardearlo?
-│  decision   │
-└──────┬──────┘
-       │ Para nosotros (local delivery)
-       ▼
-┌─────────────────────────────┐
-│  Netfilter: INPUT hook      │  ← iptables/nftables INPUT chain
-└──────┬──────────────────────┘
-       │
-       ▼
-┌─────────────┐
-│  L4 / TCP   │  tcp_v4_rcv(): valida checksum, busca socket, encola
-│  processing │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  Socket     │  Datos en el receive buffer del socket
-│  recv buffer│  La app llama read()/recv() y los consume
-└─────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"icon":"network","name":"NIC (driver)","meta":"Recibe frame Ethernet · DMA al ring buffer en RAM"},{"icon":"chip","name":"softirq NET_RX","meta":"NET_RX_SOFTIRQ procesa el sk_buff"},{"icon":"network","name":"L2 / ETH processing","meta":"eth_type_trans() determina protocolo · si no es para nosotros, DROP"},{"icon":"firewall","name":"Netfilter PREROUTING hook","meta":"ip_rcv() → ip_rcv_finish() · DNAT, connection tracking"},{"icon":"gateway","name":"Routing decision","meta":"ip_route_input(): ¿local o forward?"},{"icon":"firewall","name":"Netfilter INPUT hook","meta":"iptables/nftables INPUT chain"},{"icon":"network","name":"L4 / TCP processing","meta":"tcp_v4_rcv(): valida checksum, busca socket, encola"},{"icon":"desktop","name":"Socket recv buffer","meta":"la app llama read()/recv() y consume","focal":true}],"edges":[{"label":"IRQ / NAPI polling"},{"label":"eth_type_trans"},{"label":"PREROUTING"},{"label":"local delivery"},{"label":"INPUT"},{"label":"TCP"},{"label":"consume"}]}
 \`\`\`
 
 Cada paso puede ser un punto de fallo. Dropped en L2 → MAC incorrecto o interfaz down. Dropped en Netfilter → regla de firewall. Dropped en TCP → puerto sin listener o backlog lleno.

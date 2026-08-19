@@ -54,18 +54,8 @@ logwatch instala un cron job en \`/etc/cron.daily/00logwatch\` que se ejecuta au
 
 fail2ban monitorea archivos de log y bloquea IPs que muestran comportamiento malicioso (múltiples fallos de autenticación, escaneos, etc.).
 
-\`\`\`text
-┌──────────────────────────────────────────────────────────┐
-│                      fail2ban                            │
-│                                                          │
-│  1. lee logs  ──▶  2. detecta patrón  ──▶  3. ban IP    │
-│                                                          │
-│  /var/log/auth.log                    iptables / nftables│
-│  /var/log/nginx/error.log  ──────────▶  DROP desde esa IP│
-│  etc.                                                    │
-│                                                          │
-│  Jail = (log + filtro + acción + thresholds)             │
-└──────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"fail2ban","meta":"Jail = log + filtro + acción + thresholds"},"items":[{"name":"Lee logs","meta":"/var/log/auth.log, /var/log/nginx/error.log, etc.","icon":"log"},{"name":"Detecta patrón","meta":"filtro / regex de ataque","icon":"search"},{"name":"Ban IP","meta":"iptables / nftables DROP","icon":"firewall","focal":true}],"external":[{"name":"Logs del sistema","icon":"log","side":"left"},{"name":"iptables / nftables","icon":"firewall","side":"right"}]}
 \`\`\`
 
 \`\`\`bash

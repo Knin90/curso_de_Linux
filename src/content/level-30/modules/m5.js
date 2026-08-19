@@ -19,51 +19,16 @@ El equipo sube código que funciona en su máquina pero falla en producción. Lo
 
 **Continuous Deployment (CD — Despliegue)**: cada merge a la rama principal se despliega automáticamente a producción sin intervención humana. Requiere alta confianza en los tests.
 
-\`\`\`
-Developer push
-      │
-      ▼
-┌─────────────────────────────────────────────┐
-│                  PIPELINE                    │
-│                                             │
-│  trigger → checkout → build → test → deploy │
-│                                             │
-│  Duración típica: 3-15 minutos              │
-└─────────────────────────────────────────────┘
-      │
-      ├─── CI: hasta "test" (obligatorio en cada PR)
-      ├─── Continuous Delivery: hasta "deploy to staging" (auto) + deploy prod (manual)
-      └─── Continuous Deployment: hasta "deploy to prod" (completamente automático)
+\`\`\`diagram
+{"type":"nested","container":{"title":"Pipeline","meta":"Duración típica: 3-15 minutos · CI llega hasta test · Continuous Delivery hasta staging (deploy prod manual) · Continuous Deployment hasta prod (automático)"},"items":[{"name":"trigger","icon":"pipeline"},{"name":"checkout"},{"name":"build"},{"name":"test"},{"name":"deploy","focal":true}],"external":[{"name":"Developer push","icon":"user","side":"left"}]}
 \`\`\`
 
 ### 📖 Anatomía de un pipeline
 
 Un pipeline se compone de **stages** (fases) que se ejecutan en orden. Dentro de cada stage hay **jobs** que pueden correr en paralelo:
 
-\`\`\`yaml
-# Representación conceptual (agnóstica de plataforma)
-
-Pipeline: main push
-│
-├── Stage 1: Build (falla rápido)
-│   └── Job: compile + lint
-│
-├── Stage 2: Test (en paralelo)
-│   ├── Job: unit-tests
-│   ├── Job: integration-tests
-│   └── Job: security-scan
-│
-├── Stage 3: Package
-│   └── Job: docker-build + docker-push
-│
-├── Stage 4: Deploy Staging (auto)
-│   └── Job: deploy-to-staging
-│
-├── Stage 5: Smoke tests (auto)
-│   └── Job: health-check + e2e
-│
-└── Stage 6: Deploy Production (manual approval)
-    └── Job: deploy-to-prod
+\`\`\`diagram
+{"type":"nested","container":{"title":"Pipeline: main push"},"items":[{"name":"Build","meta":"compile + lint","icon":"package"},{"name":"Test","meta":"unit-tests · integration-tests · security-scan (en paralelo)","icon":"bug"},{"name":"Package","meta":"docker-build + docker-push","icon":"package"},{"name":"Deploy Staging","meta":"deploy-to-staging (auto)"},{"name":"Smoke tests","meta":"health-check + e2e (auto)"},{"name":"Deploy Production","meta":"deploy-to-prod (manual approval)","focal":true}]}
 \`\`\`
 
 ### 📖 Artifacts

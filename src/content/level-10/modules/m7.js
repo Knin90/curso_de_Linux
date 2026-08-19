@@ -155,59 +155,8 @@ tcp      6 86399 ESTABLISHED src=10.0.0.2 dst=10.0.0.1 sport=54321 dport=22 [UNR
 
 ### 📖 Árbol de diagnóstico: ¿firewall o aplicación?
 
-\`\`\`text
-PROBLEMA: "El servicio no responde en el puerto X"
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│ PASO 1: ¿La aplicación está escuchando localmente?                      │
-│                                                                         │
-│   ss -tlnp | grep :80                                                   │
-│   # Si no hay output: la aplicación no está corriendo                   │
-│   # → Diagnóstico: problema de aplicación, no de firewall               │
-│   # Si hay output (ej: *:80): la app escucha → continuar al paso 2      │
-└────────────────────────────────────┬────────────────────────────────────┘
-                                     │ App escucha
-                                     ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│ PASO 2: ¿Funciona localmente?                                           │
-│                                                                         │
-│   curl -s http://localhost:80 -o /dev/null -w "%{http_code}"            │
-│   # o:                                                                  │
-│   nc -zv localhost 80                                                   │
-│   # Si falla: problema de configuración de la app                       │
-│   # Si funciona → continuar al paso 3                                   │
-└────────────────────────────────────┬────────────────────────────────────┘
-                                     │ Funciona local
-                                     ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│ PASO 3: ¿Los paquetes llegan al servidor?                               │
-│                                                                         │
-│   tcpdump -i eth0 -n port 80                                            │
-│   # (Mientras el cliente intenta conectar)                              │
-│   # Si no hay paquetes: el problema está en red/routing ANTES del host  │
-│   # Si hay paquetes SYN → continuar al paso 4                           │
-└────────────────────────────────────┬────────────────────────────────────┘
-                                     │ Paquetes llegan
-                                     ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│ PASO 4: ¿El firewall está bloqueando?                                   │
-│                                                                         │
-│   iptables -L INPUT -v -n                                               │
-│   # Busca reglas DROP/REJECT para el puerto 80                          │
-│   # Mira los contadores (pkts) de reglas DROP — ¿están subiendo?        │
-│                                                                         │
-│   # Añadir LOG temporal para confirmación                               │
-│   iptables -I INPUT -p tcp --dport 80 -j LOG --log-prefix "DEBUG-80: " │
-│   journalctl -k -f | grep "DEBUG-80"                                   │
-│   # Si aparece log: el paquete llega a iptables                         │
-│   # Si no hay log después del paquete SYN: revisar PREROUTING/DNAT      │
-└─────────────────────────────────────────────────────────────────────────┘
-
-RESULTADO:
-  • No hay paquetes (tcpdump): problema de red externa o routing
-  • Hay paquetes pero no logs: problema en mangle/PREROUTING/DNAT
-  • Hay logs de DROP: el firewall bloquea → añadir regla ACCEPT
-  • Hay logs de ACCEPT pero no funciona: problema de la aplicación
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"¿La app escucha localmente?","meta":"ss -tlnp | grep :80"},{"name":"¿Funciona localmente?","meta":"curl -s http://localhost:80 ó nc -zv localhost 80"},{"name":"¿Los paquetes llegan al servidor?","meta":"tcpdump -i eth0 -n port 80"},{"name":"¿El firewall está bloqueando?","meta":"iptables -L INPUT -v -n + LOG temporal","focal":true}],"edges":[{"label":"App escucha"},{"label":"Funciona local"},{"label":"Paquetes llegan","accent":true}],"sidePanel":{"title":"RESULTADO","lines":["Sin paquetes (tcpdump): problema de red externa o routing","Hay paquetes pero no logs: problema en mangle/PREROUTING/DNAT","Hay logs de DROP: firewall bloquea, añadir regla ACCEPT","Hay logs de ACCEPT pero no funciona: problema de la aplicación"]}}
 \`\`\`
 
 ### 📋 Lo que debes recordar

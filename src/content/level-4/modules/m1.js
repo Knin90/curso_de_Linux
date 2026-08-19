@@ -15,79 +15,24 @@ Antes de tocar un solo comando, necesitas entender **cómo piensa el kernel**. S
 
 Linux no pregunta al usuario si puede acceder a un archivo. **El Kernel toma esa decisión de forma autónoma**, comparando tres datos: el UID del proceso, el GID del proceso, y los bits de permiso almacenados en el inodo del archivo.
 
-\`\`\`text
-                     Usuario / Proceso
-
-                           │
-                  Solicita acceso a archivo
-                           │
-                           ▼
-
-                    Kernel de Linux
-
-                           │
-           ┌───────────────┴───────────────┐
-           │  ¿UID del proceso == UID dueño?│
-           └───────────────┬───────────────┘
-                           │
-               Sí ─────────┴───────── No
-               │                       │
-               ▼                       ▼
-        Aplica bits User        ¿GID del proceso == GID grupo?
-                                       │
-                               Sí ─────┴───── No
-                               │              │
-                               ▼              ▼
-                        Aplica bits    Aplica bits Others
-                        Group
-                               │
-                    ¿Tiene el permiso requerido?
-                               │
-                     Sí ───────┴────── No
-                     │                 │
-                     ▼                 ▼
-              Permite acceso    Permission denied
+\`\`\`diagram
+{"type":"tree","root":{"name":"Kernel de Linux","meta":"Decide acceso comparando UID → GID → Others"},"children":[{"name":"¿UID del proceso == UID dueño?","children":[{"name":"Aplica bits User","edgeLabel":"sí"},{"name":"Aplica bits Group","edgeLabel":"no, ¿GID == grupo?"},{"name":"Aplica bits Others","edgeLabel":"no (ni UID ni GID)"}]},{"name":"¿Tiene el permiso requerido?","children":[{"name":"Permite acceso","edgeLabel":"sí"},{"name":"Permission denied","edgeLabel":"no"}]}]}
 \`\`\`
 
 ### 🗂️ El inodo: donde viven los permisos
 
 El nombre de un archivo **no almacena los permisos**. El nombre es solo un puntero. Los permisos viven en una estructura interna del sistema de archivos llamada **inodo**:
 
-\`\`\`text
-  Directorio (tabla de nombres)
-  ├── "informe.txt"  ──► Inodo 47823
-  ├── "backup.sh"    ──► Inodo 47824
-  └── "config.conf"  ──► Inodo 47825
-
-  Inodo 47823
-  ├── UID propietario: 1001
-  ├── GID grupo:       1005
-  ├── Permisos:        rw-r-----  (640)
-  ├── Tamaño:          4096 bytes
-  ├── Fecha creación:  2026-08-01
-  └── Bloques de datos: [bloque 8821, bloque 8822]
+\`\`\`diagram
+{"type":"table-like","title":"Directorio y su inodo","rows":[{"key":"informe.txt","value":"→ Inodo 47823"},{"key":"backup.sh","value":"→ Inodo 47824"},{"key":"config.conf","value":"→ Inodo 47825"},{"value":"— Inodo 47823 —"},{"key":"UID propietario","value":"1001"},{"key":"GID grupo","value":"1005"},{"key":"Permisos","value":"rw-r----- (640)"},{"key":"Tamaño","value":"4096 bytes"},{"key":"Fecha creación","value":"2026-08-01"},{"key":"Bloques de datos","value":"bloque 8821, bloque 8822"}]}
 \`\`\`
 
 > Puedes renombrar un archivo, moverlo, o tener múltiples nombres (enlaces) apuntando al mismo inodo — los permisos no cambian porque viven en el inodo, no en el nombre.
 
 ### 🔍 ¿Qué ocurre cuando ejecutas un archivo?
 
-\`\`\`text
-  Usuario escribe: ./script.sh
-
-        │
-        ▼ Shell llama a execve()
-        │
-        ▼ Kernel busca el inodo de script.sh
-        │
-        ▼ Comprueba bit de ejecución (x)
-        │
-    ¿Tiene x?
-        │
-    Sí ─┴─ No
-    │       │
-    ▼       ▼
- Ejecuta   bash: permission denied
+\`\`\`diagram
+{"type":"tree","root":{"name":"Usuario escribe: ./script.sh","meta":"execve() → kernel busca inodo → comprueba bit x"},"children":[{"name":"Ejecuta","edgeLabel":"sí, ¿tiene x?"},{"name":"bash: permission denied","edgeLabel":"no"}]}
 \`\`\`
 
 ### 💻 Inspeccionar inodos en práctica

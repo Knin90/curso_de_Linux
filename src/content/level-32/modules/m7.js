@@ -14,19 +14,11 @@ Un datacenter entero se inunda. Tus 3 servidores web y el cluster de base de dat
 
 ### 📖 HA vs. DR: dos problemas distintos
 
-\`\`\`text
-ALTA DISPONIBILIDAD (HA)               DISASTER RECOVERY (DR)
-──────────────────────────────────────────────────────────────────
-Protege contra: fallo de componente    Protege contra: pérdida total del site
-Tiempo de recuperación: segundos       Tiempo de recuperación: minutos/horas
-Transparente al usuario: sí            Transparente al usuario: no siempre
-Automático: sí (keepalived, VRRP)     Manual o semi-automático
-Radio del problema: un rack/servidor   Radio del problema: datacenter/región
-Ejemplo: HAProxy failover con VIP      Ejemplo: restore en otra región AWS
-
-HA y DR son complementarios, no mutuamente excluyentes.
-Un buen sistema tiene ambos.
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Alta Disponibilidad (HA)","icon":"sync","focal":true,"rows":["Protege contra: fallo de componente","Tiempo de recuperación: segundos","Transparente al usuario: sí","Automático: sí (keepalived, VRRP)","Radio del problema: un rack/servidor","Ejemplo: HAProxy failover con VIP"]},{"title":"Disaster Recovery (DR)","icon":"backup","rows":["Protege contra: pérdida total del site","Tiempo de recuperación: minutos/horas","Transparente al usuario: no siempre","Automático: manual o semi-automático","Radio del problema: datacenter/región","Ejemplo: restore en otra región AWS"]}]}
 \`\`\`
+
+*HA y DR son complementarios, no mutuamente excluyentes — un buen sistema tiene ambos.*
 
 ### 📖 Componentes de un plan de DR
 

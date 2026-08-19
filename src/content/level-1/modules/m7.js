@@ -14,14 +14,8 @@ Ciertas aplicaciones o dispositivos requieren acceso directo al hardware (*bare-
 
 El arranque dual requiere modificar la estructura de particiones existente para liberar espacio no asignado donde se instalará el segundo sistema operativo.
 
-\`\`\`text
-Disco Físico (GPT)
-┌───────────────────────┬───────────────────────┬───────────────────────┐
-│ Partición ESP (FAT32) │ Partición Windows     │ Partición Linux       │
-│ Bootloaders:          │ System (NTFS)         │ System (ext4 / btrfs) │
-│ - /EFI/Microsoft/     │                       │                       │
-│ - /EFI/ubuntu/ (GRUB) │                       │                       │
-└───────────────────────┴───────────────────────┴───────────────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Partición ESP (FAT32)","icon":"disk","rows":["Bootloaders:","/EFI/Microsoft/","/EFI/ubuntu/ (GRUB)"]},{"title":"Partición Windows","rows":["System (NTFS)"]},{"title":"Partición Linux","rows":["System (ext4 / btrfs)"]}]}
 \`\`\`
 
 ### 🚨 Requisitos y precauciones críticas antes de modificar particiones

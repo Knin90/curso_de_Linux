@@ -145,22 +145,8 @@ pip install django-redis
 
 ### 📖 Comparativa de estrategias
 
-\`\`\`text
-ESTRATEGIA           PROS                    CONTRAS
-────────────────────────────────────────────────────────────────────
-Sticky sessions      Sin cambios en la app   Desbalance si caen servers
-                     Simple de configurar    Sesión perdida si cae el server
-                     Zero coste de infra     No escala bien a muchos nodes
-
-Sesiones en Redis    Balanceo perfecto       Redis es un nuevo SPOF
-                     Failover transparente   Latencia adicional (~1ms)
-                     Escala horizontalmente  Cambios en la aplicación
-                     Fácil de invalidar
-
-JWT (stateless)      Sin servidor de sesión  Tokens no revocables fácilmente
-                     Escala perfectamente    Tamaño de token en cada req
-                     Sin state en ningún     Logout complicado
-                     lado
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"Sticky sessions","rows":["+ Sin cambios en la app","+ Simple de configurar","+ Zero coste de infra","− Desbalance si caen servers","− Sesión perdida si cae el server","− No escala bien a muchos nodes"]},{"title":"Sesiones en Redis","focal":true,"rows":["+ Balanceo perfecto","+ Failover transparente","+ Escala horizontalmente","+ Fácil de invalidar","− Redis es un nuevo SPOF","− Latencia adicional (~1ms)","− Cambios en la aplicación"]},{"title":"JWT (stateless)","rows":["+ Sin servidor de sesión","+ Escala perfectamente","+ Sin state en ningún lado","− Tokens no revocables fácilmente","− Tamaño de token en cada request","− Logout complicado"]}]}
 \`\`\`
 
 ### 📋 Lo que debes recordar

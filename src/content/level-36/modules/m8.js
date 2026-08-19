@@ -17,26 +17,8 @@ Este laboratorio construye ese sistema paso a paso. Al terminar tendrás algo qu
 
 ### 📖 Arquitectura del sistema que construiremos
 
-\`\`\`
-┌─────────────────────────────────────────────────────────────────┐
-│  Servidor de aplicación (app-server)                            │
-│                                                                 │
-│  /var/www/myapp/      ─── Archivos de aplicación               │
-│  /etc/myapp/          ─── Configuración                        │
-│  PostgreSQL (myapp_db) ── Base de datos                        │
-│  /var/backups/postgres/ ─ Dumps de PostgreSQL                  │
-│                                ↓                               │
-│  backup-daily.sh (systemd timer, 3am)                          │
-│  backup-integrity.sh (systemd timer, domingos 1am)             │
-│  backup-freshness.sh (cron, cada hora)                         │
-│  backup-restore-test.sh (systemd timer, 1er día del mes)       │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │ SSH + BorgBackup
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Servidor de backup (backup-server)                             │
-│  /backups/app-server/  ─── Repositorio Borg (cifrado)          │
-└─────────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"app-server","icon":"server","rows":["/var/www/myapp/ — archivos de aplicación","/etc/myapp/ — configuración","PostgreSQL (myapp_db) — base de datos","/var/backups/postgres/ — dumps de PostgreSQL","backup-daily.sh (systemd timer, 3am)","backup-integrity.sh (domingos 1am)","backup-freshness.sh (cron, cada hora)","backup-restore-test.sh (1er día del mes)"],"focal":true},{"title":"backup-server","icon":"disk","rows":["/backups/app-server/ — repositorio Borg (cifrado)"]}],"vsLabel":"SSH + BorgBackup"}
 \`\`\`
 
 ### 📖 Paso 1 — Configurar autenticación SSH para el repositorio remoto

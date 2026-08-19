@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Arquitectura de capas de Linux</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f8f6; --paper-2:#eef1ee; --ink:#1b2420; --muted:#5b6b60;
+    --rule:rgba(27,36,32,0.12); --accent:#0f9b7e; --accent-tint:#e3f5ef;
+    --link:#2e5aa8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Geist',sans-serif;padding:40px 24px 56px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .eyebrow{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:0.14em;color:var(--accent);
+    text-transform:uppercase;margin:0 0 8px}
+  h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:1.9rem;margin:0 0 4px;line-height:1.15}
+  .pill{background:var(--accent);color:#fff;border-radius:999px;padding:2px 14px;font-style:normal}
+  p.sub{font-family:'Geist',sans-serif;color:var(--muted);font-size:14px;margin:0 0 28px}
+  .diagram{width:100%;height:auto;display:block}
+  .foot{margin-top:20px;padding-top:14px;border-top:1px solid var(--rule);
+    font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Arquitectura del sistema</p>
+  <h1>Capas de un sistema <span class="pill">Linux</span></h1>
+  <p class="sub">De la aplicación de usuario al hardware — cada flecha es un salto real de responsabilidad.</p>
+
+  <svg class="diagram" viewBox="0 0 1000 900" role="img" aria-labelledby="kernel-layers-title kernel-layers-desc">
+    <title id="kernel-layers-title">Flujo de capas de un sistema Linux, de la aplicación al hardware</title>
+    <desc id="kernel-layers-desc">Cinco nodos conectados verticalmente por flechas: aplicaciones de usuario ejecutan sobre el entorno gráfico o shell, que invoca bibliotecas del sistema, que cruzan al kernel Linux mediante una syscall, que a su vez gestiona el hardware; un panel lateral detalla las syscalls típicas.</desc>
+
+    <defs>
+      <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#5b6b60"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#0f9b7e"/>
+      </marker>
+    </defs>
+
+    <rect width="1000" height="900" fill="#f7f8f6"/>
+
+    <!-- ============ connectors (drawn first, behind nodes) ============ -->
+    <!-- 1: apps -> shell -->
+    <line x1="320" y1="208" x2="320" y2="264" stroke="#5b6b60" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-muted)"/>
+    <rect x="336" y="228" width="60" height="14" rx="7" fill="#eef1ee" stroke="#5b6b60" stroke-width="0.8"/>
+    <text x="366" y="238" fill="#5b6b60" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">EJECUTA</text>
+
+    <!-- 2: shell -> libs -->
+    <line x1="320" y1="352" x2="320" y2="408" stroke="#5b6b60" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-muted)"/>
+    <rect x="336" y="372" width="60" height="14" rx="7" fill="#eef1ee" stroke="#5b6b60" stroke-width="0.8"/>
+    <text x="366" y="382" fill="#5b6b60" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">INVOCA</text>
+
+    <!-- 3: libs -> kernel (the accent syscall boundary) -->
+    <line x1="320" y1="496" x2="320" y2="552" stroke="#0f9b7e" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+    <rect x="336" y="516" width="72" height="14" rx="7" fill="#e3f5ef" stroke="#0f9b7e" stroke-width="1"/>
+    <text x="372" y="526" fill="#0f9b7e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em" font-weight="600">SYSCALL</text>
+    <!-- elbow off to the side panel -->
+    <path d="M 540 523 L 620 523" fill="none" stroke="#0f9b7e" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+
+    <!-- 4: kernel -> hardware -->
+    <line x1="320" y1="640" x2="320" y2="696" stroke="#5b6b60" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow-muted)"/>
+    <rect x="336" y="660" width="96" height="14" rx="7" fill="#eef1ee" stroke="#5b6b60" stroke-width="0.8"/>
+    <text x="384" y="670" fill="#5b6b60" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GESTIONA HW</text>
+
+    <!-- ============ nodes ============ -->
+
+    <!-- Node 1: Aplicaciones de usuario -->
+    <rect x="100" y="120" width="440" height="88" rx="10" fill="#ffffff" stroke="#1b2420" stroke-width="1.2"/>
+    <circle cx="148" cy="164" r="24" fill="#eef1ee" stroke="#1b2420" stroke-width="1"/>
+    <g transform="translate(136,152) scale(1)" color="#1b2420" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/>
+    </g>
+    <rect x="188" y="136" width="24" height="14" rx="2" fill="transparent" stroke="rgba(27,36,32,0.4)" stroke-width="0.8"/>
+    <text x="200" y="146" fill="#1b2420" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">L1</text>
+    <text x="188" y="172" fill="#1b2420" font-size="15" font-weight="600" font-family="'Geist', sans-serif">Aplicaciones de usuario</text>
+    <text x="188" y="190" fill="#5b6b60" font-size="10" font-family="'Geist Mono', monospace">navegador · editor · terminal</text>
+
+    <!-- Node 2: Entorno gráfico / Shell -->
+    <rect x="100" y="264" width="440" height="88" rx="10" fill="#ffffff" stroke="#1b2420" stroke-width="1.2"/>
+    <circle cx="148" cy="308" r="24" fill="#eef1ee" stroke="#1b2420" stroke-width="1"/>
+    <g transform="translate(136,296) scale(1)" color="#1b2420" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 9l3 3l-3 3"/><path d="M13 15l4 0"/><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1"/>
+    </g>
+    <rect x="188" y="280" width="24" height="14" rx="2" fill="transparent" stroke="rgba(27,36,32,0.4)" stroke-width="0.8"/>
+    <text x="200" y="290" fill="#1b2420" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">L2</text>
+    <text x="188" y="316" fill="#1b2420" font-size="15" font-weight="600" font-family="'Geist', sans-serif">Entorno gráfico / Shell</text>
+    <text x="188" y="334" fill="#5b6b60" font-size="10" font-family="'Geist Mono', monospace">GNOME · KDE · bash · zsh</text>
+
+    <!-- Node 3: Bibliotecas del sistema -->
+    <rect x="100" y="408" width="440" height="88" rx="10" fill="#ffffff" stroke="#1b2420" stroke-width="1.2"/>
+    <circle cx="148" cy="452" r="24" fill="#eef1ee" stroke="#1b2420" stroke-width="1"/>
+    <g transform="translate(136,440) scale(1)" color="#1b2420" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/>
+    </g>
+    <rect x="188" y="424" width="24" height="14" rx="2" fill="transparent" stroke="rgba(27,36,32,0.4)" stroke-width="0.8"/>
+    <text x="200" y="434" fill="#1b2420" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">L3</text>
+    <text x="188" y="460" fill="#1b2420" font-size="15" font-weight="600" font-family="'Geist', sans-serif">Bibliotecas del sistema</text>
+    <text x="188" y="478" fill="#5b6b60" font-size="10" font-family="'Geist Mono', monospace">glibc · systemd</text>
+
+    <!-- Node 4: KERNEL LINUX (focal) -->
+    <rect x="100" y="552" width="440" height="88" rx="10" fill="#e3f5ef" stroke="#0f9b7e" stroke-width="1.8"/>
+    <circle cx="148" cy="596" r="24" fill="#ffffff" stroke="#0f9b7e" stroke-width="1.4"/>
+    <g transform="translate(136,584) scale(1)" color="#0f9b7e" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3"/><path d="M3 15a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3l0 -2"/><path d="M7 8l0 .01"/><path d="M7 16l0 .01"/>
+    </g>
+    <rect x="188" y="568" width="24" height="14" rx="2" fill="transparent" stroke="rgba(15,155,126,0.5)" stroke-width="0.8"/>
+    <text x="200" y="578" fill="#0f9b7e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">L4</text>
+    <text x="188" y="604" fill="#1b2420" font-size="16" font-weight="700" font-family="'Geist', sans-serif" letter-spacing="0.02em">KERNEL LINUX</text>
+    <text x="188" y="622" fill="#3f6e60" font-size="10" font-family="'Geist Mono', monospace">procesos · memoria · archivos · red</text>
+    <rect x="452" y="564" width="72" height="16" rx="8" fill="#0f9b7e"/>
+    <text x="488" y="576" fill="#ffffff" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RING 0</text>
+
+    <!-- Node 5: Hardware -->
+    <rect x="100" y="696" width="440" height="88" rx="10" fill="#ffffff" stroke="#1b2420" stroke-width="1.2"/>
+    <circle cx="148" cy="740" r="24" fill="#eef1ee" stroke="#1b2420" stroke-width="1"/>
+    <g transform="translate(136,728) scale(1)" color="#1b2420" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/>
+      <path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/>
+      <path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/>
+    </g>
+    <rect x="188" y="712" width="24" height="14" rx="2" fill="transparent" stroke="rgba(27,36,32,0.4)" stroke-width="0.8"/>
+    <text x="200" y="722" fill="#1b2420" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">L5</text>
+    <text x="188" y="748" fill="#1b2420" font-size="15" font-weight="600" font-family="'Geist', sans-serif">Hardware</text>
+    <text x="188" y="766" fill="#5b6b60" font-size="10" font-family="'Geist Mono', monospace">CPU · RAM · disco · red · periféricos</text>
+
+    <!-- ============ side panel: syscall detail ============ -->
+    <rect x="620" y="452" width="280" height="144" rx="10" fill="#ffffff" stroke="#0f9b7e" stroke-width="1.2"/>
+    <rect x="620" y="452" width="280" height="30" rx="10" fill="#0f9b7e"/>
+    <rect x="620" y="466" width="280" height="16" fill="#0f9b7e"/>
+    <text x="636" y="472" fill="#ffffff" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.1em">FRONTERA DE PRIVILEGIO</text>
+    <text x="636" y="510" fill="#1b2420" font-size="13" font-style="italic" font-family="'Instrument Serif', serif">Nada toca el hardware sin</text>
+    <text x="636" y="530" fill="#1b2420" font-size="13" font-style="italic" font-family="'Instrument Serif', serif">pasar por el kernel primero.</text>
+    <rect x="636" y="548" width="248" height="24" rx="4" fill="#f7f8f6" stroke="rgba(27,36,32,0.15)" stroke-width="0.8"/>
+    <text x="648" y="564" fill="#3f6e60" font-size="9.5" font-family="'Geist Mono', monospace">open() read() write() fork()</text>
+
+    <!-- ============ legend ============ -->
+    <line x1="100" y1="820" x2="900" y2="820" stroke="rgba(27,36,32,0.10)" stroke-width="0.8"/>
+    <text x="100" y="838" fill="#5b6b60" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+    <rect x="220" y="829" width="14" height="10" rx="2" fill="#e3f5ef" stroke="#0f9b7e" stroke-width="1"/>
+    <text x="240" y="838" fill="#5b6b60" font-size="9" font-family="'Geist Mono', monospace">capa privilegiada (ring 0)</text>
+    <line x1="460" y1="834" x2="490" y2="834" stroke="#0f9b7e" stroke-width="1.8" stroke-dasharray="5,4"/>
+    <text x="500" y="838" fill="#5b6b60" font-size="9" font-family="'Geist Mono', monospace">syscall — cruce de frontera</text>
+    <line x1="700" y1="834" x2="730" y2="834" stroke="#5b6b60" stroke-width="1.4" stroke-dasharray="5,4"/>
+    <text x="740" y="838" fill="#5b6b60" font-size="9" font-family="'Geist Mono', monospace">llamada normal</text>
+  </svg>
+
+  <div class="foot">nivel-0 · módulo-1 · kernel, sistema operativo y distribución</div>
+</div>
+</body>
+</html>

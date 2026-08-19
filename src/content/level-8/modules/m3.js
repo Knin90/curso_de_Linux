@@ -17,31 +17,8 @@ El **sistema de archivos** instala una estructura sobre esos bloques que define 
 
 ### 📖 Qué construye mkfs.ext4
 
-\`\`\`text
-Partición vacía (bloques sin estructura)
-
-        ↓  mkfs.ext4 /dev/sdb1
-
-┌────────────────────────────────────────┐
-│  Superblock                            │ ← Metadatos maestros
-│  (tamaño total, bloques libres,        │   Se replica cada 32768 bloques
-│   estado del filesystem, magic number) │
-├────────────────────────────────────────┤
-│  Tabla de inodos                       │ ← Un inodo por archivo/directorio
-│  (permisos, propietario, tamaño,       │   Contiene punteros a bloques de datos
-│   timestamps, punteros a bloques)      │   No contiene el nombre del archivo
-├────────────────────────────────────────┤
-│  Bitmap de bloques                     │ ← Mapa de bloques ocupados/libres
-│  Bitmap de inodos                      │ ← Mapa de inodos en uso/disponibles
-├────────────────────────────────────────┤
-│  Journal (registro de transacciones)   │ ← Garantiza consistencia
-│                                        │   tras un corte de energía
-│                                        │   El kernel escribe aquí primero,
-│                                        │   luego al destino final
-├────────────────────────────────────────┤
-│  Bloques de datos                      │ ← Aquí viven los contenidos
-│                                        │   reales de los archivos
-└────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"mkfs.ext4 /dev/sdb1 — estructuras creadas","rows":[{"key":"Superblock","value":"Metadatos maestros: tamaño total, bloques libres, estado del filesystem, magic number. Se replica cada 32768 bloques"},{"key":"Tabla de inodos","value":"Un inodo por archivo/directorio (permisos, propietario, tamaño, timestamps, punteros a bloques). No contiene el nombre del archivo"},{"key":"Bitmap de bloques / inodos","value":"Mapa de bloques ocupados/libres y de inodos en uso/disponibles"},{"key":"Journal","value":"Registro de transacciones. Garantiza consistencia tras un corte de energía: el kernel escribe aquí primero, luego al destino final"},{"key":"Bloques de datos","value":"Aquí viven los contenidos reales de los archivos"}]}
 \`\`\`
 
 ### 📖 El inodo: la ficha de identidad de cada archivo

@@ -20,18 +20,8 @@ Secure Boot verifica la firma digital del bootloader, del kernel y de los módul
 
 Distribuciones como Ubuntu, Fedora y Debian utilizan un gestor de arranque intermedio llamado **\`shim\`**, el cual está firmado por Microsoft (cuya clave viene preinstalada en el firmware de la mayoría de fabricantes). Gracias a esto, **Linux puede arrancar con Secure Boot activo**.
 
-\`\`\`text
-UEFI localiza el bootloader firmado (shim.efi)
-        │
-        ▼
-Verifica la firma digital contra las claves del firmware (PK / KEK / db)
-        │
-   ┌────┴────┐
-   ▼         ▼
- Válida   No válida
-   │         │
-   ▼         ▼
-Continúa   Bloquea el arranque
+\`\`\`diagram
+{"type":"tree","root":{"name":"Verifica firma digital (PK / KEK / db)","meta":"UEFI localiza el bootloader firmado shim.efi"},"children":[{"name":"Válida","edgeLabel":"sí","meta":"Continúa el arranque","focal":true},{"name":"No válida","edgeLabel":"no","meta":"Bloquea el arranque"}]}
 \`\`\`
 
 ### 💻 Ejemplo básico
@@ -48,15 +38,8 @@ Al instalar controladores propietarios de video (ej. NVIDIA) o módulos de red e
 
 Al reiniciar, el sistema mostrará una pantalla azul/gris llamada **Shim UEFI Key Management**. El administrador debe seleccionar **"Enroll MOK"**, introducir la contraseña definida y confirmar la importación para autorizar la carga de los controladores.
 
-\`\`\`text
-  ┌────────────────────────────────────────────────────────┐
-  │ Perform MOK management                                 │
-  ├────────────────────────────────────────────────────────┤
-  │ Continue boot                                          │
-  │ Enroll MOK                                             │ <-- Seleccionar esta opción
-  │ Enroll key from disk                                   │
-  │ Enroll hash from disk                                  │
-  └────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Perform MOK management","rows":[{"value":"Continue boot"},{"key":"→","value":"Enroll MOK (seleccionar esta opción)"},{"value":"Enroll key from disk"},{"value":"Enroll hash from disk"}]}
 \`\`\`
 
 ### 🧪 Laboratorio guiado

@@ -10,38 +10,8 @@ const content = `
 
 Cada familia de distribuciones utiliza herramientas distintas para guiar el proceso de particionado, selección de paquetes y creación de usuarios:
 
-\`\`\`text
- ┌────────────────────────────────────────────────────────────────────────┐
- │                      FLUJO DE INSTALACIÓN REAL                         │
- └────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-                   [1] Carga de Live USB en modo UEFI
-                                     │
-                                     ▼
-                   [2] Verificación de Tabla GPT y ESP
-                                     │
-                                     ▼
-                   [3] Configuración de Particionamiento
-                                     │
-                  ┌──────────────────┴──────────────────┐
-                  ▼                                     ▼
-         Particionado Guiado                   Particionado Manual
-     (Uso de todo el disco)                  (/, /boot/efi, swap)
-                  │                                     │
-                  └──────────────────┬──────────────────┘
-                                     │
-                                     ▼
-                   [4] Copia de Archivos e Instalación
-                                     │
-                                     ▼
-                   [5] Instalación de GRUB en la ESP
-                                     │
-                                     ▼
-                   [6] Creación de Usuario / Root / Zonas
-                                     │
-                                     ▼
-                   [7] Reinicio y Verificación Final
+\`\`\`diagram
+{"type":"tree","root":{"name":"Configuración de particionamiento","meta":"[1] Live USB en modo UEFI → [2] Verificación de tabla GPT y ESP","icon":"disk"},"children":[{"name":"Particionado guiado","meta":"Uso de todo el disco","edgeLabel":"automático","children":[{"name":"Instalación final","meta":"[4] Copia de archivos → [5] GRUB en ESP → [6] Usuario/root/zonas → [7] Reinicio"}]},{"name":"Particionado manual","meta":"/, /boot/efi, swap","edgeLabel":"manual","children":[{"name":"Instalación final","meta":"[4] Copia de archivos → [5] GRUB en ESP → [6] Usuario/root/zonas → [7] Reinicio"}]}]}
 \`\`\`
 
 ### 📊 Comparativa de Instaladores

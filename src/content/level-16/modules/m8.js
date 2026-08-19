@@ -418,19 +418,8 @@ Problema 3 diagnosticado. Causa raíz: la pérdida de ICMP en saltos intermedios
 
 ### 📖 Resumen del diagnóstico completo
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────────────────┐
-│ PROBLEMA         │ SÍNTOMA              │ CAUSA              │ FIX  │
-├─────────────────────────────────────────────────────────────────────┤
-│ Puerto 80        │ Connection refused   │ listen 127.0.0.1   │ nginx│
-│                  │ desde exterior       │ en lugar de 0.0.0.0│ conf │
-├─────────────────────────────────────────────────────────────────────┤
-│ DNS interno      │ Name not known       │ nameserver 10.0.1. │ rslv │
-│                  │ para dominios        │ .254 no responde   │ conf │
-├─────────────────────────────────────────────────────────────────────┤
-│ Backend "inest." │ Cortes intermitentes │ keepalive_time=7200│ sysc │
-│                  │ (ICMP loss falso)    │ > firewall timeout │ tl   │
-└─────────────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Resumen del diagnóstico completo","rows":[{"key":"Puerto 80","value":"síntoma: Connection refused desde exterior · causa: listen 127.0.0.1 en lugar de 0.0.0.0 · fix: config de nginx"},{"key":"DNS interno","value":"síntoma: Name not known para dominios · causa: nameserver 10.0.1.254 no responde · fix: resolved.conf"},{"key":"Backend \"inestable\"","value":"síntoma: cortes intermitentes (ICMP loss falso) · causa: keepalive_time=7200 > timeout del firewall · fix: sysctl"}]}
 \`\`\`
 
 Orden de diagnóstico aplicado en cada problema:

@@ -17,16 +17,8 @@ Un servidor de producción fue comprometido. El equipo de operaciones descubre q
 
 El Cyber Kill Chain es un modelo de 7 fases que describe la progresión de un ataque dirigido. Entender cada fase permite diseñar controles en múltiples puntos del ataque.
 
-\`\`\`text
-FASE              DESCRIPCIÓN                          OBJETIVO DEL ATACANTE
-─────────────────────────────────────────────────────────────────────────────
-1. Reconocimiento  Recolección de información           Conocer el objetivo
-2. Armado          Preparar el payload/exploit          Crear la herramienta de ataque
-3. Entrega         Enviar el payload al objetivo        Llegar al sistema objetivo
-4. Explotación     Ejecutar el exploit                  Ganar ejecución de código
-5. Instalación     Instalar backdoor/malware            Persistencia en el sistema
-6. C2              Establecer canal de mando y control  Controlar el sistema comprometido
-7. Acciones        Cumplir el objetivo final            Exfiltración, destrucción, movimiento lateral
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"tag":"1","icon":"search","name":"Reconocimiento","meta":"recolección de información · conocer el objetivo"},{"tag":"2","icon":"package","name":"Armado","meta":"preparar payload/exploit · crear la herramienta de ataque"},{"tag":"3","icon":"network","name":"Entrega","meta":"enviar el payload · llegar al sistema objetivo"},{"tag":"4","icon":"bug","name":"Explotación","meta":"ejecutar el exploit · ganar ejecución de código","focal":true},{"tag":"5","icon":"disk","name":"Instalación","meta":"instalar backdoor/malware · persistencia en el sistema"},{"tag":"6","icon":"gateway","name":"C2","meta":"canal de mando y control · controlar el sistema"},{"tag":"7","icon":"alert","name":"Acciones sobre objetivos","meta":"exfiltración, destrucción, movimiento lateral","chip":"IMPACTO"}],"edges":[{"label":"prepara"},{"label":"envía"},{"label":"compromete","accent":true},{"label":"persiste"},{"label":"controla"},{"label":"ejecuta"}]}
 \`\`\`
 
 ### 📖 Superficies de ataque en Linux por fase del kill chain
@@ -57,14 +49,8 @@ El atacante prepara el exploit o payload. No requiere acceso al sistema objetivo
 
 Los vectores de entrega más comunes en Linux:
 
-\`\`\`text
-VECTOR                    EJEMPLOS REALES
-────────────────────────────────────────────────────────────────
-SSH brute force           hydra -l root -P wordlist.txt ssh://target
-Servicios web             SQLi, RFI, carga de webshells PHP
-Email (phishing)          Adjuntos maliciosos a usuarios con acceso
-Servicios expuestos       Redis sin auth, Memcached, Elasticsearch público
-Supply chain              Dependencias npm/pip comprometidas
+\`\`\`diagram
+{"type":"table-like","title":"Vectores de entrega","rows":[{"key":"SSH brute force","value":"hydra -l root -P wordlist.txt ssh://target"},{"key":"Servicios web","value":"SQLi, RFI, carga de webshells PHP"},{"key":"Email (phishing)","value":"Adjuntos maliciosos a usuarios con acceso"},{"key":"Servicios expuestos","value":"Redis sin auth, Memcached, Elasticsearch público"},{"key":"Supply chain","value":"Dependencias npm/pip comprometidas"}]}
 \`\`\`
 
 **Fase 4 — Explotación**
@@ -153,35 +139,16 @@ find / -name "*.db" -exec shred -u {} \;
 
 MITRE ATT&CK es una base de conocimiento de tácticas y técnicas de adversarios basada en observaciones del mundo real. Es más granular que el kill chain.
 
-\`\`\`text
-TÁCTICA ATT&CK              TÉCNICAS RELEVANTES EN LINUX
-─────────────────────────────────────────────────────────────────────────────
-Initial Access              T1078 (creds válidas), T1190 (exploit servicio público)
-Execution                   T1059.004 (bash/sh), T1053.003 (cron)
-Persistence                 T1136 (crear cuenta), T1546 (event triggered execution)
-Privilege Escalation        T1548.001 (SUID), T1068 (exploit kernel)
-Defense Evasion             T1070 (borrar logs), T1027 (ofuscación)
-Credential Access           T1003 (dump credenciales), T1110 (brute force)
-Discovery                   T1057 (process discovery), T1018 (remote system discovery)
-Lateral Movement            T1021.004 (SSH), T1570 (lateral tool transfer)
-Collection                  T1005 (datos locales), T1039 (datos en red compartida)
-Exfiltration                T1041 (exfil por C2), T1048 (exfil por protocolo alternativo)
+\`\`\`diagram
+{"type":"table-like","title":"MITRE ATT&CK — tácticas y técnicas en Linux","rows":[{"key":"Initial Access","value":"T1078 (creds válidas), T1190 (exploit servicio público)"},{"key":"Execution","value":"T1059.004 (bash/sh), T1053.003 (cron)"},{"key":"Persistence","value":"T1136 (crear cuenta), T1546 (event triggered execution)"},{"key":"Privilege Escalation","value":"T1548.001 (SUID), T1068 (exploit kernel)"},{"key":"Defense Evasion","value":"T1070 (borrar logs), T1027 (ofuscación)"},{"key":"Credential Access","value":"T1003 (dump credenciales), T1110 (brute force)"},{"key":"Discovery","value":"T1057 (process discovery), T1018 (remote system discovery)"},{"key":"Lateral Movement","value":"T1021.004 (SSH), T1570 (lateral tool transfer)"},{"key":"Collection","value":"T1005 (datos locales), T1039 (datos en red compartida)"},{"key":"Exfiltration","value":"T1041 (exfil por C2), T1048 (exfil por protocolo alternativo)"}]}
 \`\`\`
 
 URL de referencia: https://attack.mitre.org/matrices/enterprise/linux/
 
 ### 📖 Defense-in-depth mapeado al kill chain
 
-\`\`\`text
-FASE          CONTROL DEFENSIVO
-─────────────────────────────────────────────────────────────────────────────
-Reconocimiento  fail2ban (bloquear scanners), cerrar puertos, ocultar banners
-Armado          Inteligencia de amenazas (feeds de IoC)
-Entrega         WAF, filtrado de email, actualización de software
-Explotación     SELinux/AppArmor, deshabilitar SUID innecesarios, sudo restringido
-Instalación     AIDE (detección de cambios), monitoreo de cron, auditd
-C2              Firewall egress, IDS de red, monitoreo de DNS
-Acciones        DLP, segmentación de red, backups cifrados fuera de línea
+\`\`\`diagram
+{"type":"table-like","title":"Controles defensivos por fase","rows":[{"key":"Reconocimiento","value":"fail2ban (bloquear scanners), cerrar puertos, ocultar banners"},{"key":"Armado","value":"Inteligencia de amenazas (feeds de IoC)"},{"key":"Entrega","value":"WAF, filtrado de email, actualización de software"},{"key":"Explotación","value":"SELinux/AppArmor, deshabilitar SUID innecesarios, sudo restringido"},{"key":"Instalación","value":"AIDE (detección de cambios), monitoreo de cron, auditd"},{"key":"C2","value":"Firewall egress, IDS de red, monitoreo de DNS"},{"key":"Acciones","value":"DLP, segmentación de red, backups cifrados fuera de línea"}]}
 \`\`\`
 
 ### 📋 Lo que debes recordar

@@ -26,22 +26,8 @@ Piensa en un automóvil. El **motor** es el kernel: convierte combustible en mov
 
 Capas de un sistema Linux típico, de abajo hacia arriba:
 
-\`\`\`text
- ┌────────────────────────────────────────────────────────────┐
- │  Aplicaciones de usuario (navegador, editor, terminal...)   │
- ├────────────────────────────────────────────────────────────┤
- │  Entorno gráfico / Shell (GNOME, KDE, bash, zsh...)          │
- ├────────────────────────────────────────────────────────────┤
- │  Bibliotecas del sistema (glibc, systemd, ...)               │
- ├────────────────────────────────────────────────────────────┤
- │  KERNEL LINUX                                                 │
- │  (gestión de procesos, memoria, sistema de archivos, red)    │
- ├────────────────────────────────────────────────────────────┤
- │  Hardware (CPU, RAM, disco, red, periféricos)                 │
- └────────────────────────────────────────────────────────────┘
-
- Todo lo que está por encima del kernel se comunica con él mediante
- llamadas al sistema (syscalls): open(), read(), write(), fork()...
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"tag":"L1","icon":"desktop","name":"Aplicaciones de usuario","meta":"navegador · editor · terminal"},{"tag":"L2","icon":"terminal","name":"Entorno gráfico / Shell","meta":"GNOME · KDE · bash · zsh"},{"tag":"L3","icon":"package","name":"Bibliotecas del sistema","meta":"glibc · systemd"},{"tag":"L4","icon":"server","name":"KERNEL LINUX","meta":"procesos · memoria · archivos · red","focal":true,"chip":"RING 0"},{"tag":"L5","icon":"chip","name":"Hardware","meta":"CPU · RAM · disco · red · periféricos"}],"edges":[{"label":"EJECUTA"},{"label":"INVOCA"},{"label":"SYSCALL","accent":true},{"label":"GESTIONA HW"}],"sidePanel":{"title":"FRONTERA DE PRIVILEGIO","lines":["Nada toca el hardware sin","pasar por el kernel primero."],"code":"open() read() write() fork()"}}
 \`\`\`
 
 Una distribución empaqueta y organiza todas estas capas, añadiendo su propio criterio sobre qué software incluir por defecto y cómo mantenerlo actualizado.

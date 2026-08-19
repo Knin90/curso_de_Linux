@@ -16,21 +16,11 @@ Un atacante explota una vulnerabilidad en tu servidor web nginx. El proceso ngin
 
 DAC es el modelo de seguridad predeterminado de Unix/Linux. El término "discrecional" significa que el propietario de un recurso decide quién puede acceder a él.
 
-\`\`\`text
-Modelo DAC (chmod/chown):
-
-  archivo.conf
-  propietario: root
-  permisos:    rw-r--r-- (644)
-
-  Decisión de acceso:
-  ┌─────────────┐    ¿UID == propietario?  → aplica bits de propietario
-  │   Proceso   │    ¿GID == grupo?        → aplica bits de grupo
-  │  (uid=1000) │    ¿ninguno anterior?    → aplica bits de otros
-  └─────────────┘
-
-  El PROPIETARIO controla los permisos. El kernel solo los hace cumplir.
+\`\`\`diagram
+{"type":"tree","root":{"name":"Proceso (uid=1000)","meta":"archivo.conf · rw-r--r-- (644) · propietario: root","icon":"lock"},"children":[{"name":"Bits de propietario","edgeLabel":"UID == propietario","meta":"se aplican","icon":"user"},{"name":"Bits de grupo","edgeLabel":"GID == grupo","meta":"se aplican","icon":"users"},{"name":"Bits de otros","edgeLabel":"ningún caso anterior","meta":"se aplican","icon":"network"}]}
 \`\`\`
+
+*El propietario del archivo controla los permisos; el kernel solo los hace cumplir — nunca los reinterpreta.*
 
 **Mecanismo de DAC en Linux:**
 
@@ -66,24 +56,8 @@ find / -perm -4000 -type f 2>/dev/null
 
 MAC invierte el control: la política es definida por el administrador del sistema (o el proveedor del SO) y el kernel la impone. **Ningún proceso puede modificar su propia política de acceso**, ni siquiera root.
 
-\`\`\`text
-Modelo MAC (SELinux/AppArmor):
-
-  archivo.conf
-  contexto SELinux: system_u:object_r:httpd_config_t:s0
-
-  Decisión de acceso:
-  ┌─────────────────────────────────────────────┐
-  │              POLÍTICA DEL KERNEL            │
-  │                                             │
-  │  ¿El tipo httpd_t puede leer httpd_config_t?│
-  │  → SÍ (regla explícita en política)         │
-  │                                             │
-  │  ¿El tipo httpd_t puede leer shadow_t?      │
-  │  → NO (sin regla → denegado)                │
-  └─────────────────────────────────────────────┘
-
-  La POLÍTICA controla el acceso. El propietario no puede cambiarlo.
+\`\`\`diagram
+{"type":"nested","container":{"title":"Política del kernel","meta":"archivo.conf con contexto system_u:object_r:httpd_config_t:s0. La política controla el acceso, el propietario no puede cambiarlo."},"items":[{"name":"httpd_t → httpd_config_t","meta":"SÍ, regla explícita en política","icon":"lock"},{"name":"httpd_t → shadow_t","meta":"NO, sin regla → denegado","icon":"alert"}]}
 \`\`\`
 
 **Principio de mínimo privilegio con MAC:**
@@ -126,30 +100,11 @@ En Linux moderno, esto se implementa como MLS (Multi-Level Security) en SELinux,
 
 Los tres son mecanismos MAC pero con enfoques distintos:
 
-\`\`\`text
-┌──────────────┬──────────────────────────┬────────────────────────────┐
-│              │       SELinux             │        AppArmor            │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Base         │ Etiquetas en inodos       │ Rutas de sistema de arch.  │
-│              │ (contextos persistentes)  │ (basado en nombres/rutas)  │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Política     │ Tipo-Enforcement (TE)     │ Perfiles por aplicación    │
-│              │ MLS/MCS opcional          │                            │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Granularidad │ Muy alta (syscall-level)  │ Alta (path-based)          │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Complejidad  │ Alta (curva de aprend.)   │ Media (más accesible)      │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Distros      │ RHEL, Fedora, CentOS,     │ Ubuntu, Debian, openSUSE   │
-│              │ Rocky, AlmaLinux          │                            │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Robusto a    │ Renombrado de archivos    │ Vulnerable a path traversal│
-│              │ (usa inodos, no rutas)    │ en algunos casos           │
-├──────────────┼──────────────────────────┼────────────────────────────┤
-│ Desventaja   │ Difícil de depurar        │ Menos cobertura sistémica  │
-│              │ Puede romper servicios    │                            │
-└──────────────┴──────────────────────────┴────────────────────────────┘
+\`\`\`diagram
+{"type":"side-by-side","columns":[{"title":"SELinux","icon":"lock","rows":["Base: etiquetas en inodos (contextos persistentes)","Política: Tipo-Enforcement (TE), MLS/MCS opcional","Granularidad: muy alta (syscall-level)","Complejidad: alta (curva de aprendizaje)","Distros: RHEL, Fedora, CentOS, Rocky, AlmaLinux","Robusto a renombrado de archivos (usa inodos, no rutas)","Desventaja: difícil de depurar, puede romper servicios"]},{"title":"AppArmor","icon":"lock","rows":["Base: rutas de sistema de archivos (nombres/rutas)","Política: perfiles por aplicación","Granularidad: alta (path-based)","Complejidad: media (más accesible)","Distros: Ubuntu, Debian, openSUSE","Vulnerable a path traversal en algunos casos","Desventaja: menos cobertura sistémica"]}],"vsLabel":"VS"}
+\`\`\`
 
+\`\`\`text
 seccomp (Secure Computing Mode):
   - No es MAC completo, sino filtro de syscalls
   - Usado por Docker, Chrome, systemd (SystemCallFilter=)

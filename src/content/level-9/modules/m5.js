@@ -103,14 +103,8 @@ sftp db-prod
 
 En infraestructuras reales, los servidores de base de datos, internos y de staging **no tienen IP pública**. Solo el bastión la tiene.
 
-\`\`\`text
-Internet
-    │
-    ▼
-┌──────────┐     ┌──────────────────┐
-│  Bastión │────▶│  Servidor privado │
-│ IP pública│     │  10.0.0.15        │
-└──────────┘     └──────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"icon":"cloud","name":"Internet"},{"icon":"gateway","name":"Bastión","meta":"IP pública"},{"icon":"server","name":"Servidor privado","meta":"10.0.0.15"}],"edges":[{"label":"SSH"},{"label":"ProxyJump"}]}
 \`\`\`
 
 **Sin \`~/.ssh/config\`:**

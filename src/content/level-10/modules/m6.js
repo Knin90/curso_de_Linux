@@ -34,25 +34,8 @@ SOLUCIÓN:
 
 ### 📖 Los tres tipos de NAT
 
-\`\`\`text
-┌────────────────┬────────────────────────────────────────────────────────┐
-│ Tipo           │ Descripción y uso                                      │
-├────────────────┼────────────────────────────────────────────────────────┤
-│ MASQUERADE     │ Modifica la IP de ORIGEN de paquetes salientes.        │
-│ (SNAT dinámico)│ Usa la IP de la interfaz de salida automáticamente.    │
-│                │ Ideal cuando la IP pública puede cambiar (DHCP).       │
-│                │ Uso: gateway/router para red interna.                  │
-├────────────────┼────────────────────────────────────────────────────────┤
-│ SNAT           │ Como MASQUERADE pero con IP de origen fija.            │
-│ (Source NAT)   │ Más eficiente que MASQUERADE (no consulta la IP        │
-│                │ de interfaz en cada paquete).                          │
-│                │ Uso: cuando la IP pública es estática.                 │
-├────────────────┼────────────────────────────────────────────────────────┤
-│ DNAT           │ Modifica la IP/puerto de DESTINO de paquetes           │
-│ (Dest. NAT)    │ entrantes. Redirige tráfico de IP pública a servidor   │
-│ Port forwarding│ interno.                                               │
-│                │ Uso: exponer un servidor interno al exterior.          │
-└────────────────┴────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Tipos de NAT","rows":[{"key":"MASQUERADE (SNAT dinámico)","value":"Modifica la IP de origen de paquetes salientes. Usa la IP de la interfaz de salida automáticamente. Ideal cuando la IP pública puede cambiar (DHCP). Uso: gateway/router para red interna."},{"key":"SNAT (Source NAT)","value":"Como MASQUERADE pero con IP de origen fija. Más eficiente que MASQUERADE. Uso: cuando la IP pública es estática."},{"key":"DNAT (Dest. NAT / Port forwarding)","value":"Modifica la IP/puerto de destino de paquetes entrantes. Redirige tráfico de IP pública a servidor interno. Uso: exponer un servidor interno al exterior."}]}
 \`\`\`
 
 ### 📖 Flujo de MASQUERADE (gateway para red interna)

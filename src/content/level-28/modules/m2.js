@@ -15,35 +15,8 @@ Tu equipo tiene 5 desarrolladores, un servidor de staging y un servidor de produ
 
 ### 📖 La arquitectura en capas de Docker
 
-\`\`\`text
-┌────────────────────────────────────────────────────────────────┐
-│                        CLIENTE DOCKER                          │
-│   docker build / docker run / docker pull / docker push        │
-│   CLI o Docker Desktop en tu workstation                       │
-└────────────────────────┬───────────────────────────────────────┘
-                         │ HTTP REST API sobre Unix socket
-                         │ /var/run/docker.sock
-                         ▼
-┌────────────────────────────────────────────────────────────────┐
-│                    DOCKER DAEMON (dockerd)                      │
-│   Gestiona imágenes, contenedores, volúmenes, redes            │
-│   Delega ejecución a containerd                                │
-└──────────┬──────────────────────────────────────┬─────────────┘
-           │                                      │
-           ▼                                      ▼
-┌──────────────────────┐              ┌──────────────────────────┐
-│     containerd       │              │    Docker Registry        │
-│  Ciclo de vida de    │              │  Docker Hub (público)     │
-│  contenedores e      │              │  Harbor, ECR, GCR         │
-│  imágenes            │              │  (privados)               │
-└──────────┬───────────┘              └──────────────────────────┘
-           │
-           ▼
-┌──────────────────────┐
-│        runc          │
-│  Crea namespaces,    │
-│  cgroups, exec()     │
-└──────────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"tag":"L1","icon":"desktop","name":"Cliente Docker","meta":"docker build / run / pull / push · CLI o Docker Desktop"},{"tag":"L2","icon":"server","name":"Docker Daemon (dockerd)","meta":"Gestiona imágenes, contenedores, volúmenes, redes","focal":true},{"tag":"L3","icon":"sync","name":"containerd","meta":"Ciclo de vida de contenedores e imágenes"},{"tag":"L4","icon":"cloud","name":"Docker Registry","meta":"Docker Hub (público), Harbor, ECR, GCR (privados)"},{"tag":"L5","icon":"chip","name":"runc","meta":"Crea namespaces, cgroups, exec()"}],"edges":[{"label":"HTTP REST API / var/run/docker.sock","accent":true},{"label":"delega ejecución"},{"label":"push / pull de imágenes"},{"label":"runtime"}],"sidePanel":{"title":"docker.sock","lines":["Es la API completa del daemon","Montarlo en un contenedor equivale a dar acceso root al host"]}}
 \`\`\`
 
 ### 📖 /var/run/docker.sock: el socket de la API
@@ -132,21 +105,8 @@ curl http://localhost:5000/v2/_catalog
 
 Una imagen Docker no es un bloque monolítico. Es una **pila de capas**, donde cada instrucción del Dockerfile que modifica el filesystem crea una nueva capa de solo lectura. El contenedor añade una capa de escritura encima:
 
-\`\`\`text
-┌─────────────────────────────────┐
-│    Capa de escritura (rw)        │  ← Solo esta capa es del contenedor
-│    /var/lib/docker/overlay2/    │
-│    <id>/diff/                   │
-├─────────────────────────────────┤
-│    Capa 4: COPY app/ /app       │  ← Solo lectura
-├─────────────────────────────────┤
-│    Capa 3: RUN npm install      │  ← Solo lectura
-├─────────────────────────────────┤
-│    Capa 2: RUN apt-get update   │  ← Solo lectura
-├─────────────────────────────────┤
-│    Capa 1: FROM node:18-alpine  │  ← Solo lectura (imagen base)
-└─────────────────────────────────┘
-      overlay2 filesystem
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Capa de escritura (rw)","meta":"/var/lib/docker/overlay2/<id>/diff/ · solo del contenedor","focal":true,"chip":"RW"},{"name":"Capa 4: COPY app/ /app","meta":"solo lectura"},{"name":"Capa 3: RUN npm install","meta":"solo lectura"},{"name":"Capa 2: RUN apt-get update","meta":"solo lectura"},{"name":"Capa 1: FROM node:18-alpine","meta":"solo lectura (imagen base)"}],"edges":[{"label":"copy-on-write","accent":true},{"label":"apila sobre"},{"label":"apila sobre"},{"label":"apila sobre"}],"sidePanel":{"title":"overlay2","lines":["Filesystem unificado del kernel","Modificar una capa inferior copia el archivo a la capa de escritura"]}}
 \`\`\`
 
 overlay2 usa el filesystem OverlayFS del kernel para presentar estas capas como un filesystem unificado y coherente. Cuando un proceso modifica un archivo de una capa inferior, overlay2 lo copia a la capa de escritura (copy-on-write):

@@ -20,24 +20,8 @@ La trampa más común es desplegar Sentinel como si fuera suficiente para escala
 
 Un despliegue típico consiste en un master, dos o más réplicas, y tres procesos Sentinel que observan todo el conjunto.
 
-\`\`\`
-        ┌─────────────┐
-        │ Sentinel 1  │
-        │  :26379     │
-        └──────┬──────┘
-               │ monitorea
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-┌────────┐ ┌────────┐ ┌────────┐
-│ Master │ │Replica │ │Replica │
-│ :6379  │ │ :6380  │ │ :6381  │
-└────────┘ └────────┘ └────────┘
-    ▲          ▲
-    │ monitorea│
-┌──────────────────┐
-│   Sentinel 2     │   Sentinel 3
-│    :26379        │    :26379
-└──────────────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"3x Sentinel (quorum 2)","meta":":26379","icon":"monitoring"},"children":[{"name":"Master","meta":":6379","edgeLabel":"monitorea","focal":true},{"name":"Replica","meta":":6380","edgeLabel":"monitorea"},{"name":"Replica","meta":":6381","edgeLabel":"monitorea"}]}
 \`\`\`
 
 Los Sentinels se comunican entre sí y con las instancias Redis. Para declarar que el master está caído (ODOWN — Objectively Down) se necesita que al menos \`quorum\` Sentinels coincidan en el diagnóstico. Por eso siempre se despliegan en número impar: 3 Sentinels con quorum 2 toleran que 1 Sentinel falle sin perder la capacidad de decidir.

@@ -470,19 +470,102 @@
 }
 .level-page .fedge {
   align-self: center;
-  width: 1px;
+  width: 0;
   height: 24px;
-  background: var(--border);
+  border-left: 1.4px dashed var(--muted);
   position: relative;
 }
 .level-page .fedge::after {
   content: "";
   position: absolute;
-  left: -3px;
+  left: -3.5px;
   bottom: 0;
   border-left: 3.5px solid transparent;
   border-right: 3.5px solid transparent;
-  border-top: 5px solid var(--border);
+  border-top: 5px solid var(--muted);
+}
+
+/* ---------- Diagramas (íconos + flechas de flujo) ----------
+   Sistema visual compartido por los 5 tipos de diagrama
+   (flow-stack, tree, side-by-side, nested, table-like).
+   Prefijo dg- = "diagram", genérico entre tipos. */
+.level-page .dg-diagram { margin: 8px 0; }
+.level-page .dg-svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+.level-page .dg-box,
+.level-page .dg-badge,
+.level-page .dg-tagbox,
+.level-page .dg-panel-box,
+.level-page .dg-panel-code-box,
+.level-page .dg-container-box {
+  fill: color-mix(in oklab, var(--surface) 70%, transparent);
+  stroke: var(--border);
+  stroke-width: 1.2;
+}
+.level-page .dg-box-focal,
+.level-page .dg-badge-focal {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 1.8;
+}
+/* Standby / backup: mismo lenguaje que "Optional / Async" — presente pero
+   no en la ruta principal, se marca con borde punteado en vez de sólido. */
+.level-page .dg-box-standby { stroke-dasharray: 4,3; opacity: 0.82; }
+.level-page .dg-icon { color: var(--fg); }
+.level-page .dg-icon-focal { color: var(--accent); }
+.level-page .dg-tagbox { stroke: color-mix(in oklab, var(--fg) 40%, transparent); fill: none; stroke-width: 0.8; }
+.level-page .dg-tagtext { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.06em; fill: var(--fg); }
+.level-page .dg-name { font-family: var(--font-display); font-size: 15px; font-weight: 600; fill: var(--fg); }
+.level-page .dg-name-focal { font-family: var(--font-display); font-size: 16px; font-weight: 700; fill: var(--fg); letter-spacing: 0.02em; }
+.level-page .dg-meta { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+
+.level-page .dg-chip-box { fill: var(--accent); }
+.level-page .dg-chip-text { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.06em; fill: var(--bg); }
+
+.level-page .dg-line-muted { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5,4; fill: none; }
+.level-page .dg-line-accent { stroke: var(--accent); stroke-width: 1.8; stroke-dasharray: 5,4; fill: none; }
+.level-page .dg-muted-fill { fill: var(--muted); }
+.level-page .dg-accent-fill { fill: var(--accent); }
+.level-page .dg-tag-muted { fill: color-mix(in oklab, var(--surface) 80%, transparent); stroke: var(--muted); stroke-width: 0.8; }
+.level-page .dg-tag-accent { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+.level-page .dg-label-muted { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.06em; fill: var(--muted); }
+.level-page .dg-label-accent { font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.06em; fill: var(--accent-ink); }
+
+.level-page .dg-panel-box { stroke: var(--accent); stroke-width: 1.2; }
+.level-page .dg-panel-head { fill: var(--accent); }
+.level-page .dg-panel-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; fill: var(--bg); }
+.level-page .dg-panel-quote { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 13px; fill: var(--fg); }
+.level-page .dg-panel-code { font-family: var(--font-mono); font-size: 9.5px; fill: var(--accent-ink); }
+
+.level-page .dg-hairline { stroke: var(--border); stroke-width: 0.8; }
+.level-page .dg-legend-eyebrow { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.14em; fill: var(--muted); }
+.level-page .dg-legend-text { font-family: var(--font-mono); font-size: 9px; fill: var(--muted); }
+
+/* Nested: contenedor grande con hijos adentro */
+.level-page .dg-container-box { stroke-dasharray: 3,3; }
+.level-page .dg-container-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; fill: var(--muted); }
+
+/* Side-by-side: divisor "VS" entre columnas */
+.level-page .dg-vs-box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+.level-page .dg-vs-text { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; fill: var(--muted); }
+
+/* Table-like: caja única con filas separadas por hairline */
+.level-page .dg-row-sep { stroke: var(--border); stroke-width: 0.8; }
+.level-page .dg-row-text { font-family: var(--font-mono); font-size: 11.5px; fill: var(--fg); }
+.level-page .dg-row-key { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; fill: var(--accent-ink); }
+
+.level-page .dg-node, .level-page .dg-edge, .level-page .dg-panel { opacity: 0; }
+.level-page .dg-diagram.in .dg-node {
+  animation: flow-node-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.level-page .dg-diagram.in .dg-edge {
+  animation: flow-node-in 320ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 60ms);
+}
+.level-page .dg-diagram.in .dg-panel {
+  animation: flow-node-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
 }
 
 /* ---------- Tables ---------- */

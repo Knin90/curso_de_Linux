@@ -20,21 +20,8 @@ Ansible no instala ningún daemon en los servidores gestionados. Solo necesita:
 - **Control node**: cualquier máquina Linux con Python 3 y Ansible instalado.
 - **Managed nodes**: acceso SSH y Python ≥ 2.7 (o Python 3).
 
-\`\`\`text
-┌─────────────────────────────────────────────────────┐
-│                   CONTROL NODE                      │
-│  ansible/ansible-playbook CLI                       │
-│  inventario + playbooks + roles                     │
-└──────────────────┬──────────────────────────────────┘
-                   │ SSH (puerto 22 por defecto)
-        ┌──────────┴──────────┐
-        ▼                     ▼
-┌───────────────┐    ┌───────────────┐
-│  web-01       │    │  db-01        │
-│  (managed)    │    │  (managed)    │
-│  Python 3     │    │  Python 3     │
-│  Sin agente   │    │  Sin agente   │
-└───────────────┘    └───────────────┘
+\`\`\`diagram
+{"type":"tree","root":{"name":"Control node","meta":"ansible/ansible-playbook CLI · inventario + playbooks + roles","icon":"terminal"},"children":[{"name":"web-01","meta":"managed · Python 3 · sin agente","edgeLabel":"SSH (puerto 22)","icon":"server"},{"name":"db-01","meta":"managed · Python 3 · sin agente","edgeLabel":"SSH (puerto 22)","icon":"database"}]}
 \`\`\`
 
 El flujo de ejecución:

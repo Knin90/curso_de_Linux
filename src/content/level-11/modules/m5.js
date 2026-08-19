@@ -16,22 +16,8 @@ Necesitas aumentar el número máximo de conexiones abiertas en un servidor de a
 
 No son directorios en tu disco duro. Son **sistemas de archivos virtuales** generados por el kernel en tiempo real:
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────────┐
-│                        KERNEL                               │
-│  estructuras de datos internas: procesos, red, memoria...   │
-└──────────────┬──────────────────────────┬───────────────────┘
-               │                          │
-               ▼                          ▼
-    ┌──────────────────┐      ┌──────────────────────┐
-    │   /proc          │      │   /sys               │
-    │                  │      │                      │
-    │  Vista de        │      │  Vista del           │
-    │  procesos y      │      │  hardware y          │
-    │  estado general  │      │  parámetros del      │
-    │  del kernel      │      │  kernel              │
-    └──────────────────┘      └──────────────────────┘
-         procfs                      sysfs
+\`\`\`diagram
+{"type":"tree","root":{"name":"KERNEL","meta":"Estructuras internas: procesos, red, memoria..."},"children":[{"name":"/proc","meta":"Vista de procesos y estado general del kernel (procfs)"},{"name":"/sys","meta":"Vista del hardware y parámetros del kernel (sysfs)"}]}
 \`\`\`
 
 Leer \`/proc/meminfo\` no lee un archivo en disco — el kernel genera esos bytes al momento de la lectura.

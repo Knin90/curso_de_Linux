@@ -11,26 +11,8 @@ const content = `
 
 Ante cualquier fallo de conexión SSH, diagnosticar de abajo hacia arriba:
 
-\`\`\`text
-¿No conecta?
-      │
-      ▼ ping servidor
-   ┌──┴──┐
-  Sí    No → Red caída, servidor apagado, ICMP bloqueado
-   │
-   ▼ nc -zv servidor 22
-   ┌──┴──┐
-  Sí    No → Firewall bloquea puerto 22, sshd no corre,
-   │          o SSH en puerto diferente
-   ▼ ssh -vvv usuario@servidor
-   │  (¿en qué fase falla?)
-   ├── "Connection refused"   → sshd no corre o puerto equivocado
-   ├── "Host key changed"     → reinstalación o ataque MITM
-   ├── "Permission denied"    → autenticación fallida
-   │    └── ¿Permisos ~/.ssh? → ls -la ~/.ssh/ en servidor
-   │    └── ¿Llave en authorized_keys? → cat ~/.ssh/authorized_keys
-   │    └── ¿PasswordAuthentication no sin llave? → acceso por consola
-   └── Conecta pero lento     → DNS reverso, UsePrivilegeSeparation
+\`\`\`diagram
+{"type":"tree","root":{"name":"¿No conecta?","meta":"ping servidor · si no: red caída, servidor apagado, ICMP bloqueado"},"children":[{"name":"nc -zv servidor 22","meta":"si no: firewall bloquea puerto 22, sshd no corre, o SSH en puerto diferente","edgeLabel":"sí","children":[{"name":"ssh -vvv usuario@servidor","meta":"¿en qué fase falla?","edgeLabel":"sí","children":[{"name":"Connection refused","meta":"sshd no corre o puerto equivocado"},{"name":"Host key changed","meta":"reinstalación o ataque MITM"},{"name":"Permission denied","meta":"autenticación fallida","children":[{"name":"¿Permisos ~/.ssh?","meta":"ls -la ~/.ssh/ en servidor"},{"name":"¿Llave en authorized_keys?","meta":"cat ~/.ssh/authorized_keys"},{"name":"¿PasswordAuthentication no sin llave?","meta":"acceso por consola"}]},{"name":"Conecta pero lento","meta":"DNS reverso, UsePrivilegeSeparation"}]}]}]}
 \`\`\`
 
 ### 💻 Herramientas de diagnóstico

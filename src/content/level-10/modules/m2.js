@@ -16,22 +16,8 @@ Configuras un firewall perfecto con iptables. Reinicias el servidor y todas las 
 
 iptables organiza las reglas en **tablas**, cada una con un propósito diferente:
 
-\`\`\`text
-┌──────────┬────────────────────────────────────────────────────────────┐
-│ Tabla    │ Propósito                                                  │
-├──────────┼────────────────────────────────────────────────────────────┤
-│ filter   │ La tabla por defecto. Decide si un paquete se acepta o     │
-│          │ descarta. Contiene INPUT, FORWARD, OUTPUT.                 │
-├──────────┼────────────────────────────────────────────────────────────┤
-│ nat      │ Network Address Translation. Modifica IPs y puertos de     │
-│          │ origen/destino. Contiene PREROUTING, OUTPUT, POSTROUTING.  │
-├──────────┼────────────────────────────────────────────────────────────┤
-│ mangle   │ Modificación de cabeceras de paquetes (TTL, TOS, marcas).  │
-│          │ Uso avanzado: QoS, enrutamiento basado en políticas.       │
-├──────────┼────────────────────────────────────────────────────────────┤
-│ raw      │ Exenciones de conntrack. Los paquetes marcados aquí        │
-│          │ no pasan por el rastreador de conexiones.                  │
-└──────────┴────────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Tablas de iptables","rows":[{"key":"filter","value":"La tabla por defecto. Decide si un paquete se acepta o descarta. Contiene INPUT, FORWARD, OUTPUT."},{"key":"nat","value":"Network Address Translation. Modifica IPs y puertos de origen/destino. Contiene PREROUTING, OUTPUT, POSTROUTING."},{"key":"mangle","value":"Modificación de cabeceras de paquetes (TTL, TOS, marcas). Uso avanzado: QoS, enrutamiento basado en políticas."},{"key":"raw","value":"Exenciones de conntrack. Los paquetes marcados aquí no pasan por el rastreador de conexiones."}]}
 \`\`\`
 
 > En el 90% de los casos solo necesitas la tabla **filter**. Cuando trabajas con NAT, usas la tabla **nat**. Las tablas mangle y raw son para casos muy especializados.
@@ -65,18 +51,8 @@ iptables -L | grep policy
 # Chain OUTPUT (policy ACCEPT)
 \`\`\`
 
-\`\`\`text
-┌─────────────────┬────────────────────────────────────────────────────┐
-│ Política        │ Comportamiento                                     │
-├─────────────────┼────────────────────────────────────────────────────┤
-│ ACCEPT          │ Si ninguna regla coincide, el paquete PASA.        │
-│ (inseguro)      │ Debes escribir reglas de bloqueo explícitas.       │
-│                 │ Un error de omisión deja pasar el tráfico.         │
-├─────────────────┼────────────────────────────────────────────────────┤
-│ DROP            │ Si ninguna regla coincide, el paquete se DESCARTA. │
-│ (seguro)        │ Debes escribir reglas de permiso explícitas.       │
-│                 │ Un error de omisión bloquea el tráfico.            │
-└─────────────────┴────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"table-like","title":"Políticas por defecto","rows":[{"key":"ACCEPT (inseguro)","value":"Si ninguna regla coincide, el paquete PASA. Debes escribir reglas de bloqueo explícitas. Un error de omisión deja pasar el tráfico."},{"key":"DROP (seguro)","value":"Si ninguna regla coincide, el paquete se DESCARTA. Debes escribir reglas de permiso explícitas. Un error de omisión bloquea el tráfico."}]}
 \`\`\`
 
 En producción, la política correcta es **DROP** en INPUT y FORWARD. Esto implementa el principio de mínimo privilegio: nada está permitido hasta que lo permites explícitamente.

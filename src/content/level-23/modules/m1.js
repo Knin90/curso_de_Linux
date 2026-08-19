@@ -14,46 +14,14 @@ Un servidor fue comprometido. Los atacantes borraron su rastro eliminando entrad
 
 ### 📖 Arquitectura del subsistema de auditoría
 
-\`\`\`text
-┌─────────────────────────────────────────────────────────┐
-│                     ESPACIO DE KERNEL                   │
-│                                                         │
-│  ┌─────────────┐    ┌──────────────────────────────┐   │
-│  │  Syscalls   │───▶│  Audit Subsystem (kauditd)   │   │
-│  │  (open,     │    │  - Intercepta llamadas        │   │
-│  │   write,    │    │  - Genera registros de audit  │   │
-│  │   execve…)  │    │  - Envía por netlink socket   │   │
-│  └─────────────┘    └──────────────┬─────────────────┘  │
-└────────────────────────────────────│────────────────────┘
-                                     │ netlink socket
-┌────────────────────────────────────▼────────────────────┐
-│                    ESPACIO DE USUARIO                   │
-│                                                         │
-│  ┌──────────┐   ┌──────────┐   ┌──────────────────────┐ │
-│  │  auditd  │   │ausearch  │   │     aureport          │ │
-│  │  daemon  │   │(búsqueda)│   │  (reportes resumidos) │ │
-│  │          │   └──────────┘   └──────────────────────┘ │
-│  │ /var/log/│   ┌──────────┐   ┌──────────────────────┐ │
-│  │ audit/   │   │auditctl  │   │    audispd/plugins   │ │
-│  │ audit.log│   │(reglas)  │   │  (syslog, prelúd…)   │ │
-│  └──────────┘   └──────────┘   └──────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"nested","container":{"title":"Espacio de kernel","meta":"Intercepta syscalls antes de espacio de usuario"},"items":[{"name":"Syscalls","meta":"open, write, execve…","icon":"terminal"},{"name":"Audit Subsystem (kauditd)","meta":"Genera registros y envía por netlink socket","icon":"chip"}],"external":[{"name":"auditd","meta":"daemon, /var/log/audit/audit.log","icon":"server","side":"right"},{"name":"ausearch","meta":"búsqueda","icon":"search","side":"right"},{"name":"aureport","meta":"reportes resumidos","icon":"file","side":"right"},{"name":"auditctl","meta":"reglas","icon":"terminal","side":"right"},{"name":"audispd/plugins","meta":"syslog, prelude…","icon":"sync","side":"right"}]}
 \`\`\`
 
 ### 📖 Componentes principales
 
-\`\`\`text
-COMPONENTE          FUNCIÓN
-──────────────────────────────────────────────────────────────────
-kauditd             Módulo del kernel que captura eventos
-auditd              Daemon de usuario que recibe y escribe eventos
-auditctl            Herramienta para gestionar reglas en tiempo real
-/etc/audit/         Directorio de configuración principal
-audit.rules         Reglas de auditoría permanentes
-audit.log           Log principal de eventos
-ausearch            Búsqueda en audit.log con filtros
-aureport            Reportes estadísticos de audit.log
-audispd             Dispatcher: reenvía eventos a plugins externos
+\`\`\`diagram
+{"type":"table-like","title":"Componentes principales","rows":[{"key":"kauditd","value":"Módulo del kernel que captura eventos"},{"key":"auditd","value":"Daemon de usuario que recibe y escribe eventos"},{"key":"auditctl","value":"Herramienta para gestionar reglas en tiempo real"},{"key":"/etc/audit/","value":"Directorio de configuración principal"},{"key":"audit.rules","value":"Reglas de auditoría permanentes"},{"key":"audit.log","value":"Log principal de eventos"},{"key":"ausearch","value":"Búsqueda en audit.log con filtros"},{"key":"aureport","value":"Reportes estadísticas de audit.log"},{"key":"audispd","value":"Dispatcher: reenvía eventos a plugins externos"}]}
 \`\`\`
 
 ### 📖 Instalación y arranque

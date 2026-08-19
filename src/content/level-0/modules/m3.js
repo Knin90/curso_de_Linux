@@ -36,24 +36,8 @@ Un concepto clave para elegir: el **ciclo de lanzamiento**.
 
 Mapa simplificado de parentescos entre distribuciones:
 
-\`\`\`text
-                              Unix (1969)
-                                  │
-                            Kernel Linux (1991)
-                                  │
-        ┌─────────────────────────┼─────────────────────────┐
-        ▼                         ▼                         ▼
-     DEBIAN                  RED HAT                      ARCH
-   (apt, .deb)              (dnf, .rpm)                (pacman)
-        │                         │                         │
-   ┌────┴────┐             ┌──────┴──────┐             ┌────┴────┐
-   ▼         ▼             ▼             ▼             ▼         ▼
- Ubuntu   Linux Mint    Fedora         RHEL          Manjaro  EndeavourOS
-   │                       │             │
-   ▼                       │        ┌────┴────┐
- Pop!_OS                   │        ▼         ▼
-                      (upstream   AlmaLinux  Rocky Linux
-                       de RHEL)  (clones compatibles con RHEL)
+\`\`\`diagram
+{"type":"tree","root":{"name":"Kernel Linux (1991)","meta":"deriva de Unix (1969)"},"children":[{"name":"Debian","meta":"apt / apt-get, .deb","children":[{"name":"Ubuntu","children":[{"name":"Pop!_OS"}]},{"name":"Linux Mint"}]},{"name":"Red Hat","meta":"dnf (antes yum), .rpm","children":[{"name":"Fedora"},{"name":"RHEL","children":[{"name":"AlmaLinux","meta":"clon compatible"},{"name":"Rocky Linux","meta":"clon compatible"}]}]},{"name":"Arch","meta":"pacman","children":[{"name":"Manjaro"},{"name":"EndeavourOS"}]}]}
 \`\`\`
 
 ### 💻 Ejemplo básico

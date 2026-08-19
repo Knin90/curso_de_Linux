@@ -14,18 +14,8 @@ Gestionas 20 servidores. Cuando uno falla, tienes que conectarte por SSH a ese s
 
 ### 📖 Arquitectura de rsyslog
 
-\`\`\`text
-┌─────────────────────────────────────────────────────┐
-│                    rsyslog                          │
-│                                                     │
-│  INPUTS          FILTROS/RULES       OUTPUTS        │
-│  ────────        ──────────────      ──────────     │
-│  imuxsock  ───▶  selector            omfile         │
-│  imjournal ───▶  facility.severity   omfwd (red)    │
-│  imtcp     ───▶  property-based      ommysql        │
-│  imudp     ───▶  script (rainerscript) omrelp       │
-│  imfile    ───▶                      omelasticsearch │
-└─────────────────────────────────────────────────────┘
+\`\`\`diagram
+{"type":"flow-stack","layers":[{"name":"Inputs","meta":"imuxsock · imjournal · imtcp · imudp · imfile"},{"name":"Filtros / Rules","meta":"selector · facility.severity · property-based · rainerscript","focal":true},{"name":"Outputs","meta":"omfile · omfwd (red) · ommysql · omrelp · omelasticsearch"}],"edges":[{"label":"clasifica"},{"label":"enruta a"}]}
 \`\`\`
 
 rsyslog usa un lenguaje de configuración con dos sintaxis:
