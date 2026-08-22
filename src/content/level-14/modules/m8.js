@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio integrado: gestión de procesos en producción
+## Módulo 8 — Proyecto real: incidente de procesos en un servidor de producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -13,7 +13,19 @@ const content = `
 
 Son las 2:00 AM. Tu servidor de producción está respondiendo lento. El equipo de monitoreo reporta que la memoria disponible cayó de 16 GB a 200 MB en las últimas 3 horas, la CPU de un proceso está al 100% sostenido, y hay varios procesos zombie acumulándose. Tienes que diagnosticar y resolver cada problema sin reiniciar el servidor ni interrumpir el servicio principal.
 
----
+### 📖 Estructura del proyecto
+
+\`\`\`
+diagnostico-procesos/
+├── check-memory.sh
+├── check-cpu.sh
+├── cleanup-zombies.sh
+├── cgroup-limit.sh
+├── performance-report.sh
+└── graceful-shutdown.sh
+\`\`\`
+
+Cada script documenta una técnica de diagnóstico que se ejecuta en orden durante el incidente, de la más general (memoria) a la más específica (apagado controlado).
 
 ### 📖 Escenario 1: Proceso con memory leak
 
@@ -95,8 +107,6 @@ ulimit -m $((6 * 1024 * 1024))   # 6 GB de RSS
 exec java -jar report-gen.jar
 \`\`\`
 
----
-
 ### 📖 Escenario 2: Proceso runaway en CPU
 
 **Contexto:** Un proceso de conversión de video está consumiendo el 100% de un núcleo durante horas.
@@ -169,8 +179,6 @@ taskset -cp 28441
 pid 28441's current affinity list: 7
 \`\`\`
 
----
-
 ### 📖 Escenario 3: Procesos zombie
 
 **Contexto:** ps aux muestra varios procesos en estado Z (zombie).
@@ -233,8 +241,6 @@ Un proceso zombie no consume CPU ni memoria significativa — solo una entrada e
 # hay un bug en el código del padre — considera reiniciar el servicio padre:
 systemctl restart php8.1-fpm
 \`\`\`
-
----
 
 ### 📖 Escenario 4: Cgroups v2 — límite de memoria a un grupo de procesos
 
@@ -300,8 +306,6 @@ watch -n 2 'cat /sys/fs/cgroup/report-service/memory.current'
 # Cuando supere memory.max, el OOM killer terminará el proceso
 \`\`\`
 
----
-
 ### 📖 Escenario 5: Reporte de rendimiento con pidstat
 
 **Paso 1: Generar reporte de CPU y memoria cada 5 segundos durante 1 minuto**
@@ -332,8 +336,6 @@ pidstat -d -p 14823 5 6
 05:00:15 AM  1001     14823    4096.00    512.00      0.00      12  java
 05:00:20 AM  1001     14823    8192.00   1024.00      0.00       8  java
 \`\`\`
-
----
 
 ### 📖 Escenario 6: Script de apagado graceful
 
@@ -409,8 +411,6 @@ sudo ./graceful-shutdown.sh
 [2024-04-15 05:05:36] OK: app-server terminado correctamente en 32s
 [2024-04-15 05:05:36] === Apagado completado ===
 \`\`\`
-
----
 
 ### 📋 Lo que debes recordar
 

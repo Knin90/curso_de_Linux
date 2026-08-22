@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: diagnóstico completo de problemas de red
+## Módulo 8 — Proyecto real: diagnóstico completo de problemas de red en producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -11,9 +11,18 @@ const content = `
 
 ### ❓ El problema real
 
-Un servidor nuevo fue desplegado ayer por el equipo de infraestructura. Esta mañana llegan tres tickets de soporte: el puerto 80 no es accesible desde el exterior aunque nginx está activo, los nombres de dominio internos no resuelven, y el equipo de backend reporta que la conexión al servicio de base de datos "es inestable". Tres problemas distintos, tres diagnósticos distintos. Este laboratorio los replica y los resuelve uno por uno.
+Un servidor nuevo fue desplegado ayer por el equipo de infraestructura. Esta mañana llegan tres tickets de soporte: el puerto 80 no es accesible desde el exterior aunque nginx está activo, los nombres de dominio internos no resuelven, y el equipo de backend reporta que la conexión al servicio de base de datos "es inestable". Tres problemas distintos, tres diagnósticos distintos. Este proyecto los replica y los resuelve uno por uno, con evidencia de comandos en cada paso.
 
-### 📖 Preparación del laboratorio
+### 📖 Estructura del entorno afectado
+
+\`\`\`
+servidor-app/
+├── /etc/nginx/sites-enabled/mi-app.conf   ← directiva listen mal configurada
+├── /etc/systemd/resolved.conf             ← nameserver interno inexistente
+└── /etc/sysctl.d/99-network-tuning.conf   ← keepalive TCP a ajustar
+\`\`\`
+
+### 📖 Preparación del entorno
 
 Antes de iniciar, verifica el estado general del servidor:
 
@@ -416,7 +425,7 @@ EOF
 
 Problema 3 diagnosticado. Causa raíz: la pérdida de ICMP en saltos intermedios era un falso positivo (QoS del router). Las desconexiones reales se originan en el timeout de TCP keep-alive excesivo vs. el timeout del firewall de red.
 
-### 📖 Resumen del diagnóstico completo
+### 📖 Balance final del incidente
 
 \`\`\`diagram
 {"type":"table-like","title":"Resumen del diagnóstico completo","rows":[{"key":"Puerto 80","value":"síntoma: Connection refused desde exterior · causa: listen 127.0.0.1 en lugar de 0.0.0.0 · fix: config de nginx"},{"key":"DNS interno","value":"síntoma: Name not known para dominios · causa: nameserver 10.0.1.254 no responde · fix: resolved.conf"},{"key":"Backend \"inestable\"","value":"síntoma: cortes intermitentes (ICMP loss falso) · causa: keepalive_time=7200 > timeout del firewall · fix: sysctl"}]}

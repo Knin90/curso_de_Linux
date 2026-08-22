@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'systemd timers: la alternativa moderna a cron' },
   { id: 6, title: 'at y batch: tareas únicas programadas' },
   { id: 7, title: 'Patrones de automatización: locks, logs y notificaciones' },
-  { id: 8, title: 'Laboratorio integrado: sistema de automatización completo' },
+  { id: 8, title: 'Proyecto real: sistema de automatización para un servidor de producción' },
 ]

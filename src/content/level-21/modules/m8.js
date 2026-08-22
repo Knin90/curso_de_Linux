@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: hardening completo de un servidor
+## Módulo 8 — Proyecto real: hardening completo de un servidor
 
 ### 🎯 Objetivos de aprendizaje
 * Ejecutar un ciclo completo de hardening sobre Ubuntu 22.04 desde cero
@@ -10,6 +10,24 @@ const content = `
 
 ### ❓ El problema real
 Recibes un servidor Ubuntu 22.04 recién instalado que va a pasar a producción en 72 horas. El equipo de seguridad exige un hardening index mínimo de 70% en Lynis antes del go-live. El servidor tiene el índice por defecto: 58%. Tienes que llegar al objetivo sin romper la aplicación que correrá sobre él.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+/root/hardening-lab/
+├── lynis-before.dat
+├── lynis-before.log
+├── lynis-after.dat
+├── lynis-after.log
+└── suid-list.txt
+
+/etc/sysctl.d/99-hardening.conf
+/etc/ssh/sshd_config.d/99-hardening.conf
+/etc/security/pwquality.conf
+/etc/security/faillock.conf
+/etc/issue.net
+/etc/issue
+\`\`\`
 
 ### 📖 Preparación del entorno
 
@@ -433,7 +451,7 @@ grep "^warning\[]" /root/hardening-lab/lynis-after.dat | wc -l
 grep "^warning\[]" /root/hardening-lab/lynis-after.dat
 \`\`\`
 
-### 📖 Resumen de cambios aplicados
+### 📖 Tabla de cambios aplicados
 
 | Control | Archivo modificado | Verificación |
 |---------|-------------------|--------------|

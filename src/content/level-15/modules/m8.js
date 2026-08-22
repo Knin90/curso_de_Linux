@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: gestión empresarial de usuarios en producción
+## Módulo 8 — Proyecto real: onboarding de usuarios para TechCorp
 
 ### 🎯 Objetivos de aprendizaje
 * Integrar grupos, usuarios, sudo, políticas de contraseña, cuotas, PAM y límites del sistema en un flujo de incorporación real
@@ -20,6 +20,16 @@ La empresa **TechCorp** está incorporando tres nuevos desarrolladores. El equip
 - Configurar límites del sistema para aplicaciones de producción
 
 Si alguno de estos pasos se omite, el sistema queda expuesto o el desarrollador no puede trabajar correctamente.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+onboarding-techcorp/
+├── sudoers.d/techcorp
+├── security/faillock.conf
+├── security/limits.conf
+└── verify.sh
+\`\`\`
 
 ### 📖 Paso 1 — Crear grupos departamentales
 

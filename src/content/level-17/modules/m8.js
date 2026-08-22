@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: red compleja con múltiples interfaces
+## Módulo 8 — Proyecto real: red compleja con múltiples interfaces para un servidor de producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -10,9 +10,9 @@ const content = `
 
 ### ❓ El problema real
 
-Este laboratorio simula el entorno de red de un servidor de producción moderno: múltiples VLANs para segregar tráfico, namespaces que simulan contenedores, policy routing para separar tráfico de gestión del de aplicaciones. Al completarlo, habrás aplicado todos los conceptos del nivel en un escenario realista.
+Este proyecto simula el entorno de red de un servidor de producción moderno: múltiples VLANs para segregar tráfico, namespaces que simulan contenedores, policy routing para separar tráfico de gestión del de aplicaciones. Al completarlo, habrás construido y verificado una topología completa aplicando todos los conceptos del nivel.
 
-### 📖 Topología del laboratorio
+### 📖 Estructura del proyecto (topología)
 
 \`\`\`diagram
 {"type":"nested","container":{"title":"HOST (servidor)","meta":"eth0 (trunk)"},"items":[{"name":"eth0.10","meta":"10.10.0.1/24 · VLAN Producción"},{"name":"eth0.20","meta":"10.20.0.1/24 · VLAN Gestión"},{"name":"br-prod (bridge)","meta":"puerto: eth0.10"},{"name":"veth-app0 → ns-app0","meta":"10.10.0.10/24"},{"name":"veth-app1 → ns-app1","meta":"10.10.0.11/24"}],"external":[{"name":"Policy routing","meta":"10.10.0.0/24 → tabla prod","side":"right"},{"name":"Policy routing","meta":"10.20.0.0/24 → tabla mgmt","side":"right"}]}
@@ -119,11 +119,11 @@ echo "Ruta para tráfico de gestión:"
 ip route get 8.8.8.8 from 10.20.0.1
 \`\`\`
 
-### 📖 Fase 4: Verificación y limpieza
+### 📖 Fase 4: Comprobación y limpieza
 
 \`\`\`bash
 # Script de verificación
-echo "=== Verificación del laboratorio ==="
+echo "=== Comprobación del entorno ==="
 
 # 1. Interfaces
 echo "-- Interfaces VLAN:"
@@ -144,7 +144,7 @@ ping -c 1 -W 1 10.10.0.11 >/dev/null 2>&1 && echo "OK" || echo "FALLO"
 
 # Script de limpieza
 cleanup() {
-  echo "=== Limpieza del laboratorio ==="
+  echo "=== Limpieza del entorno ==="
   ip netns del ns-app0 2>/dev/null; ip netns del ns-app1 2>/dev/null
   ip rule del priority 100 2>/dev/null; ip rule del priority 101 2>/dev/null
   ip link del br-prod 2>/dev/null
@@ -157,14 +157,14 @@ cleanup() {
 
 ### 📋 Lo que debes recordar
 
-* Un laboratorio de red complejo se construye en capas: interfaces físicas → VLANs → bridges → namespaces → routing.
+* Una red compleja se construye en capas: interfaces físicas → VLANs → bridges → namespaces → routing.
 * Los bridges conectan dominios de nivel 2; el routing (ip_forward + rutas) conecta dominios de nivel 3.
 * Siempre tener un script de limpieza antes de aplicar cambios complejos de red — especialmente si trabajas en un servidor remoto.
 * La secuencia de verificación: interfaces up → IPs asignadas → rutas presentes → ping → telnet/nc al puerto.
 
 ### 🧪 Autoevaluación
 
-1. En la topología del laboratorio, ¿qué elemento permite que ns-app0 y ns-app1 se comuniquen sin pasar por el routing del host?
+1. En la topología del proyecto, ¿qué elemento permite que ns-app0 y ns-app1 se comuniquen sin pasar por el routing del host?
 2. Si el ping de ns-app0 a ns-app1 falla, ¿cuál es el primer comando de diagnóstico?
 3. ¿Por qué en la Fase 2 se necesita \`ip route add default via 10.10.0.1\` dentro de cada namespace?
 

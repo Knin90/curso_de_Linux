@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: implementar MAC completo en un servidor de producción
+## Módulo 8 — Proyecto real: implementar MAC completo en un servidor de producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -11,6 +11,19 @@ const content = `
 ### ❓ El problema real
 
 Tu empresa migra un servidor nginx a producción. La configuración es deliberadamente no estándar para evitar rutas predecibles: el contenido está en \`/opt/webroot\`, el puerto HTTPS es 8443, y nginx actúa como proxy hacia un backend Node en \`localhost:3000\`. Hay dos servidores: uno Rocky Linux 9 (SELinux) y otro Ubuntu 22.04 (AppArmor). Ambos tienen MAC activo. Nada funciona en la primera prueba. Este laboratorio reproduce el problema y lo resuelve paso a paso.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+Rocky Linux 9 (SELinux)
+├── /opt/webroot/index.html
+├── /etc/nginx/conf.d/produccion.conf
+└── contexto: httpd_sys_content_t, puerto 8443 registrado como http_port_t
+
+Ubuntu 22.04 (AppArmor)
+├── /var/log/myapp/{access.log,error.log}
+└── /etc/apparmor.d/usr.sbin.nginx
+\`\`\`
 
 ### 📖 Parte A — SELinux en Rocky Linux / RHEL
 
@@ -402,7 +415,7 @@ grep myapp /etc/apparmor.d/usr.sbin.nginx
 # /var/log/myapp/*.log  w,
 \`\`\`
 
-### 📖 Resumen del proceso completo
+### 📖 Comparativa del proceso completo
 
 El patrón de trabajo es el mismo en SELinux y AppArmor:
 

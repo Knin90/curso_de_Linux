@@ -1,0 +1,49 @@
+/* ============================================================
+   Animación de diagramas y secuencias explicativas
+   ============================================================ */
+/* Flujo: nodos y conectores entran en cascada cuando el diagrama aparece */
+.level-page .flow .fnode,
+.level-page .flow .fedge { opacity: 0; }
+.level-page .flow.in .fnode {
+  animation: flow-node-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.level-page .flow.in .fedge {
+  animation: flow-edge-in 280ms var(--ease-in-out) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+@keyframes flow-node-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes flow-edge-in {
+  from { opacity: 0; transform: scaleY(0); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+/* Secuencias (listas numeradas): los pasos entran en cascada */
+.level-page .list-steps li { opacity: 0; }
+.level-page .list-steps.in li {
+  animation: step-in 380ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   View Transitions (cambio de página completa entre módulos)
+   ============================================================ */
+::view-transition-old(root) { animation: vt-fade-out 240ms var(--ease-out); }
+::view-transition-new(root) { animation: vt-fade-in 240ms var(--ease-out); }
+.vt-next::view-transition-old(root) { animation: vt-out-left 280ms var(--ease-out); }
+.vt-next::view-transition-new(root) { animation: vt-in-right 280ms var(--ease-out); }
+.vt-prev::view-transition-old(root) { animation: vt-out-right 280ms var(--ease-out); }
+.vt-prev::view-transition-new(root) { animation: vt-in-left 280ms var(--ease-out); }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-out-left  { to { opacity: 0; transform: translateX(-24px); } }
+@keyframes vt-in-right  { from { opacity: 0; transform: translateX(24px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(24px); } }
+@keyframes vt-in-left   { from { opacity: 0; transform: translateX(-24px); } }

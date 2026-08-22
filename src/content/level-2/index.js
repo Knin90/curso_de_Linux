@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Targets de systemd y niveles de ejecución (Runlevels)' },
   { id: 6, title: 'Análisis de tiempos y dependencias de arranque' },
   { id: 7, title: 'Modos de recuperación, rescate y bypass de autenticación' },
-  { id: 8, title: 'Laboratorio integrador: Diagnóstico y reparación' },
+  { id: 8, title: 'Proyecto real: runbook de incidentes de arranque' },
 ]

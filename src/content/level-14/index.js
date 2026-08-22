@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'cgroups v2: control de recursos del sistema' },
   { id: 6, title: 'Procesos zombie, huérfanos y gestión del ciclo de vida' },
   { id: 7, title: 'Diagnóstico de procesos: pmap, pidstat y perf básico' },
-  { id: 8, title: 'Laboratorio integrado: gestión de procesos en producción' },
+  { id: 8, title: 'Proyecto real: incidente de procesos en un servidor de producción' },
 ]

@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: Servidor Web nginx de Producción Completo
+## Módulo 8 — Proyecto real: servidor web nginx de producción completo
 
 ### 🎯 Objetivos de aprendizaje
 * Instalar y habilitar nginx como servicio systemd en Ubuntu y Rocky Linux
@@ -12,8 +12,22 @@ const content = `
 Tu equipo necesita desplegar tres servicios bajo el mismo servidor:
 un sitio estático con assets de larga duración, una aplicación PHP y una API
 REST con rate limiting. Cada uno tiene dominios distintos, debe servir HTTPS,
-y el equipo de seguridad exige cabeceras HTTP estrictas. Este laboratorio
+y el equipo de seguridad exige cabeceras HTTP estrictas. Este proyecto
 construye esa infraestructura desde cero, paso a paso.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+/etc/nginx/
+├── nginx.conf              ← configuración principal
+├── conf.d/
+│   ├── static.conf         ← static.empresa.com
+│   ├── app.conf            ← app.empresa.com (PHP-FPM)
+│   └── api.conf            ← api.empresa.com (rate limiting)
+├── ssl/                    ← certificados autofirmados
+/var/www/{static,app,api}/  ← raíces de cada sitio
+/var/log/nginx/             ← logs por dominio
+\`\`\`
 
 ### 📖 Paso 1 — Instalación y servicio systemd
 

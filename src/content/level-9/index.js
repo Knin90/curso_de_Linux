@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: '~/.ssh/config: alias, perfiles y ProxyJump' },
   { id: 6, title: 'Transferencia de archivos: scp y sftp' },
   { id: 7, title: 'Hardening del servidor SSH: sshd_config' },
-  { id: 8, title: 'Diagnóstico y laboratorios integrados' },
+  { id: 8, title: 'Proyecto real: acceso SSH sin contraseñas para automatización con Ansible' },
 ]

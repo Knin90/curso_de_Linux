@@ -1,13 +1,27 @@
 const content = `
-## Módulo 8 — Laboratorio: scripts de producción reales
+## Módulo 8 — Proyecto real: kit de scripts de producción para un equipo pequeño
 
 ### 🎯 Objetivos de aprendizaje
 
-* Integrar todos los conceptos del nivel en scripts reales y completos.
-* Aplicar el patrón de script de producción: shebang, set -euo pipefail, logging, trap, validación.
-* Construir un script de backup, un script de deployment y un analizador de logs.
+* Integrar variables, control de flujo, funciones, manejo de errores y procesamiento de texto en scripts completos.
+* Aplicar el patrón de script de producción: shebang, \`set -euo pipefail\`, logging, \`trap\`, validación.
+* Construir un script de backup, un script de deployment con rollback y un analizador de logs con \`awk\`.
 
-### 📖 Script 1: backup automatizado con rotación
+### ❓ El problema real
+
+Eres la única persona con conocimientos de Linux en una startup de 6 personas. La aplicación corre en un solo servidor con nginx, Node.js y PostgreSQL, y hasta ahora los backups y despliegues se hacían "a mano" copiando comandos de un documento. Necesitas dejar tres scripts robustos —backup, deploy y análisis de logs— que cualquier compañero pueda ejecutar sin romper nada, con logging, manejo de errores y rollback automático si algo falla.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+scripts-produccion/
+├── backup.sh
+├── deploy.sh
+├── analyze-logs.sh
+└── CHECKLIST.md
+\`\`\`
+
+### 📖 backup.sh — backup automatizado con rotación
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -72,7 +86,7 @@ log_info "Backups restantes: $BACKUPS_RESTANTES"
 log_info "Backup completado exitosamente"
 \`\`\`
 
-### 📖 Script 2: deployment con rollback
+### 📖 deploy.sh — deployment con rollback automático
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -148,7 +162,7 @@ ls -t "$RELEASES_DIR" | tail -n +$(( MAX_RELEASES + 1 )) | xargs -I{} rm -rf "$R
 log "Deployment de $VERSION completado exitosamente"
 \`\`\`
 
-### 📖 Script 3: analizador de logs con reporte
+### 📖 analyze-logs.sh — analizador de logs con reporte
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -201,7 +215,7 @@ echo ""
 echo "=========================================="
 \`\`\`
 
-### 📖 Patrón final: checklist de script de producción
+### 📖 CHECKLIST.md — patrón de script de producción
 
 \`\`\`text
 ANTES de poner un script en producción:
@@ -220,20 +234,89 @@ ANTES de poner un script en producción:
 □ ¿Es idempotente? ¿Se puede ejecutar dos veces sin daño?
 \`\`\`
 
-### 🧪 Ejercicio de cierre
+### 📖 Secuencia de ejecución
 
-Escribe un script de producción que:
+**Paso 1: preparar el directorio y dar permisos de ejecución**
 
-1. Reciba como argumento un directorio a vigilar
-2. Use \`set -euo pipefail\` y \`trap cleanup EXIT\`
-3. Compruebe que el directorio existe y es legible
-4. Genere un reporte con: número de archivos, tamaño total, archivo más grande y más reciente
-5. Guarde el reporte en \`/tmp/reporte-$(date +%Y%m%d).txt\`
-6. Imprima un resumen en pantalla
+\`\`\`bash
+mkdir -p scripts-produccion && cd scripts-produccion
+chmod +x backup.sh deploy.sh analyze-logs.sh
+\`\`\`
 
-Referencia de comandos: \`find\`, \`du\`, \`stat\`, \`sort\`, \`wc\`, \`awk\`.
+**Paso 2: ejecutar el backup y confirmar la rotación**
 
-Este ejercicio integra: shebang correcto, manejo de errores, validación de argumentos, redirección, y procesamiento de texto con awk/find.
+\`\`\`bash
+sudo ./backup.sh
+ls -lh /var/backups/app/
+\`\`\`
+
+Salida esperada (fragmento del log):
+
+\`\`\`
+[2024-05-01 02:00:01] [INFO ] Iniciando backup: 20240501_020001
+[2024-05-01 02:00:03] [INFO ] Exportando base de datos: produccion
+[2024-05-01 02:00:05] [INFO ] Comprimiendo archivos: /var/www/app
+[2024-05-01 02:00:12] [INFO ] Backup creado: /var/backups/app/backup-20240501_020001.tar.gz (48M)
+[2024-05-01 02:00:12] [INFO ] Rotando backups con más de 30 días
+[2024-05-01 02:00:12] [INFO ] Backup completado exitosamente
+\`\`\`
+
+**Paso 3: desplegar una nueva versión**
+
+\`\`\`bash
+sudo ./deploy.sh v1.4.2
+\`\`\`
+
+Si el \`healthcheck\` falla, el \`trap 'rollback' ERR\` restaura automáticamente el symlink anterior y reinicia el servicio — no se requiere intervención manual.
+
+**Paso 4: analizar el tráfico del día**
+
+\`\`\`bash
+sudo ./analyze-logs.sh /var/log/nginx/access.log 5
+\`\`\`
+
+\`\`\`
+==========================================
+ Análisis: /var/log/nginx/access.log
+ Generado: 2024-05-01 09:12:03
+==========================================
+
+Total de requests: 48213
+
+--- Códigos HTTP ---
+   45012  200
+    2104  304
+     820  404
+     277  500
+
+--- Top 5 IPs ---
+    3210  190.15.22.4
+    2894  201.88.14.9
+...
+Errores 5xx: 277
+\`\`\`
+
+Los 277 errores 5xx encontrados por \`analyze-logs.sh\` son la señal para revisar \`journalctl -u mi-app --since today -p err\` antes de que un cliente abra un ticket de soporte.
+
+### 📋 Lo que debes recordar
+
+* \`set -euo pipefail\` + \`trap cleanup EXIT\` es la base de cualquier script que toque producción.
+* \`trap 'rollback' ERR\` convierte un fallo a mitad de despliegue en una recuperación automática, no en un servidor roto.
+* Las variables siempre entre comillas (\`"$var"\`) evitan errores de word-splitting con espacios o rutas vacías.
+* \`awk\` es la herramienta correcta para agregaciones sobre texto estructurado (top IPs, códigos HTTP, tráfico total) sin escribir un script completo.
+* Un script de producción se prueba simulando el fallo, no solo el camino feliz.
+
+### 🧪 Autoevaluación
+
+1. En \`deploy.sh\`, ¿qué garantiza que un \`healthcheck\` fallido revierta automáticamente al release anterior, y qué línea del script lo activa?
+2. \`backup.sh\` usa \`trap cleanup EXIT\` en lugar de llamar a \`cleanup\` al final del script. ¿Qué ventaja tiene esto si \`pg_dump\` falla a mitad de la ejecución?
+3. ¿Por qué \`analyze-logs.sh\` usa \`awk '{print $9}'\` para extraer el código HTTP en lugar de \`grep\`?
+
+---
+
+1. La línea \`trap 'rollback' ERR\` combinada con \`set -euo pipefail\`: cualquier comando que falle (incluido el \`curl -sf .../health || die\`) dispara \`ERR\`, lo que ejecuta \`rollback()\` y restaura el symlink guardado en \`ROLLBACK_TARGET\` antes de salir.
+2. \`trap cleanup EXIT\` se ejecuta siempre que el script termina, sea por éxito, por \`die\` o por una señal — así el directorio temporal (\`TMP_DIR\`) se borra incluso si \`pg_dump\` falla a mitad, sin dejar archivos huérfanos en \`/tmp\`.
+3. Los logs de nginx en formato combinado tienen el código HTTP como un campo posicional fijo (columna 9); \`awk '{print $9}'\` lo extrae de forma exacta y rápida, mientras que \`grep\` solo podría buscar patrones de texto y sería más frágil ante variaciones en la línea.
 `
 
 export default content

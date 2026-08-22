@@ -11,5 +11,5 @@ export const modules = [
   { id: 1, title: '¿Qué es Linux? Kernel, sistema operativo y distribución' },
   { id: 2, title: 'Historia y filosofía: Unix, GNU, Linus Torvalds y el software libre' },
   { id: 3, title: 'El ecosistema de distribuciones: familias y cómo elegir una' },
-  { id: 4, title: 'Laboratorio integrador: primer contacto con la terminal' },
+  { id: 4, title: 'Mini-proyecto real: documenta tu primer sistema Linux' },
 ]

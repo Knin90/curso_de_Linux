@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'SSH hardening: configuración segura de producción' },
   { id: 6, title: 'PAM y políticas de autenticación robustas' },
   { id: 7, title: 'CIS Benchmark: evaluación y remediación automatizada' },
-  { id: 8, title: 'Laboratorio: hardening completo de un servidor' },
+  { id: 8, title: 'Proyecto real: hardening completo de un servidor' },
 ]

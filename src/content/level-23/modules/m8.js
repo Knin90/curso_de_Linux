@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: sistema de auditoría de producción completo
+## Módulo 8 — Proyecto real: sistema de auditoría de producción completo
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -11,6 +11,22 @@ const content = `
 ### ❓ El problema real
 
 Este laboratorio simula la implementación de auditd en un servidor de producción nuevo. El objetivo es tener un sistema funcional al final: reglas persistentes, alertas configuradas, reportes automatizados, y evidencia de que todo funciona.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+/etc/audit/rules.d/
+├── 00-base.rules
+├── 10-identity.rules
+├── 20-privilege.rules
+├── 30-system.rules
+├── 40-sessions.rules
+└── 99-finalize.rules
+
+/usr/local/bin/audit-daily-report.sh
+/etc/cron.d/audit-report
+/var/reports/audit/
+\`\`\`
 
 ### 📖 Paso 1: Instalar y verificar auditd
 
@@ -183,7 +199,7 @@ echo "0 6 * * * root /usr/local/bin/audit-daily-report.sh" | \
     sudo tee /etc/cron.d/audit-report
 \`\`\`
 
-### 📖 Paso 5: Verificación final del sistema
+### 📖 Paso 5: Estado final del sistema
 
 \`\`\`bash
 # Checklist de verificación

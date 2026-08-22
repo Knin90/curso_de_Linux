@@ -1,0 +1,236 @@
+/* ============================================================
+   Página de módulo (lector de un solo módulo)
+   ============================================================ */
+.level-page .module-hero { padding: 40px 0 8px; }
+.level-page .module-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.level-page .module-hero h1 {
+  margin-top: 14px;
+  font-size: clamp(28px, 3.6vw, 40px);
+  max-width: 24ch;
+}
+
+/* Stepper de módulos */
+.level-page .module-stepper {
+  display: flex;
+  gap: 8px;
+  margin-top: 26px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.level-page .module-stepper::-webkit-scrollbar { display: none; }
+.level-page .ms-chip {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 40px;
+  height: 34px;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: color-mix(in oklab, var(--surface) 65%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.2s ease, transform 160ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .ms-chip:hover { color: var(--fg); border-color: var(--fg); }
+}
+.level-page .ms-chip:active { transform: scale(0.94); }
+.level-page .ms-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .ms-chip.active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Halo de «radar» del módulo en curso: anillo que se expande y se desvanece
+   (pseudo-elemento con scale/opacity — compositor-friendly, sin box-shadow) */
+.level-page .ms-chip.active::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1.5px solid var(--accent);
+  border-radius: 11px;
+  opacity: 0;
+  pointer-events: none;
+  animation: ms-active-breath 2.2s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes ms-active-breath {
+  0%   { transform: scale(0.9);  opacity: 0.65; }
+  55%  { transform: scale(1.08); opacity: 0; }
+  100% { transform: scale(1.08); opacity: 0; }
+}
+
+/* Punto pulsante del módulo en curso (dentro del chip activo) */
+.level-page .ms-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ms-pulse 1.5s var(--ease-in-out) infinite;
+  will-change: transform, opacity;
+}
+@keyframes ms-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.95; }
+  50%      { transform: scale(0.55); opacity: 0.45; }
+}
+
+/* Check dibujado (trazo animado) en los módulos completados.
+   El retardo escalonado (--i) se topa a 280ms para que completar un módulo
+   en vivo se sienta ágil, aunque la cascada inicial siga viéndose. */
+.level-page .ms-check {
+  display: block;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.level-page .ms-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ms-check-draw 360ms var(--ease-out) both;
+  animation-delay: min(calc(var(--i, 0) * 70ms), 280ms);
+}
+@keyframes ms-check-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-page .ms-chip.active::after,
+  .level-page .ms-pulse,
+  .level-page .ms-check path {
+    animation: none;
+  }
+  .level-page .ms-pulse { display: none; }
+  .level-page .ms-check path { stroke-dashoffset: 0; }
+}
+
+/* Contenido del módulo (columna de lectura) */
+.level-page .module-body {
+  max-width: 880px;
+  padding-top: 26px;
+}
+.level-page .module-end {
+  height: 1px;
+  pointer-events: none;
+}
+
+/* Entradas animadas del contenido (fallback sin View Transitions) */
+.level-page .module-enter-fade { animation: module-fade-in 340ms var(--ease-out) both; }
+.level-page .module-enter-next { animation: module-in-right 400ms var(--ease-out) both; }
+.level-page .module-enter-prev { animation: module-in-left 400ms var(--ease-out) both; }
+@keyframes module-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes module-in-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes module-in-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Navegación entre módulos */
+.level-page .module-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 14px;
+  padding-top: 12px;
+  padding-bottom: 72px;
+}
+.level-page .module-nav-prev,
+.level-page .module-nav-next {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  transition: border-color 0.15s ease, transform 200ms var(--ease-out), background-color 0.2s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-prev:hover,
+  .level-page .module-nav-next:hover {
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    transform: translateY(-1px);
+  }
+}
+.level-page .module-nav-prev:active,
+.level-page .module-nav-next:active { transform: scale(0.99); }
+.level-page .module-nav-prev:focus-visible,
+.level-page .module-nav-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .module-nav-next { justify-content: space-between; }
+.level-page .module-nav-prev.is-empty { visibility: hidden; }
+.level-page .mn-arrow {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-prev:hover .mn-arrow { transform: translateX(-3px); }
+  .level-page .module-nav-next:hover .mn-arrow { transform: translateX(3px); }
+}
+.level-page .mn-k {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.level-page .mn-t {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--fg);
+}
+.level-page .module-nav-next.close-level {
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--border));
+  background: color-mix(in oklab, var(--ok-soft) 75%, transparent);
+}
+.level-page .module-nav-next.close-level .mn-arrow { color: var(--ok); }
+@media (hover: hover) and (pointer: fine) {
+  .level-page .module-nav-next.close-level:hover { border-color: var(--ok); }
+}
+

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Redes Docker: bridge, host, overlay y custom networks' },
   { id: 6, title: 'Multi-stage builds y optimización de imágenes' },
   { id: 7, title: 'Seguridad de contenedores: capabilities, seccomp y rootless' },
-  { id: 8, title: 'Laboratorio: containerizar una aplicación real' },
+  { id: 8, title: 'Proyecto real: containerizar una aplicación real' },
 ]

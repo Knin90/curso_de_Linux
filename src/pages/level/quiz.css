@@ -1,0 +1,74 @@
+/* ---------- Quiz reveal ---------- */
+.level-page .list-quiz {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 0;
+}
+.level-page .quiz-item {
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s ease, transform 160ms var(--ease-out);
+  overflow: hidden;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .quiz-item:hover { border-color: var(--accent); }
+}
+.level-page .quiz-item:active { transform: scale(0.985); }
+.level-page .quiz-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .quiz-item.quiz-open { border-color: var(--accent); }
+.level-page .quiz-question {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.level-page .quiz-q-text { flex: 1; }
+.level-page .quiz-toggle-icon {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  transition: transform 200ms var(--ease-out);
+}
+.level-page .quiz-item.quiz-open .quiz-toggle-icon {
+  transform: rotate(180deg);
+}
+/* Reveal animado: grid-template-rows 0fr→1fr (interrumpible, solo GPU) */
+.level-page .quiz-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 240ms var(--ease-out), opacity 180ms ease;
+}
+.level-page .quiz-item.quiz-open .quiz-answer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.level-page .quiz-answer-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.level-page .quiz-answer-inner > div {
+  padding: 10px 16px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg);
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
+}

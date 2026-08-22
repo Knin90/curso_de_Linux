@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Monitoreo de archivos críticos: /etc/passwd, /etc/sudoers, /bin/' },
   { id: 6, title: 'Auditoría de llamadas al sistema y escalada de privilegios' },
   { id: 7, title: 'Cumplimiento normativo: PCI-DSS, HIPAA y CIS con auditd' },
-  { id: 8, title: 'Laboratorio: sistema de auditoría de producción completo' },
+  { id: 8, title: 'Proyecto real: sistema de auditoría de producción completo' },
 ]

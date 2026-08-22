@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: pipeline CI/CD completo para servidor Linux
+## Módulo 8 — Proyecto real: pipeline CI/CD completo para servidor Linux
 
 ### 🎯 Objetivos de aprendizaje
 * Construir un pipeline CI/CD funcional de extremo a extremo
@@ -11,9 +11,7 @@ const content = `
 
 Los módulos anteriores enseñaron cada pieza por separado. Este laboratorio las une en un sistema real: una aplicación Node.js con tests, que se valida localmente antes del commit, se testea en CI al hacer push, y se despliega automáticamente al servidor Linux cuando pasa todo.
 
----
-
-### 📖 Infraestructura del laboratorio
+### 📖 Estructura del proyecto
 
 **Requisitos previos:**
 * Repositorio en GitHub con una app Express básica
@@ -54,8 +52,6 @@ myapp/
   "devDependencies": { "jest": "^29.0.0", "eslint": "^8.0.0" }
 }
 \`\`\`
-
----
 
 ### 📖 Paso 1 — Pre-commit hook (gate de calidad local)
 
@@ -111,8 +107,6 @@ exit 0
 \`\`\`bash
 chmod +x .githooks/commit-msg
 \`\`\`
-
----
 
 ### 📖 Paso 2 — GitHub Actions workflow principal
 
@@ -265,8 +259,6 @@ jobs:
             -d '{"text": "❌ Deploy fallido en *\${{ github.repository }}* — commit \${{ github.sha }}"}'
 \`\`\`
 
----
-
 ### 📖 Configuración del servicio systemd en el servidor
 
 \`\`\`ini
@@ -297,8 +289,6 @@ sudo systemctl start myapp
 # Verificar estado
 sudo systemctl status myapp
 \`\`\`
-
----
 
 ### 📖 Paso 3 — Versionado semántico y releases
 
@@ -356,9 +346,7 @@ git push origin v1.0.0
 gh release view v1.0.0
 \`\`\`
 
----
-
-### 📖 Paso 4 — Verificar el pipeline completo
+### 📖 Paso 4 — Estado del pipeline completo
 
 **Escenario de prueba: corregir un bug y desplegarlo**
 
@@ -409,8 +397,6 @@ gh run view <run-id> --log
 # Re-ejecutar un workflow fallido
 gh run rerun <run-id>
 \`\`\`
-
----
 
 ### 📖 Diagnóstico de problemas frecuentes
 

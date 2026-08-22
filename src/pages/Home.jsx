@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { levels, stages } from '../registry'
 import { metaRegistry } from '../content/metaRegistry'
 import ThemeToggle from '../components/ThemeToggle'
+import ZoomControl from '../components/ZoomControl'
 import CountUp from '../components/CountUp'
 import useRevealOnScroll from '../hooks/useRevealOnScroll'
 import useCourseProgress from '../hooks/useCourseProgress'
@@ -139,6 +140,7 @@ export default function Home() {
             <span className="brand-mark">&gt;_</span>
             Curso de Linux
           </a>
+          <ZoomControl />
           <ThemeToggle />
         </div>
       </header>

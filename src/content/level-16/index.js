@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'tcpdump: captura y análisis de tráfico de red' },
   { id: 6, title: '/proc/net e internals del stack TCP/IP' },
   { id: 7, title: 'Metodología de troubleshooting de red en producción' },
-  { id: 8, title: 'Laboratorio: diagnóstico completo de problemas de red' },
+  { id: 8, title: 'Proyecto real: diagnóstico completo de problemas de red en producción' },
 ]

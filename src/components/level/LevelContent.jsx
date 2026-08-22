@@ -166,6 +166,13 @@ export function parseModule(md) {
       continue
     }
 
+    const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)\n]+)\)$/)
+    if (imageMatch) {
+      flushAll()
+      addBlock({ type: 'image', alt: imageMatch[1], src: imageMatch[2] })
+      continue
+    }
+
     if (trimmed.startsWith('>')) {
       flushAll()
       while (i < lines.length && lines[i].trim().startsWith('>')) {
@@ -290,6 +297,13 @@ function renderBlock(b, key) {
           <span className="kicker">Nota</span>
           <p>{Inline(b.text)}</p>
         </div>
+      )
+    case 'image':
+      return (
+        <figure key={key} className="b module-figure">
+          <img src={b.src} alt={b.alt} loading="lazy" />
+          {b.alt && <figcaption>{b.alt}</figcaption>}
+        </figure>
       )
     case 'code':
       if (isDiagramBlock(b.lang)) {

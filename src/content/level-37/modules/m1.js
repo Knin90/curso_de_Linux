@@ -53,7 +53,7 @@ systemctl --failed           # unidades systemd fallidas
 Un síntoma es lo que se observa ("el sitio responde con 502"). Una causa contribuyente es un factor que agrava el problema ("hay 3 procesos php-fpm colgados"). La causa raíz es el origen real ("un query sin índice satura la conexión a la base de datos, agota el pool de PHP-FPM, y nginx recibe 502 al no encontrar workers disponibles").
 
 \`\`\`diagram
-{"type":"side-by-side","columns":[{"title":"Síntoma","icon":"alert","rows":["\\"El sitio da 502\\"","\\"El servidor está lento\\"","\\"No puedo hacer SSH\\""]},{"title":"Causa contribuyente","icon":"search","rows":["PHP-FPM sin workers libres","Swap al 90%","sshd no escucha"]},{"title":"Causa raíz","icon":"bug","focal":true,"rows":["Query N+1 sin índice","Memory leak en app","Disco lleno, journal no escribe"]}],"vsLabel":"→"}
+{"type":"side-by-side","columns":[{"title":"Síntoma","icon":"alert","rows":["El sitio da 502","El servidor está lento","No puedo hacer SSH"]},{"title":"Causa contribuyente","icon":"search","rows":["PHP-FPM sin workers libres","Swap al 90%","sshd no escucha"]},{"title":"Causa raíz","icon":"bug","focal":true,"rows":["Query N+1 sin índice","Memory leak en app","Disco lleno, journal no escribe"]}],"vsLabel":"→"}
 \`\`\`
 
 Corregir solo el síntoma (reiniciar php-fpm) resuelve el problema temporalmente pero no evita que vuelva a ocurrir. Encontrar la causa raíz es el objetivo del troubleshooting profesional.

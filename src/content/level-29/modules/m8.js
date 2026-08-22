@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: stack completo LEMP con Docker Compose
+## Módulo 8 — Proyecto real: stack completo LEMP con Docker Compose
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -179,7 +179,7 @@ server {
 }
 \`\`\`
 
-### 📖 Verificación del stack
+### 📖 Estado del stack en marcha
 
 \`\`\`bash
 # Construir y arrancar

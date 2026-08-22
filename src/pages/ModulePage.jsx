@@ -5,6 +5,7 @@ import { getLevel, levels, stages } from '../registry'
 import { contentRegistry } from '../content/contentRegistry'
 import ModuleContent from '../components/level/LevelContent'
 import ThemeToggle from '../components/ThemeToggle'
+import ZoomControl from '../components/ZoomControl'
 import ReadingProgress from '../components/ReadingProgress'
 import useLevelProgress from '../hooks/useLevelProgress'
 import useScrollMemory from '../hooks/useScrollMemory'
@@ -174,6 +175,7 @@ export default function ModulePage() {
             Curso de Linux
           </Link>
           <span className="nav-level">Nivel {level.id} · Módulo {pad(module.id)}</span>
+          <ZoomControl />
           <ThemeToggle />
           <Link className="nav-cta" to={`/nivel/${level.id}`}>Índice del nivel</Link>
         </div>

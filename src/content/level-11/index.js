@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'El sistema de archivos /proc y /sys' },
   { id: 6, title: 'Alertas automáticas: logwatch y fail2ban' },
   { id: 7, title: 'Observabilidad avanzada: strace, lsof y ss' },
-  { id: 8, title: 'Laboratorio integrado: sistema de monitoreo end-to-end' },
+  { id: 8, title: 'Proyecto real: stack de monitoreo para un servidor de producción' },
 ]

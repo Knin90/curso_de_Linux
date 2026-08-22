@@ -13,7 +13,11 @@ Es habitual escuchar frases como *"voy a instalar Linux"* o *"prefiero Windows a
 
 ### 💡 Analogía
 
-Piensa en un automóvil. El **motor** es el kernel: convierte combustible en movimiento, gestiona la combustión, la temperatura, la transmisión de fuerza a las ruedas. Pero un motor solo, tirado en el suelo, no te lleva a ningún lado. Necesitas una **carrocería, un chasis, un volante, asientos, radio** — el resto del sistema operativo. Y esa combinación de motor + carrocería puede ensamblarse de mil formas distintas según el fabricante: así como Toyota y Ford usan el motor de combustión bajo filosofías de diseño distintas, Ubuntu y Fedora usan el kernel Linux bajo filosofías de distribución distintas.
+Piensa en un automóvil. El **motor** es el kernel: convierte combustible en movimiento. Pero un motor solo, tirado en el suelo, no te lleva a ningún lado — necesitas la **carrocería**: chasis, volante, asientos, el resto del sistema operativo. Motor + carrocería = auto completo y usable.
+
+\`\`\`diagram
+{"type":"side-by-side","gapLabels":["+","="],"columns":[{"title":"Motor","icon":"server","rows":["Es el kernel","Mueve todo, pero solo no sirve de nada"]},{"title":"Carrocería","icon":"package","rows":["Es el resto del SO","Chasis, volante, asientos"]},{"title":"Auto completo","icon":"desktop","focal":true,"rows":["Es el sistema operativo","Listo para conducir"]}]}
+\`\`\`
 
 ### 📖 Explicación técnica
 

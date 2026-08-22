@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Dominio de tmux: Sesiones, Ventanas y Paneles' },
   { id: 6, title: 'Configuración Profesional de tmux (.tmux.conf)' },
   { id: 7, title: 'Sesiones Colaborativas y Alternativas (screen)' },
-  { id: 8, title: 'Laboratorio integrador: Entorno de Operaciones Inmune' },
+  { id: 8, title: 'Proyecto real: dashboard de operaciones resiliente a caídas de red' },
 ]

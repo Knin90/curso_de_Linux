@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Evaluación de troubleshooting I: fallos de servicio y de red' },
   { id: 6, title: 'Evaluación de troubleshooting II: arranque, disco lleno y rendimiento' },
   { id: 7, title: 'Evaluación de automatización: Bash, cron y systemd timers' },
-  { id: 8, title: 'Examen final integrador y criterio de certificación' },
+  { id: 8, title: 'Caso real: examen final integrador y criterio de certificación' },
 ]

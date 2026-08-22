@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Sesiones distribuidas y sticky sessions' },
   { id: 6, title: 'Monitoreo de un cluster HA: métricas y alertas' },
   { id: 7, title: 'Disaster recovery: procedimientos y testing' },
-  { id: 8, title: 'Laboratorio: cluster HA completo con HAProxy y keepalived' },
+  { id: 8, title: 'Proyecto real: cluster HA completo con HAProxy y keepalived' },
 ]

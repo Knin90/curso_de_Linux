@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Pub/Sub, streams y casos de uso avanzados' },
   { id: 6, title: 'Redis Sentinel: alta disponibilidad y failover automático' },
   { id: 7, title: 'Redis Cluster: sharding horizontal y distribución de datos' },
-  { id: 8, title: 'Laboratorio: Redis como capa de caché para aplicación web' },
+  { id: 8, title: 'Proyecto real: Redis como capa de caché para aplicación web' },
 ]

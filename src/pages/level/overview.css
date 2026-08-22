@@ -1,0 +1,228 @@
+/* ============================================================
+   Portada del nivel — módulos en tarjetas (páginas separadas)
+   ============================================================ */
+.level-page .level-progress {
+  margin-top: 6px;
+  padding: 18px 20px;
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.level-page .level-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.level-page .level-progress-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.level-page .level-progress-count {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.level-page .level-progress-count.done { color: var(--ok); }
+.level-page .level-progress-track {
+  margin-top: 12px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--bg) 60%, transparent);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.level-page .level-progress-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 500ms var(--ease-out);
+}
+.level-page .level-progress-fill.full { background: var(--ok); }
+
+.level-page .level-modules-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 56px;
+}
+.level-page .level-modules-title {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: -0.018em;
+}
+.level-page .level-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-cta:hover { background: var(--accent-ink); }
+}
+.level-page .level-cta:active { transform: scale(0.97); }
+.level-page .level-cta:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .level-cta .btn-arrow {
+  display: inline-block;
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-cta:hover .btn-arrow { transform: translateX(4px); }
+}
+
+/* Rejilla de tarjetas de módulos */
+.level-page .level-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 24px 0 8px;
+}
+.level-page .level-module-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-decoration: none;
+  color: var(--fg);
+  transition: border-color 0.15s ease, transform 200ms var(--ease-out), background-color 0.2s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .level-module-card:hover {
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    transform: translateY(-2px);
+  }
+}
+.level-page .level-module-card:active { transform: scale(0.98); }
+.level-page .level-module-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.level-page .level-module-card.done {
+  border-color: color-mix(in oklab, var(--ok) 35%, var(--border));
+}
+.level-page .lmc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.level-page .lmc-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.level-page .lmc-state {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--accent);
+  transition: color 0.2s ease;
+}
+.level-page .level-module-card.done .lmc-state { color: var(--ok); }
+.level-page .lmc-title {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 16.5px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Mini-barra de % de lectura por módulo */
+.level-page .lmc-reading {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 4px;
+}
+.level-page .lmc-reading-track {
+  flex: 1;
+  min-width: 0;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--bg) 60%, transparent);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.level-page .lmc-reading-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 400ms var(--ease-out);
+}
+.level-page .level-module-card.done .lmc-reading-fill { background: var(--ok); }
+.level-page .lmc-reading-pct {
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.level-page .level-module-card.done .lmc-reading-pct { color: var(--ok); }
+.level-page .lmc-foot {
+  margin-top: 8px;
+  padding-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.level-page .lmc-done { color: var(--ok); }
+.level-page .lmc-pending { color: var(--muted); }
+
+/* ---------- Reveal on scroll (portada) ---------- */
+.level-page [data-reveal]:not(.in) {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.level-page [data-reveal].in {
+  animation: level-rise 460ms var(--ease-out) backwards;
+  animation-delay: min(calc(var(--i, 0) * 60ms), 240ms);
+}
+@keyframes level-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

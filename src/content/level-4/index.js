@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'umask: permisos por defecto al crear archivos' },
   { id: 6, title: 'Permisos Especiales: SUID, SGID y Sticky Bit' },
   { id: 7, title: 'Listas de Control de Acceso (ACLs)' },
-  { id: 8, title: 'Laboratorio integrador: Infraestructura segura de equipos' },
+  { id: 8, title: 'Proyecto real: infraestructura de identidades para una empresa de software' },
 ]

@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: stack de monitoreo completo Prometheus/Grafana
+## Módulo 8 — Proyecto real: stack de monitoreo completo Prometheus/Grafana
 
 ### 🎯 Objetivos de aprendizaje
 * Instalar y configurar Prometheus con scrape targets y rule files
@@ -9,16 +9,12 @@ const content = `
 * Instalar Grafana, conectarla a Prometheus e importar y crear dashboards
 * Simular una alerta de CPU y verificar el flujo completo hasta la notificación
 
----
-
 ### ❓ El problema real
 
 Tienes servidores en producción sin observabilidad. Cuando algo falla, te enteras
 porque un usuario llama. Este laboratorio construye el stack completo:
 Prometheus recolecta, Alertmanager notifica y Grafana visualiza.
 Al final, una alerta de CPU disparada por una carga simulada llegará a Slack en menos de 15 minutos.
-
----
 
 ### 📖 Paso 1: instalación de Prometheus
 
@@ -102,8 +98,6 @@ systemctl status prometheus
 curl -s http://localhost:9090/metrics | head -5
 \`\`\`
 
----
-
 ### 📖 Paso 2: instalación de node_exporter en el servidor monitorizado
 
 **En el servidor que quieres monitorizar (server-ip):**
@@ -145,8 +139,6 @@ curl -s http://localhost:9100/metrics | grep node_cpu | head -3
 http://prometheus-ip:9090/targets
 # Verificar: up{job="node", instance="server-ip:9100"} == 1
 \`\`\`
-
----
 
 ### 📖 Paso 3: instalación de Alertmanager
 
@@ -210,8 +202,6 @@ systemctl daemon-reload
 systemctl enable --now alertmanager
 curl -s http://localhost:9093/api/v1/status | python3 -m json.tool
 \`\`\`
-
----
 
 ### 📖 Paso 4: reglas de alerta
 
@@ -288,8 +278,6 @@ http://prometheus-ip:9090/rules
 # Todas las reglas deben aparecer en estado "inactive"
 \`\`\`
 
----
-
 ### 📖 Paso 5: instalación y configuración de Grafana
 
 **Instalar desde el repositorio oficial:**
@@ -327,8 +315,6 @@ systemctl enable --now grafana-server
 5. Thresholds: verde < 60, amarillo < 80, rojo ≥ 80
 6. Título: "CPU Usage %"
 
----
-
 ### 📖 Paso 6: simular una alerta y verificar el flujo completo
 
 **Instalar stress en el servidor monitorizado:**
@@ -362,8 +348,6 @@ http://prometheus-ip:9093
 # La alerta HighCPUUsage debe aparecer en la lista de alertas activas
 \`\`\`
 
----
-
 ### 📖 PromQL de referencia para este lab
 
 \`\`\`
@@ -388,8 +372,6 @@ node_load1
 # Instancias caídas
 up == 0
 \`\`\`
-
----
 
 ### 📋 Lo que debes recordar
 * prometheus.yml define scrape targets, reglas y la dirección de Alertmanager en tres secciones separadas

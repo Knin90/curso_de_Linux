@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: programa completo de gestión de vulnerabilidades
+## Módulo 8 — Proyecto real: programa completo de gestión de vulnerabilidades
 
 ### 🎯 Objetivos de aprendizaje
 * Ejecutar una auditoría Lynis y extraer los hallazgos prioritarios
@@ -8,8 +8,6 @@ const content = `
 * Aplicar remediaciones y verificar la mejora del hardening index
 * Automatizar el ciclo de escaneo con un script semanal y cron
 
----
-
 ### ❓ El problema real
 
 Tienes una infraestructura de 5 servidores: web, base de datos, correo, monitoreo y backup.
@@ -17,7 +15,19 @@ Sin un proceso sistemático, las vulnerabilidades se acumulan silenciosamente.
 Este laboratorio construye un programa completo: detección, priorización, remediación,
 verificación y automatización. Al final tendrás un ciclo reproducible cada semana.
 
----
+### 📖 Estructura del proyecto
+
+\`\`\`
+/tmp/lynis-report.txt
+/tmp/lynis-report-post.txt
+/var/log/lynis.log
+
+/opt/scripts/weekly-vuln-scan.sh
+/var/reports/vulnerabilidades/
+├── lynis-<fecha>.txt
+└── .last_hardening_index
+/var/log/weekly-vuln-scan.log
+\`\`\`
 
 ### 📖 Paso 1: auditoría Lynis en el servidor web
 
@@ -55,8 +65,6 @@ grep "^\[suggestion\]" /var/log/lynis.log | head -20
 **Interpretar la salida:** cada línea con \`!\` es una advertencia que requiere acción.
 Las líneas con \`*\` son sugerencias de mejora. Ambas contribuyen al hardening index.
 
----
-
 ### 📖 Paso 2: descubrimiento de vulnerabilidades con nmap
 
 Nmap puede identificar versiones de servicios y cruzarlas con scripts de vulnerabilidades conocidas.
@@ -88,8 +96,6 @@ CVSS completo y confirmar si el sistema es vulnerable según la versión exacta.
 más completos. Nmap con --script vuln cubre los casos más conocidos y es suficiente
 para este laboratorio.
 
----
-
 ### 📖 Paso 3: construcción de la lista de priorización
 
 Con los hallazgos del paso anterior, construye un registro de vulnerabilidades
@@ -117,8 +123,6 @@ Puntuación efectiva = CVSS_temporal × factor_criticidad_activo
 2. LYNIS-SSH-ROOT — acceso root directo por SSH, SLA 7 días
 3. LYNIS-SYSCTL — hardening de red, SLA 15 días
 4. LYNIS-AVAHI — servicio innecesario, SLA 60 días
-
----
 
 ### 📖 Paso 4: remediación
 
@@ -166,9 +170,7 @@ apt-get install auditd -y
 systemctl enable --now auditd
 \`\`\`
 
----
-
-### 📖 Paso 5: verificación post-remediación
+### 📖 Paso 5: estado post-remediación
 
 **5.1 Re-ejecutar Lynis y comparar hardening index:**
 \`\`\`bash
@@ -200,8 +202,6 @@ nmap -sV -sC --script vuln 192.168.1.10
 CVE-2021-41773   | 7.5  | High | web-server-01 | Cerrado | MTTR: 1 día
 LYNIS-SSH-ROOT   | —    | High | web-server-01 | Cerrado | MTTR: 1 día
 \`\`\`
-
----
 
 ### 📖 Paso 6: automatización con script semanal
 
@@ -265,8 +265,6 @@ crontab -e
 0 3 * * 0 /opt/scripts/weekly-vuln-scan.sh >> /var/log/weekly-vuln-scan.log 2>&1
 \`\`\`
 
----
-
 ### 📖 Política de gestión de vulnerabilidades (plantilla)
 
 Un programa maduro requiere documentación formal. Secciones mínimas:
@@ -292,8 +290,6 @@ Detección → Registro en tracker → Priorización → Asignación → Remedia
 **5. Escalación:**
 Si un SLA Critical no puede cumplirse, el sysadmin notifica al Security team en menos de 4 horas
 para acordar mitigación temporal (WAF rule, desactivar servicio, firewall rule).
-
----
 
 ### 📋 Lo que debes recordar
 * Lynis produce un hardening index — documentar antes y después de cada ciclo de remediación

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getLevel, levels, stages } from '../registry'
 import { contentRegistry } from '../content/contentRegistry'
 import ThemeToggle from '../components/ThemeToggle'
+import ZoomControl from '../components/ZoomControl'
 import ReadingProgress from '../components/ReadingProgress'
 import useLevelProgress from '../hooks/useLevelProgress'
 import useScrollMemory from '../hooks/useScrollMemory'
@@ -100,6 +101,7 @@ export default function LevelPage() {
             Curso de Linux
           </Link>
           <span className="nav-level">Nivel {level.id} · {meta.title}</span>
+          <ZoomControl />
           <ThemeToggle />
           <Link className="nav-cta" to={startTo}>{ctaLabel}</Link>
         </div>
@@ -141,7 +143,7 @@ export default function LevelPage() {
               </span>
             </div>
             <div className="level-progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={count}>
-              <div className={`level-progress-fill${allDone ? ' full' : ''}`} style={{ width: `${pct}%` }} />
+              <div className={`level-progress-fill${allDone ? ' full' : ''}`} style={{ transform: `scaleX(${pct / 100})` }} />
             </div>
           </div>
         </section>
@@ -173,7 +175,7 @@ export default function LevelPage() {
                 <span className="lmc-title">{m.title}</span>
                 <span className="lmc-reading">
                   <span className="lmc-reading-track" aria-hidden="true">
-                    <span className="lmc-reading-fill" style={{ width: `${readingPct(m.id)}%` }} />
+                    <span className="lmc-reading-fill" style={{ transform: `scaleX(${readingPct(m.id) / 100})` }} />
                   </span>
                   <span className="lmc-reading-pct">{readingPct(m.id)}%</span>
                 </span>

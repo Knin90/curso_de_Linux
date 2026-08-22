@@ -1,0 +1,61 @@
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .level-page .hero { padding: 44px 0 36px; }
+  .level-page .two-col { grid-template-columns: 1fr; }
+  .level-page .def-row { grid-template-columns: 1fr; gap: 2px; }
+  .level-page .next-level { flex-direction: column; align-items: flex-start; }
+  .level-page td:first-child { white-space: normal; }
+  .level-page .nav-level { display: none; }
+}
+
+/* ---------- Responsive (portada + módulo) ---------- */
+@media (max-width: 900px) {
+  .level-page .level-modules { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .level-page .module-nav { grid-template-columns: 1fr; }
+  .level-page .module-nav-prev.is-empty { display: none; }
+  .level-page .level-modules { grid-template-columns: 1fr; }
+  .level-page .module-hero { padding: 34px 0 6px; }
+}
+
+/* ---------- Preferencias de movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .level-page [data-reveal]:not(.in) {
+    opacity: 1;
+    transform: none;
+  }
+  .level-page .flow .fnode,
+  .level-page .flow .fedge,
+  .level-page .list-steps li,
+  .level-page .dg-node,
+  .level-page .dg-panel,
+  .level-page .dg-badge-pop {
+    opacity: 1 !important;
+  }
+  .level-page .dg-node,
+  .level-page .dg-panel,
+  .level-page .dg-connector,
+  .level-page .dg-connector-flow,
+  .level-page .dg-badge-pop {
+    animation: none !important;
+  }
+  .level-page .dg-connector {
+    stroke-dashoffset: 0 !important;
+  }
+  .level-page .dg-connector-flow {
+    opacity: 0.85 !important;
+  }
+  .level-page .dg-badge-pop {
+    transform: none !important;
+  }
+  .level-page .module-enter-fade,
+  .level-page .module-enter-next,
+  .level-page .module-enter-prev {
+    animation: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

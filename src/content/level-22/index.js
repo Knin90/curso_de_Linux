@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Mutual TLS (mTLS): autenticación de cliente' },
   { id: 6, title: 'Diagnóstico de problemas SSL/TLS' },
   { id: 7, title: 'Certificados internos: CA propia con openssl' },
-  { id: 8, title: 'Laboratorio: gestión completa de PKI' },
+  { id: 8, title: 'Proyecto real: gestión completa de PKI' },
 ]

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'DNF y RPM: el sistema de paquetes Fedora/RHEL' },
   { id: 6, title: 'La base de datos local de paquetes' },
   { id: 7, title: 'Actualizaciones, limpieza y mantenimiento' },
-  { id: 8, title: 'Laboratorio integrador: ciclo completo de software en producción' },
+  { id: 8, title: 'Proyecto real: despliegue verificado de nginx en un servidor nuevo' },
 ]

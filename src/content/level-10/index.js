@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'ufw: gestión simplificada del firewall' },
   { id: 6, title: 'NAT, reenvío de puertos y masquerading' },
   { id: 7, title: 'Logging y diagnóstico de tráfico bloqueado' },
-  { id: 8, title: 'Hardening de red y laboratorios integrados' },
+  { id: 8, title: 'Proyecto real: ruleset de producción para un servidor web con acceso restringido' },
 ]

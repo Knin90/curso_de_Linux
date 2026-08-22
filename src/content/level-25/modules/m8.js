@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: detectar y responder a un ataque simulado
+## Módulo 8 — Proyecto real: detectar y responder a un ataque simulado
 
 ### 🎯 Objetivos de aprendizaje
 * Aplicar las fases de respuesta a incidentes en un escenario realista de punta a punta
@@ -9,6 +9,28 @@ const content = `
 
 ### ❓ El problema real
 Este módulo integra todo lo aprendido en el nivel 25. En lugar de teoría, trabajas con un escenario completo: un servidor fue comprometido, tú eres el analista IR, y tienes que reconstruir qué pasó, detener el daño, y dejar el sistema limpio. La narrativa del ataque se describe primero para que entiendas qué deberías encontrar — en un incidente real, no tendrías esta ventaja.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+webserver-01
+├── /var/log/fail2ban.log
+├── /var/log/auth.log
+├── /etc/passwd (usuario backdoor h4ck3r, UID 1337)
+├── /var/spool/cron/crontabs/backup (cron malicioso)
+└── /tmp/.hidden_data (copia exfiltrada de /etc/shadow)
+
+/root/evidence-<timestamp>/
+├── logs.tar.gz
+├── connections.txt
+├── active_sessions.txt
+├── processes.txt
+├── lsof.txt
+├── backup_crontab.txt
+├── passwd.bak / shadow.bak
+├── exfiltrated_shadow.bak
+└── hashes.sha256
+\`\`\`
 
 ### 📖 Narrativa del ataque (lo que hizo el atacante)
 
@@ -57,8 +79,6 @@ echo "h4ck3r:\$6\$salt\$hash_de_password" >> /etc/passwd
 cp /etc/shadow /tmp/.hidden_data
 # El archivo existe en el disco pero el nombre con punto lo oculta del ls básico
 \`\`\`
-
----
 
 ### 📖 Fase 1 — Detección: encontrar los indicadores de compromiso
 
@@ -208,8 +228,6 @@ backup:\$6\$rounds=656000\$moresalt\$morehash:19740:0:99999:7:::
 
 Es una copia del archivo \`/etc/shadow\` — los hashes de contraseñas de todos los usuarios fueron exfiltrados. **Este es el hallazgo más crítico: todas las contraseñas deben considerarse comprometidas.**
 
----
-
 ### 📖 Fase 2 — Preservación de evidencia
 
 Antes de cualquier cambio, preserva el estado actual:
@@ -243,8 +261,6 @@ sha256sum "\$EVIDENCE"/* > "\$EVIDENCE/hashes.sha256"
 
 echo "Evidencia preservada en: \$EVIDENCE"
 \`\`\`
-
----
 
 ### 📖 Fase 3 — Contención
 
@@ -285,8 +301,6 @@ ps aux | grep "pts/1"
 # Terminar la sesión:
 pkill -9 -t pts/1
 \`\`\`
-
----
 
 ### 📖 Fase 4 — Eradicación
 
@@ -359,8 +373,6 @@ grep -v "^#\|^$" /etc/sudoers
 cat /etc/sudoers.d/* 2>/dev/null
 \`\`\`
 
----
-
 ### 📖 Fase 5 — Recuperación
 
 \`\`\`bash
@@ -404,8 +416,6 @@ systemctl reload sshd
 systemctl restart fail2ban
 fail2ban-client status sshd
 \`\`\`
-
----
 
 ### 📖 Fase 6 — Documentación del timeline
 

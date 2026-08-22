@@ -157,6 +157,7 @@ export default function FlowStackDiagram({ layers, edges = [], sidePanel }) {
           const y = rowY(i)
           return (
             <g key={i} style={{ '--i': i }} className="dg-node">
+            <g className="dg-node-hover">
               <rect x={X} y={y} width={W} height={H} rx="10" className={l.focal ? 'dg-box-focal' : 'dg-box'} />
               {l.icon && (
                 <>
@@ -193,6 +194,7 @@ export default function FlowStackDiagram({ layers, edges = [], sidePanel }) {
                   </text>
                 </>
               )}
+            </g>
             </g>
           )
         })}

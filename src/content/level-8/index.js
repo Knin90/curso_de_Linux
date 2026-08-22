@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Formateo y etiquetado de particiones' },
   { id: 6, title: 'Montaje temporal y el VFS' },
   { id: 7, title: 'UUID, LABEL y persistencia con /etc/fstab' },
-  { id: 8, title: 'Diagnóstico de espacio e inodos: laboratorios integrados' },
+  { id: 8, title: 'Proyecto real: postmortem de un servidor al borde del colapso por espacio' },
 ]

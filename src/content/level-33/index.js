@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'EXPLAIN ANALYZE: optimización de consultas en producción' },
   { id: 6, title: 'Replicación streaming: primario y réplicas de lectura' },
   { id: 7, title: 'Backup y recuperación: pg_dump, pg_basebackup y PITR' },
-  { id: 8, title: 'Laboratorio: PostgreSQL de producción completo' },
+  { id: 8, title: 'Proyecto real: PostgreSQL de producción completo' },
 ]

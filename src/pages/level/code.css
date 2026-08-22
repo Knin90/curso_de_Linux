@@ -1,0 +1,61 @@
+/* ---------- Code ---------- */
+.level-page .code-block {
+  position: relative;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.level-page .code-block + .code-block { margin-top: 14px; }
+.level-page .code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid color-mix(in oklab, white 10%, transparent);
+}
+.level-page .code-lang {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--code-mut);
+}
+.level-page .copy-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--code-fg);
+  background: transparent;
+  border: 1px solid color-mix(in oklab, white 18%, transparent);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out), color 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .copy-btn:hover { background: color-mix(in oklab, white 10%, transparent); }
+}
+.level-page .copy-btn:active { transform: scale(0.93); }
+.level-page .copy-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.level-page .copy-btn.done {
+  color: var(--ok);
+  border-color: color-mix(in oklab, var(--ok) 50%, transparent);
+  transform: scale(1.03);
+}
+.level-page pre {
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  color: var(--code-fg);
+  background: transparent;
+}
+.level-page pre .c { color: var(--code-mut); }
+.level-page .cl { min-height: 1.55em; }

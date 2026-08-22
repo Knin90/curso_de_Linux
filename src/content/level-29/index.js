@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Override files: compose.override.yml para dev/prod' },
   { id: 6, title: 'Health checks y dependencias entre servicios' },
   { id: 7, title: 'Troubleshooting de aplicaciones multi-contenedor' },
-  { id: 8, title: 'Laboratorio: stack completo LEMP con Docker Compose' },
+  { id: 8, title: 'Proyecto real: stack completo LEMP con Docker Compose' },
 ]

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'AppArmor: perfiles, modos y herramientas' },
   { id: 6, title: 'aa-genprof y aa-logprof: creación de perfiles AppArmor' },
   { id: 7, title: 'Confinamiento de servicios en producción: nginx, sshd, contenedores' },
-  { id: 8, title: 'Laboratorio: implementar MAC completo en un servidor de producción' },
+  { id: 8, title: 'Proyecto real: implementar MAC completo en un servidor de producción' },
 ]

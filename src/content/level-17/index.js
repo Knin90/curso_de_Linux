@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Bridges y interfaces virtuales' },
   { id: 6, title: 'Namespaces de red: virtualización de red en Linux' },
   { id: 7, title: 'Diagnóstico avanzado de routing: problemas reales' },
-  { id: 8, title: 'Laboratorio: red compleja con múltiples interfaces' },
+  { id: 8, title: 'Proyecto real: red compleja con múltiples interfaces para un servidor de producción' },
 ]

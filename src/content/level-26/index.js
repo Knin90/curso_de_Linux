@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Gestión de vulnerabilidades en producción: priorización y remediación' },
   { id: 6, title: 'Automatización de parches con unattended-upgrades' },
   { id: 7, title: 'Métricas de seguridad: CVSS, tiempo de remediación, SLA' },
-  { id: 8, title: 'Laboratorio: programa completo de gestión de vulnerabilidades' },
+  { id: 8, title: 'Proyecto real: programa completo de gestión de vulnerabilidades' },
 ]

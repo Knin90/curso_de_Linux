@@ -1,215 +1,176 @@
 const content = `
-## Módulo 8 — Laboratorio integrador: despliegue profesional de un servicio
+## Módulo 8 — Proyecto real: monitoreo de salud con systemd para una flota de servidores
 
 ### 🎯 Objetivos de aprendizaje
 
-* Desplegar un servicio completo siguiendo el flujo profesional de producción.
-* Crear una unidad \`.service\` personalizada desde cero.
-* Aplicar el checklist de troubleshooting ante un fallo introducido deliberadamente.
+* Diseñar un servicio systemd personalizado junto con un timer que reemplace un cron tradicional.
+* Aplicar el ciclo completo: crear unidad, recargar systemd, habilitar, verificar y auditar logs.
+* Diagnosticar y recuperar un servicio crítico (\`chronyd\`) tras un fallo de configuración introducido en producción.
 
-### 🏢 Escenario: servidor de sincronización de tiempo en producción
+### ❓ El problema real
 
-Eres el administrador de un servidor recién instalado. La sincronización de tiempo es crítica para logs, certificados SSL y coordinación de bases de datos distribuidas. Debes:
+El equipo de operaciones de una startup necesita saber, en cualquier momento, si un servidor está sano: uptime, uso de disco, memoria libre y carga del sistema. Hasta ahora dependían de que alguien entrara por SSH y mirara a mano. Te piden automatizar esa verificación cada 5 minutos, que sobreviva a reinicios, que quede registrada en el journal para poder auditar el historial, y que la hora del servidor esté siempre sincronizada (los timestamps de los reportes deben ser confiables). Además, un compañero reporta que en uno de los servidores \`chronyd\` "se rompió" después de un cambio de configuración manual — debes diagnosticarlo y repararlo con el mismo flujo que usarías en producción.
 
-1. Instalar chrony como demonio de sincronización NTP.
-2. Asegurarte de que sobrevive a reinicios.
-3. Monitorear sus logs en tiempo real.
-4. Crear una unidad personalizada para un script de salud del sistema.
-5. Diagnosticar un fallo introducido deliberadamente.
+### 📖 Estructura del proyecto
 
----
-
-### 🧪 Fase 1: Instalación y arranque de chrony
-
-\`\`\`bash
-# Debian/Ubuntu
-sudo apt update && sudo apt install -y chrony
-
-# RHEL/Fedora
-sudo dnf install -y chrony
-
-# Ver el archivo de unidad que instaló el paquete
-systemctl cat chronyd
-
-# Habilitar y arrancar en un solo paso
-sudo systemctl enable --now chronyd
-
-# Verificar estado completo
-sudo systemctl status chronyd
+\`\`\`
+monitoreo-salud/
+├── health-check.sh
+├── health-check.service
+├── health-check.timer
+└── runbook-diagnostico.md
 \`\`\`
 
-**Resultado esperado:**
-\`\`\`text
-● chrony.service - chrony, an NTP client/server
-     Loaded: loaded (/usr/lib/systemd/system/chrony.service; enabled; ...)
-     Active: active (running) since ...
-\`\`\`
-
-Confirmar dos datos:
-- \`Loaded: ... enabled\` → sobrevivirá al reinicio
-- \`Active: active (running)\` → está funcionando ahora
-
----
-
-### 🧪 Fase 2: Monitoreo de logs en tiempo real
-
-En una terminal, iniciar monitoreo en vivo:
+### 📖 health-check.sh — script de verificación
 
 \`\`\`bash
-journalctl -u chronyd -f
-\`\`\`
-
-En otra terminal, reiniciar el servicio para ver el evento:
-
-\`\`\`bash
-sudo systemctl restart chronyd
-\`\`\`
-
-Observar en la primera terminal cómo aparecen los mensajes de parada y arranque en tiempo real.
-
-\`\`\`bash
-# Verificar sincronización con los servidores NTP
-chronyc tracking
-
-# Ver las fuentes de tiempo
-chronyc sources -v
-\`\`\`
-
----
-
-### 🧪 Fase 3: Crear una unidad personalizada
-
-Crear un script de verificación de salud del sistema y registrarlo como servicio oneshot:
-
-\`\`\`bash
-# 1. Crear el script
-sudo tee /usr/local/bin/health-check.sh <<'EOF'
 #!/bin/bash
-echo "=== Health Check $(date) ==="
-echo "Uptime: $(uptime -p)"
-echo "Disk usage: $(df -h / | tail -1 | awk '{print $5}')"
-echo "Memory free: $(free -h | awk '/^Mem:/{print $4}')"
-echo "Load average: $(cat /proc/loadavg | awk '{print $1, $2, $3}')"
-EOF
+set -euo pipefail
 
-sudo chmod +x /usr/local/bin/health-check.sh
+echo "=== Health Check \$(date) ==="
+echo "Uptime: \$(uptime -p)"
+echo "Disk usage: \$(df -h / | tail -1 | awk '{print \$5}')"
+echo "Memory free: \$(free -h | awk '/^Mem:/{print \$4}')"
+echo "Load average: \$(cat /proc/loadavg | awk '{print \$1, \$2, \$3}')"
+\`\`\`
 
-# 2. Crear la unidad de servicio
-sudo tee /etc/systemd/system/health-check.service <<'EOF'
+Se instala en \`/usr/local/bin/health-check.sh\` con permisos de ejecución.
+
+### 📖 health-check.service — unidad oneshot
+
+\`\`\`ini
 [Unit]
 Description=System Health Check
-After=network.target
+After=network.target chronyd.service
 
 [Service]
 Type=oneshot
 ExecStart=/usr/local/bin/health-check.sh
 StandardOutput=journal
 StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# 3. Recargar systemd y probar
-sudo systemctl daemon-reload
-sudo systemctl start health-check
-sudo systemctl status health-check
-
-# 4. Ver la salida en el journal
-journalctl -u health-check -n 20
 \`\`\`
 
----
+Nota el \`Type=oneshot\`: el proceso corre, termina, y systemd considera el servicio "exitoso" según el código de salida — no queda residente.
 
-### 🧪 Fase 4: Diagnóstico de un fallo deliberado
+### 📖 health-check.timer — disparador periódico
 
-Introducir un error en la configuración de chrony para practicar troubleshooting:
+\`\`\`ini
+[Unit]
+Description=Ejecutar health-check.sh cada 5 minutos
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=health-check.service
+
+[Install]
+WantedBy=timers.target
+\`\`\`
+
+\`OnBootSec\` da un margen tras el arranque; \`OnUnitActiveSec\` mide desde la última ejecución, no desde un reloj fijo — así el servidor nunca queda sin verificación aunque el timer se reinicie.
+
+### 📖 Secuencia de ejecución
+
+1. Instalar y habilitar la sincronización de tiempo, requisito de todo el resto:
 
 \`\`\`bash
-# Hacer copia de seguridad de la configuración
+sudo apt update && sudo apt install -y chrony
+sudo systemctl enable --now chronyd
+sudo systemctl status chronyd
+\`\`\`
+
+Salida esperada: \`Active: active (running)\` y \`Loaded: ... enabled\`.
+
+2. Crear el script y darle permisos de ejecución:
+
+\`\`\`bash
+sudo cp health-check.sh /usr/local/bin/health-check.sh
+sudo chmod +x /usr/local/bin/health-check.sh
+\`\`\`
+
+3. Instalar las unidades \`.service\` y \`.timer\` en \`/etc/systemd/system/\`:
+
+\`\`\`bash
+sudo cp health-check.service /etc/systemd/system/
+sudo cp health-check.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+\`\`\`
+
+4. Habilitar y arrancar el timer (no el service — el timer lo dispara):
+
+\`\`\`bash
+sudo systemctl enable --now health-check.timer
+systemctl list-timers health-check.timer
+\`\`\`
+
+Salida esperada:
+
+\`\`\`
+NEXT                        LEFT     LAST  PASSED  UNIT                 ACTIVATES
+Mon 2024-01-15 10:05:00 UTC 4min left n/a  n/a     health-check.timer   health-check.service
+\`\`\`
+
+5. Forzar una ejecución manual y revisar el resultado en el journal:
+
+\`\`\`bash
+sudo systemctl start health-check.service
+journalctl -u health-check.service -n 20
+\`\`\`
+
+6. Simular el incidente reportado: introducir un error en \`chrony.conf\`:
+
+\`\`\`bash
 sudo cp /etc/chrony.conf /etc/chrony.conf.bak
-
-# Introducir un error deliberado
 sudo sed -i 's/^server/invalid_directive/' /etc/chrony.conf
-
-# Intentar reiniciar — fallará
 sudo systemctl restart chronyd
 \`\`\`
 
-**Aplicar el flujo de diagnóstico:**
+7. Aplicar el árbol de diagnóstico: estado, logs, validador de configuración y línea exacta del error:
 
 \`\`\`bash
-# Paso 1: ¿Qué dice el estado?
 sudo systemctl status chronyd
-
-# Paso 2: ¿Cuál fue el último mensaje del proceso?
 journalctl -u chronyd -n 20 --no-pager
-
-# Paso 3: ¿Hay un validador de configuración?
-chronyd -Q  # test de configuración de chrony
-
-# Paso 4: Ver exactamente la línea con error
+chronyd -Q
 grep "invalid_directive" /etc/chrony.conf
+\`\`\`
 
-# Paso 5: Restaurar la configuración correcta
+8. Restaurar la configuración y recuperar el servicio:
+
+\`\`\`bash
 sudo cp /etc/chrony.conf.bak /etc/chrony.conf
-
-# Paso 6: Resetear el contador de fallos y arrancar
 sudo systemctl reset-failed chronyd
 sudo systemctl start chronyd
 sudo systemctl status chronyd
 \`\`\`
 
----
-
-### 🧪 Fase 5: Verificación final completa
+9. Verificación final de todo el sistema:
 
 \`\`\`bash
-# ¿Está corriendo?
-systemctl is-active chronyd
-
-# ¿Arrancará al reiniciar?
-systemctl is-enabled chronyd
-
-# ¿Qué target lo activa?
-systemctl show chronyd -p WantedBy
-
-# ¿Cuánto tiempo lleva corriendo?
-systemctl show chronyd -p ActiveEnterTimestamp
-
-# Ver historial de arranques y paradas del servicio
-journalctl -u chronyd --since today
+systemctl is-active chronyd health-check.timer
+systemctl is-enabled chronyd health-check.timer
+journalctl -u health-check.service --since today
 \`\`\`
+
+### 📋 Lo que debes recordar
+
+* Un \`.timer\` + un \`.service Type=oneshot\` es el reemplazo moderno de cron: se integra con el journal, respeta dependencias (\`After=\`) y se audita con \`systemctl list-timers\`.
+* Tras crear o modificar cualquier archivo de unidad, \`systemctl daemon-reload\` es obligatorio antes de que el cambio surta efecto.
+* Se habilita y arranca el \`.timer\`, no el \`.service\` directamente, salvo para pruebas manuales puntuales.
+* \`journalctl -u <unidad>\` centraliza toda la evidencia: stdout, stderr y eventos de systemd en una sola línea de tiempo.
+* Ante un servicio que falla tras un cambio de configuración: \`systemctl status\` → \`journalctl -n\` → validador de configuración propio del programa → revisar la línea exacta → restaurar backup → \`reset-failed\` → arrancar.
+* \`systemctl reset-failed\` limpia el contador de fallos; sin él, systemd puede negarse a reiniciar un servicio marcado como fallido repetidamente.
+
+### 🧪 Autoevaluación
+
+1. ¿Por qué se usa \`OnUnitActiveSec\` en lugar de una hora fija tipo \`OnCalendar\` para este caso de uso?
+2. Después de copiar \`health-check.service\` a \`/etc/systemd/system/\`, ejecutas \`systemctl start health-check\` y no pasa nada visible. ¿Qué paso faltó y por qué es obligatorio?
+3. \`chronyd\` no arranca tras un cambio manual en su configuración. ¿Cuál es el primer comando que ejecutas y qué información específica buscas en su salida?
 
 ---
 
-### 📋 Tabla resumen de herramientas del Nivel 6
-
-| Herramienta | Función |
-| --- | --- |
-| \`systemctl status\` | Estado actual + últimos logs del servicio |
-| \`systemctl start\` | Arrancar servicio ahora (volátil) |
-| \`systemctl stop\` | Detener servicio |
-| \`systemctl restart\` | Matar y recrear el proceso (corta conexiones) |
-| \`systemctl reload\` | Recargar config sin cortar conexiones |
-| \`systemctl enable\` | Persistencia en el arranque |
-| \`systemctl disable\` | Quitar persistencia |
-| \`systemctl enable --now\` | Persistencia + arranque inmediato |
-| \`systemctl mask\` | Bloqueo total del servicio |
-| \`systemctl is-active\` | ¿Está corriendo? (para scripts) |
-| \`systemctl is-enabled\` | ¿Arranca al boot? (para scripts) |
-| \`systemctl daemon-reload\` | Recargar definición de unidades tras cambios |
-| \`systemctl reset-failed\` | Resetear contador de intentos fallidos |
-| \`systemctl list-units\` | Listar unidades activas |
-| \`systemctl list-dependencies\` | Ver árbol de dependencias |
-| \`systemctl get-default\` | Ver target de arranque por defecto |
-| \`systemctl set-default\` | Cambiar target por defecto |
-| \`systemctl cat\` | Ver el archivo .service de una unidad |
-| \`systemd-analyze blame\` | Ver tiempos de arranque por servicio |
-| \`journalctl -u\` | Logs de un servicio específico |
-| \`journalctl -u -f\` | Logs en tiempo real |
-| \`journalctl -p err\` | Solo errores del sistema |
-| \`journalctl -b -1\` | Logs del arranque anterior |
-| \`journalctl --vacuum-time\` | Limpiar logs antiguos |
+1. \`OnUnitActiveSec\` mide el intervalo desde la última vez que el servicio terminó de ejecutarse, garantizando siempre 5 minutos de separación real entre corridas, sin importar si el timer se recargó o el sistema estuvo suspendido. \`OnCalendar\` dispara en horas de reloj fijas, lo cual es útil para tareas tipo "todos los días a las 3am", pero no para un monitoreo de intervalo constante.
+2. Faltó \`systemctl daemon-reload\`. systemd solo lee las unidades al arrancar o cuando se le pide explícitamente que recargue su configuración; copiar un archivo nuevo a \`/etc/systemd/system/\` no lo registra automáticamente, por lo que \`systemctl start\` falla silenciosamente o reporta que la unidad no existe.
+3. El primer comando es \`systemctl status chronyd\`. Se busca la línea \`Active:\` (para confirmar que falló, no solo que está detenido) y la referencia a las últimas líneas de log que el propio \`status\` muestra, que suelen apuntar directamente a la directiva de configuración inválida antes de tener que ir a \`journalctl\`.
 `
+
 export default content

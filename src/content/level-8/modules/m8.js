@@ -1,216 +1,182 @@
 const content = `
-## Módulo 8 — Diagnóstico de espacio e inodos: laboratorios integrados
+## Módulo 8 — Proyecto real: postmortem de un servidor al borde del colapso por espacio
 
 ### 🎯 Objetivos de aprendizaje
 
-* Aplicar el árbol de diagnóstico completo ante cualquier problema de almacenamiento.
-* Localizar el consumidor de espacio en segundos usando \`du\`, \`find\` y \`lsof\`.
-* Detectar y liberar espacio fantasma (archivos borrados con descriptores abiertos).
+* Aplicar el árbol de diagnóstico completo ante un incidente real de almacenamiento en producción.
+* Distinguir espacio agotado por bloques, por inodos y por "espacio fantasma" (archivos borrados aún abiertos).
+* Escribir un runbook de incidente reutilizable con causa raíz, remediación y prevención.
 
-### 📖 Árbol de diagnóstico
+### ❓ El problema real
 
-Ante cualquier problema de almacenamiento, sigue siempre de **abajo hacia arriba**:
+Son las 3 AM. PagerDuty despierta al equipo de guardia: la aplicación de un cliente empezó a fallar al escribir logs. \`df -h\` confirma que \`/\` está al 97%. Debes actuar rápido pero de forma metódica: localizar qué está consumiendo el espacio, liberar lo necesario sin romper nada, verificar que no es un problema de inodos disfrazado de problema de espacio, y detectar si hay "espacio fantasma" — archivos ya borrados pero que un proceso sigue teniendo abiertos, invisibles para \`du\` pero contados por \`df\`. Al terminar, entregas un postmortem con la causa raíz y la prevención para que no vuelva a pasar.
 
-\`\`\`diagram
-{"type":"tree","root":{"name":"¿El disco aparece?","meta":"lsblk · si no: verificar hardware/consola cloud"},"children":[{"name":"¿Tiene partición?","meta":"sudo fdisk -l /dev/sdb · si no: fdisk → g → n → w","edgeLabel":"sí","children":[{"name":"¿Tiene filesystem?","meta":"lsblk -f /dev/sdb · si no: mkfs.ext4 o mkfs.xfs","edgeLabel":"sí","children":[{"name":"¿Está montado?","meta":"findmnt · si no: mount /dev/sdb1 /mnt/punto","edgeLabel":"sí","children":[{"name":"¿Está en fstab?","meta":"grep /etc/fstab · si no: añadir entrada UUID y mount -a","edgeLabel":"sí","children":[{"name":"Todo correcto","edgeLabel":"sí"}]}]}]}]}]}
+### 📖 Estructura del proyecto
+
+\`\`\`
+incidente-disco-lleno/
+├── diagnostico.sh
+├── liberar-espacio.sh
+├── diagnostico-inodos.sh
+└── postmortem.md
 \`\`\`
 
-### 💻 Herramientas de auditoría de espacio
+### 📖 diagnostico.sh — localizar al consumidor
 
 \`\`\`bash
-# Espacio disponible en todos los montajes
+#!/bin/bash
+set -euo pipefail
+
+echo "[1] Confirmar qué filesystem está lleno:"
 df -h
 
-# Inodos disponibles (crítico en servidores de correo/cache)
-df -i
+echo "[2] Localizar el mayor consumidor (top 15, 2 niveles de profundidad):"
+sudo du -h --max-depth=2 / 2>/dev/null | sort -rh | head -15
 
-# Tamaño de un directorio específico
-sudo du -sh /var/log/
+echo "[3] Archivos individuales mayores a 1 GB:"
+sudo find / -type f -size +1G 2>/dev/null | xargs ls -lh 2>/dev/null || true
 
-# Los 10 directorios más grandes bajo /var
-sudo du -h /var | sort -rh | head -n 10
-
-# Archivos mayores a 100 MB
-sudo find / -type f -size +100M 2>/dev/null | xargs ls -lh
-
-# Archivos borrados pero aún abiertos por procesos (espacio fantasma)
+echo "[4] Espacio fantasma: archivos borrados pero aún abiertos por un proceso:"
 sudo lsof +L1
 \`\`\`
 
-### 🧪 Laboratorio 1: Disco nuevo completo
+\`lsof +L1\` es la herramienta clave del paso 4: lista descriptores de archivo con menos de 1 enlace (\`link count\`), es decir, archivos que ya fueron borrados del árbol de directorios pero cuyo espacio no se libera porque un proceso todavía los tiene abiertos.
 
-**Escenario:** Disco de 100 GB recién agregado como \`/dev/sdb\`. Prepararlo para producción.
-
-\`\`\`bash
-# 1. Verificar que existe
-lsblk -f
-
-# 2. Crear tabla GPT y partición
-sudo fdisk /dev/sdb
-# g → n → Enter → Enter → Enter → w
-
-# 3. Forzar re-lectura de tabla
-sudo partprobe /dev/sdb
-
-# 4. Formatear y etiquetar
-sudo mkfs.ext4 -L RESPALDOS /dev/sdb1
-
-# 5. Crear punto de montaje
-sudo mkdir -p /srv/backups
-
-# 6. Montar temporalmente
-sudo mount /dev/sdb1 /srv/backups
-findmnt /srv/backups
-
-# 7. Obtener UUID
-sudo blkid /dev/sdb1
-
-# 8. Backup y edición de fstab
-sudo cp /etc/fstab /etc/fstab.bak
-sudo nano /etc/fstab
-# Añadir: UUID=<uuid> /srv/backups ext4 defaults,noatime 0 2
-
-# 9. Validar (CRÍTICO)
-sudo umount /srv/backups
-sudo mount -a
-
-# 10. Verificación final
-findmnt /srv/backups
-df -h /srv/backups
-echo "test" | sudo tee /srv/backups/test.txt
-\`\`\`
-
----
-
-### 🧪 Laboratorio 2: El disco que desapareció
-
-**Escenario:** \`/mnt/datos\` está vacío después del reinicio. El disco existe pero no está montado.
+### 📖 liberar-espacio.sh — remediación
 
 \`\`\`bash
-# Capa 1: ¿El disco físico existe?
-lsblk
+#!/bin/bash
+set -euo pipefail
 
-# Capa 2: ¿Tiene partición?
-sudo fdisk -l /dev/sdb
-
-# Capa 3: ¿Tiene filesystem?
-lsblk -f /dev/sdb
-
-# Capa 4: ¿Está en fstab?
-grep "/mnt/datos" /etc/fstab
-
-# Diagnóstico: la entrada en fstab falta (el admin montó con mount manual)
-# Solución:
-sudo blkid /dev/sdb1
-sudo nano /etc/fstab
-# Añadir la entrada correcta
-sudo mount -a
-findmnt /mnt/datos
-\`\`\`
-
-**Pregunta:** Si \`lsblk\` muestra el disco pero \`fdisk -l\` no muestra particiones, ¿qué ocurrió?
-
-> La tabla de particiones se corrompió o el disco nunca fue particionado. Crear nueva tabla con \`fdisk\` — pero esto **borra cualquier dato existente**. Considerar primero \`testdisk\` para recuperación.
-
----
-
-### 🧪 Laboratorio 3: El disco lleno
-
-**Escenario:** \`df -h\` muestra \`/\` al 97%. La aplicación ya falla al escribir logs.
-
-\`\`\`bash
-# 1. Confirmar cuál filesystem está lleno
-df -h
-
-# 2. Localizar el mayor consumidor
-sudo du -h --max-depth=2 / 2>/dev/null | sort -rh | head -15
-
-# 3. Si /var/log es el culpable:
+echo "[1] Diagnóstico de journald:"
 sudo journalctl --disk-usage
 sudo journalctl --vacuum-time=3d
 
-# Limpiar logs rotados antiguos
+echo "[2] Logs de aplicación rotados y antiguos:"
 sudo find /var/log -name "*.gz" -mtime +7 -delete
+sudo find /var/log -name "*.log.*" -mtime +7 -delete
 
-# 4. Archivos mayores a 1 GB
-sudo find / -type f -size +1G 2>/dev/null | xargs ls -lh
+echo "[3] Caché de paquetes:"
+sudo apt clean 2>/dev/null || sudo dnf clean all 2>/dev/null || true
 
-# 5. Espacio fantasma: archivos borrados pero abiertos
-sudo lsof +L1
-# Columna SIZE muestra el tamaño del archivo borrado
-# NOMBRE del proceso en columna COMMAND
-# Opción A: reiniciar el proceso
-sudo systemctl restart nombre-servicio
-# Opción B: truncar sin reiniciar (avanzado)
-# sudo truncate -s 0 /proc/<PID>/fd/<FD>
+echo "[4] Temporales antiguos:"
+sudo find /tmp -type f -mtime +1 -delete
+sudo find /var/tmp -type f -mtime +7 -delete
 
-# 6. Limpiar caché de paquetes
-sudo apt clean      # Debian/Ubuntu
-sudo dnf clean all  # RHEL/Fedora
-
-# 7. Verificar resultado
+echo "[5] Resultado:"
 df -h /
 \`\`\`
 
----
+Nota que este script NO trunca archivos fantasma automáticamente — esa acción se decide manualmente porque implica reiniciar o intervenir un proceso en producción (ver secuencia de ejecución, paso 6).
 
-### 🧪 Laboratorio 4: El problema de los inodos
-
-**Escenario:** \`df -h\` muestra espacio libre pero la aplicación no puede crear archivos.
+### 📖 diagnostico-inodos.sh — el problema que \`df -h\` no muestra
 
 \`\`\`bash
-# Verificar: ¿son los inodos?
+#!/bin/bash
+set -euo pipefail
+
+echo "[1] Inodos disponibles (no confundir con espacio en bloques):"
 df -i
 
-# Ejemplo de salida alarmante:
-# Filesystem      Inodes   IUsed   IFree IUse% Mounted on
-# /dev/sda1      6553600 6553600       0  100% /var
-
-# Encontrar el directorio con más archivos
+echo "[2] Directorio con más archivos bajo /var:"
 sudo find /var -xdev -printf '%h\\n' 2>/dev/null | sort | uniq -c | sort -rn | head -10
 
-# Caso típico: sesiones PHP no limpiadas
-ls /var/lib/php/sessions/ | wc -l
-sudo find /var/lib/php/sessions -type f -mtime +1 -delete
-
-# Verificar mejoría
-df -i /var
+echo "[3] Caso típico: sesiones de aplicación no limpiadas:"
+ls /var/lib/php/sessions/ 2>/dev/null | wc -l
 \`\`\`
+
+Un filesystem puede tener espacio libre en bloques (\`df -h\` se ve bien) y aun así no permitir crear archivos nuevos, porque se agotó la tabla de inodos (\`df -i\` al 100%). Es un fallo distinto que requiere un diagnóstico distinto.
+
+### 📖 Secuencia de ejecución
+
+1. Confirmar el incidente y localizar al consumidor:
+
+\`\`\`bash
+bash diagnostico.sh
+\`\`\`
+
+Salida esperada del paso 2 (ejemplo):
+
+\`\`\`
+30G   /var/log
+12G   /var/lib/docker
+3G    /home
+\`\`\`
+
+2. Si \`/var/log\` es el mayor consumidor, ejecutar la remediación:
+
+\`\`\`bash
+bash liberar-espacio.sh
+\`\`\`
+
+3. Verificar el resultado inmediato:
+
+\`\`\`bash
+df -h /
+\`\`\`
+
+Si el porcentaje bajó por debajo del umbral crítico (ej. de 97% a 80%), la remediación de logs y caché fue suficiente.
+
+4. Si el porcentaje casi no cambió a pesar de haber liberado logs, revisar espacio fantasma:
+
+\`\`\`bash
+sudo lsof +L1
+\`\`\`
+
+Salida esperada si hay un archivo fantasma:
+
+\`\`\`
+COMMAND   PID   USER   FD   TYPE DEVICE  SIZE/OFF NLINK NODE NAME
+nginx    1842   www    12w  REG   8,1    4200000000    0 5234 /var/log/nginx/access.log (deleted)
+\`\`\`
+
+La columna \`NLINK 0\` confirma que el archivo ya no tiene nombre en el árbol de directorios, pero \`SIZE/OFF\` muestra 4.2 GB que \`df\` sigue contando como usados.
+
+5. Liberar el espacio fantasma reiniciando el proceso responsable (opción preferida en producción) o truncando el descriptor directamente:
+
+\`\`\`bash
+# Opción A (preferida): reiniciar el proceso
+sudo systemctl restart nginx
+
+# Opción B (si no se puede reiniciar): truncar sin matar el proceso
+sudo truncate -s 0 /proc/1842/fd/12
+\`\`\`
+
+6. Descartar un problema de inodos como causa alternativa o adicional:
+
+\`\`\`bash
+bash diagnostico-inodos.sh
+\`\`\`
+
+Salida esperada si hay agotamiento de inodos:
+
+\`\`\`
+Filesystem      Inodes   IUsed   IFree IUse% Mounted on
+/dev/sda1      6553600 6553600       0  100% /var
+\`\`\`
+
+7. Documentar el incidente en \`postmortem.md\` con causa raíz, remediación aplicada y prevención (rotación de logs, límite de tamaño en journald, alertas al 85%).
+
+### 📋 Lo que debes recordar
+
+* Diagnostica siempre en este orden: espacio en bloques (\`df -h\`) → mayor consumidor (\`du\`) → espacio fantasma (\`lsof +L1\`) → inodos (\`df -i\`). Cada capa puede ocultar la causa real de la anterior.
+* \`du\` y \`df\` pueden discrepar: si \`du\` no explica todo el espacio usado que reporta \`df\`, sospecha de espacio fantasma.
+* \`lsof +L1\` es la única herramienta que revela archivos borrados pero aún abiertos; \`find\` y \`du\` no los ven porque ya no existen en el árbol de directorios.
+* Reiniciar el proceso propietario es la forma más segura de liberar espacio fantasma; truncar el descriptor con \`truncate -s 0 /proc/<PID>/fd/<FD>\` es la alternativa cuando no se puede reiniciar.
+* \`df -i\` puede reportar 100% de inodos usados incluso con espacio en bloques libre — son dos recursos independientes que se agotan por separado.
+* Todo incidente termina con un postmortem: causa raíz, remediación aplicada y una acción de prevención concreta.
+
+### 🧪 Autoevaluación
+
+1. \`du -h /var/log\` reporta solo 2 GB, pero \`df -h\` muestra que el filesystem está casi lleno con "espacio fantasma" sospechado. ¿Qué comando usarías para confirmarlo y qué columna de su salida es la evidencia clave?
+2. Un servidor tiene espacio libre según \`df -h\` pero las aplicaciones no pueden crear archivos nuevos. ¿Qué comando revela la causa y qué se busca en su salida?
+3. En el incidente, ¿por qué reiniciar el proceso propietario del archivo fantasma es preferible a truncar el descriptor directamente con \`truncate\`?
 
 ---
 
-### 📋 Tabla resumen de comandos del Nivel 8
-
-| Comando | Función |
-| --- | --- |
-| \`lsblk\` | Ver discos, particiones y montajes en árbol |
-| \`lsblk -f\` | Agregar FSTYPE, UUID, LABEL y uso |
-| \`fdisk\` / \`gdisk\` | Crear/gestionar tablas de particiones GPT |
-| \`partprobe\` | Re-leer tabla de particiones sin reiniciar |
-| \`mkfs.ext4\` / \`mkfs.xfs\` | Formatear partición |
-| \`e2label\` / \`xfs_admin -L\` | Ver/cambiar etiqueta de ext4/xfs |
-| \`tune2fs -l\` | Inspeccionar superblock de ext4 |
-| \`mount\` | Montar filesystem temporalmente |
-| \`umount\` | Desmontar filesystem |
-| \`findmnt\` | Ver montajes activos en jerarquía |
-| \`blkid\` | Obtener UUID, LABEL y tipo |
-| \`/etc/fstab\` | Configurar montajes persistentes |
-| \`mount -a\` | Validar fstab sin reiniciar |
-| \`df -h\` | Espacio disponible por filesystem |
-| \`df -i\` | Inodos disponibles por filesystem |
-| \`du -sh\` | Tamaño de un directorio |
-| \`du -h | sort -rh\` | Localizar directorio más grande |
-| \`find -size +100M\` | Encontrar archivos grandes |
-| \`lsof +L1\` | Detectar espacio fantasma |
-| \`lsof\` / \`fuser\` | Ver qué proceso usa un filesystem |
-
-### 🎯 Reglas de oro
-
-1. **Nunca uses \`/dev/sdX\` en fstab.** UUID es permanente.
-2. **Siempre valida con \`mount -a\`** antes de reiniciar.
-3. **Backup de fstab antes de editar**: \`cp /etc/fstab /etc/fstab.bak\`
-4. **Diagnostica de abajo hacia arriba**: disco → partición → filesystem → montaje → fstab.
-5. **Monitorea inodos**, no solo espacio: \`df -i\` puede salvar tu día.
-6. **Usa \`noatime\`** en SSDs — reduce escrituras innecesarias.
+1. \`sudo lsof +L1\`, que lista descriptores abiertos con \`NLINK\` menor a 1. La columna clave es \`NLINK\`: un valor de \`0\` confirma que el archivo fue borrado del árbol de directorios pero un proceso sigue teniéndolo abierto, por lo que el espacio no se libera hasta que ese proceso lo cierre o termine.
+2. \`df -i\`, que muestra inodos usados y disponibles por filesystem, un recurso independiente del espacio en bloques. Se busca la columna \`IUse%\` cercana o igual a 100%: eso confirma que el filesystem se quedó sin "entradas" disponibles para crear archivos nuevos, aunque técnicamente haya bloques de datos libres.
+3. Reiniciar el proceso cierra limpiamente todos sus descriptores de archivo, incluido el archivo fantasma, liberando el espacio de forma segura y sin riesgo de dejar al proceso en un estado inconsistente. Truncar el descriptor con \`truncate -s 0 /proc/<PID>/fd/<FD>\` libera el espacio sin reiniciar, pero el proceso puede no esperar ese cambio y comportarse de forma impredecible si sigue escribiendo en ese archivo asumiendo su tamaño anterior.
 `
+
 export default content

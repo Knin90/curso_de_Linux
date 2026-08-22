@@ -1,239 +1,186 @@
 const content = `
-## Módulo 8 — Diagnóstico y laboratorios integrados
+## Módulo 8 — Proyecto real: acceso SSH sin contraseñas para automatización con Ansible
 
 ### 🎯 Objetivos de aprendizaje
 
-* Diagnosticar sistemáticamente fallos de conexión SSH.
-* Usar \`ssh -v\`, \`journalctl\` y \`nc\` para identificar la capa exacta del fallo.
-* Completar el flujo completo de una infraestructura SSH lista para Ansible.
+* Configurar acceso SSH por llave, sin contraseñas, listo para ser automatizado con Ansible.
+* Aplicar hardening básico a \`sshd_config\`: deshabilitar contraseñas y login de root.
+* Diagnosticar sistemáticamente un fallo de conexión SSH usando \`ssh -vvv\`, \`journalctl\` y \`nc\`.
 
-### 📖 Árbol de diagnóstico SSH
+### ❓ El problema real
 
-Ante cualquier fallo de conexión SSH, diagnosticar de abajo hacia arriba:
+El equipo de plataforma va a empezar a gestionar 20 servidores Ubuntu con Ansible, que requiere SSH sin contraseñas para funcionar de forma no interactiva. Te asignan preparar el primer servidor como plantilla del proceso: generar una llave dedicada, distribuirla, crear un alias reutilizable en \`~/.ssh/config\`, y aplicar hardening (sin contraseñas, sin root directo). Mientras terminas, un compañero reporta en el canal de incidentes: "no puedo entrar a \`web-prod\`". Debes diagnosticar ese fallo con el mismo rigor antes de dar por cerrado el día.
 
-\`\`\`diagram
-{"type":"tree","root":{"name":"¿No conecta?","meta":"ping servidor · si no: red caída, servidor apagado, ICMP bloqueado"},"children":[{"name":"nc -zv servidor 22","meta":"si no: firewall bloquea puerto 22, sshd no corre, o SSH en puerto diferente","edgeLabel":"sí","children":[{"name":"ssh -vvv usuario@servidor","meta":"¿en qué fase falla?","edgeLabel":"sí","children":[{"name":"Connection refused","meta":"sshd no corre o puerto equivocado"},{"name":"Host key changed","meta":"reinstalación o ataque MITM"},{"name":"Permission denied","meta":"autenticación fallida","children":[{"name":"¿Permisos ~/.ssh?","meta":"ls -la ~/.ssh/ en servidor"},{"name":"¿Llave en authorized_keys?","meta":"cat ~/.ssh/authorized_keys"},{"name":"¿PasswordAuthentication no sin llave?","meta":"acceso por consola"}]},{"name":"Conecta pero lento","meta":"DNS reverso, UsePrivilegeSeparation"}]}]}]}
+### 📖 Estructura del proyecto
+
+\`\`\`
+acceso-ssh-ansible/
+├── setup-cliente.sh
+├── ssh-config.entry
+├── hardening-servidor.sh
+└── diagnostico.sh
 \`\`\`
 
-### 💻 Herramientas de diagnóstico
+### 📖 setup-cliente.sh — generación y distribución de la llave
 
 \`\`\`bash
-# ─── DESDE EL CLIENTE ───────────────────────────────────────────────
+#!/bin/bash
+set -euo pipefail
 
-# Verificar conectividad básica
-ping servidor
+echo "[1] Generar llave Ed25519 con passphrase:"
+ssh-keygen -t ed25519 -C "ansible@empresa.com" -f ~/.ssh/id_ed25519_ansible
 
-# Verificar que el puerto SSH está abierto
-nc -zv servidor 22
+echo "[2] Iniciar ssh-agent y cargar la llave:"
+eval "\$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519_ansible
 
-# Modo verbose nivel 1: información básica
-ssh -v usuario@servidor
-
-# Modo verbose nivel 3: máximo detalle (cada paquete)
-ssh -vvv usuario@servidor
-
-# Ver qué llave ofrece el agente
-ssh-add -l
-
-# ─── EN EL SERVIDOR (por consola o sesión existente) ────────────────
-
-# Estado del servicio sshd
-sudo systemctl status sshd
-
-# Logs en tiempo real
-sudo journalctl -u sshd -f
-
-# Últimas 50 líneas de log con errores de autenticación
-sudo journalctl -u sshd -n 50 | grep -E "Failed|Invalid|error|Accepted"
-
-# Logs clásicos (alternativa)
-sudo tail -f /var/log/auth.log        # Debian/Ubuntu
-sudo tail -f /var/log/secure          # RHEL/Fedora
-
-# Verificar configuración efectiva
-sudo sshd -T | grep -E "passwordauth|pubkeyauth|permitrootlogin|port"
-
-# Verificar permisos del ~/.ssh del usuario que intenta entrar
-ls -la /home/usuario/.ssh/
-cat /home/usuario/.ssh/authorized_keys
-
-# Eliminar entrada de known_hosts si el servidor fue reinstalado
-ssh-keygen -R 192.168.1.50
+echo "[3] Copiar la llave pública al servidor:"
+ssh-copy-id -i ~/.ssh/id_ed25519_ansible.pub ubuntu@192.168.1.50
 \`\`\`
 
-### 🧪 Laboratorio 1: Auditoría del entorno local SSH
+Ed25519 se elige por ser el algoritmo moderno recomendado: llaves más cortas, más rápido de verificar y sin las debilidades históricas de RSA con módulos pequeños.
 
-\`\`\`bash
-# 1. Inventariar las llaves presentes
-ls -la ~/.ssh/
+### 📖 ssh-config.entry — alias reutilizable
 
-# 2. Verificar permisos
-stat ~/.ssh ~/.ssh/id_ed25519 ~/.ssh/authorized_keys 2>/dev/null
-
-# 3. Ver cuántos servidores conocidos tienes
-wc -l ~/.ssh/known_hosts
-
-# 4. Ver qué llaves tiene cargadas el agente
-ssh-add -l
-
-# 5. Ver fingerprint de tu llave
-ssh-keygen -l -f ~/.ssh/id_ed25519
-\`\`\`
-
----
-
-### 🧪 Laboratorio 2: Flujo completo de acceso seguro
-
-**Escenario:** Preparar un servidor Ubuntu para acceso sin contraseñas, listo para ser automatizado con Ansible.
-
-\`\`\`bash
-# ─── EN EL CLIENTE (tu máquina) ─────────────────────────────────────
-
-# 1. Generar llave Ed25519 con passphrase
-ssh-keygen -t ed25519 -C "admin@empresa.com"
-
-# 2. Iniciar ssh-agent
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
-
-# 3. Copiar llave al servidor
-ssh-copy-id -i ~/.ssh/id_ed25519.pub ubuntu@192.168.1.50
-
-# 4. Crear alias en ~/.ssh/config
-cat >> ~/.ssh/config << 'EOF'
+\`\`\`text
 Host servidor-lab
     HostName 192.168.1.50
     User ubuntu
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/id_ed25519_ansible
     StrictHostKeyChecking accept-new
     ServerAliveInterval 60
-EOF
-chmod 600 ~/.ssh/config
+\`\`\`
 
-# 5. Probar la conexión
-ssh servidor-lab
+\`ServerAliveInterval\` evita que conexiones inactivas se corten por timeouts de red intermedios; \`StrictHostKeyChecking accept-new\` acepta automáticamente hosts nuevos sin desactivar del todo la verificación de \`known_hosts\`, un balance razonable para infraestructura gestionada.
 
-# ─── EN EL SERVIDOR ──────────────────────────────────────────────────
+### 📖 hardening-servidor.sh — endurecer sshd_config
 
-# 6. Verificar que la llave está instalada
-cat ~/.ssh/authorized_keys
+\`\`\`bash
+#!/bin/bash
+set -euo pipefail
 
-# 7. Hacer backup y aplicar hardening
+echo "[1] Backup de la configuración actual:"
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+echo "[2] Aplicar hardening mínimo:"
 sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
 
-# O editarlo manualmente
-sudo nano /etc/ssh/sshd_config
-
-# 8. Validar y recargar
+echo "[3] Validar sintaxis ANTES de recargar (obligatorio):"
 sudo sshd -t
+
+echo "[4] Recargar sin cortar sesiones activas:"
 sudo systemctl reload sshd
-
-# ─── VERIFICACIÓN FINAL (desde otra terminal) ───────────────────────
-
-# 9. Confirmar que la conexión funciona con llave
-ssh servidor-lab
-
-# 10. Confirmar que la contraseña es rechazada
-ssh -o PasswordAuthentication=yes -o PubkeyAuthentication=no ubuntu@192.168.1.50
-# Debe fallar con "Permission denied (publickey)"
 \`\`\`
 
----
+El orden es crítico: nunca se recarga \`sshd\` sin validar primero con \`sshd -t\`. Una sintaxis inválida en \`sshd_config\` puede dejar el servicio sin arrancar en el próximo reinicio, y sin acceso por consola eso significa perder el servidor.
 
-### 🧪 Laboratorio 3: ProxyJump a servidor privado
-
-\`\`\`bash
-# Configuración en ~/.ssh/config
-cat >> ~/.ssh/config << 'EOF'
-
-Host bastion
-    HostName 203.0.113.10
-    User admin
-    IdentityFile ~/.ssh/id_ed25519
-
-Host privado
-    HostName 10.0.0.15
-    User ubuntu
-    IdentityFile ~/.ssh/id_ed25519
-    ProxyJump bastion
-EOF
-
-# Verificar que la llave está en el bastión
-ssh-copy-id -i ~/.ssh/id_ed25519.pub admin@203.0.113.10
-
-# Verificar que la llave está en el servidor privado
-# (conectarse al bastión primero y copiarla)
-ssh bastion
-ssh-copy-id -i ~/.ssh/id_ed25519.pub ubuntu@10.0.0.15
-
-# Conectar en un solo comando desde el cliente
-ssh privado
-\`\`\`
-
----
-
-### 🧪 Laboratorio 4: Diagnóstico de una conexión rota
-
-**Escenario:** "No puedo entrar a web-prod". Diagnosticar sistemáticamente.
+### 📖 diagnostico.sh — árbol de diagnóstico ante "no puedo entrar"
 
 \`\`\`bash
-# Desde la máquina del compañero:
-ping web-prod
+#!/bin/bash
+# Ejecutar desde la máquina que reporta el fallo
+
+echo "[1] ¿Hay conectividad de red básica?"
+ping -c 2 web-prod
+
+echo "[2] ¿El puerto SSH está abierto?"
 nc -zv web-prod 22
-ssh -vvv web-prod 2>&1 | head -50
 
-# En el servidor (por consola cloud):
+echo "[3] ¿En qué fase exacta falla el handshake?"
+ssh -vvv web-prod 2>&1 | tail -30
+\`\`\`
+
+Y en el servidor, por consola o una sesión ya abierta:
+
+\`\`\`bash
 sudo systemctl status sshd
 sudo journalctl -u sshd -n 20
 sudo sshd -t
 ls -la /home/ubuntu/.ssh/
 cat /home/ubuntu/.ssh/authorized_keys
-grep "PasswordAuthentication\\|PubkeyAuthentication\\|PermitRootLogin" /etc/ssh/sshd_config
+grep -E "PasswordAuthentication|PubkeyAuthentication|PermitRootLogin" /etc/ssh/sshd_config
 \`\`\`
 
-**Pregunta:** \`nc -zv web-prod 22\` reporta \`Connection refused\` pero \`ping web-prod\` funciona. ¿Qué investigas?
+### 📖 Secuencia de ejecución
 
-> sshd no está corriendo (\`systemctl status sshd\`), o SSH está escuchando en un puerto diferente (\`sshd -T | grep port\`), o un firewall local bloquea el 22 (\`ufw status\` o \`iptables -L\`).
+1. Desde el cliente, generar y cargar la llave dedicada:
+
+\`\`\`bash
+bash setup-cliente.sh
+\`\`\`
+
+2. Añadir el alias al archivo de configuración local con los permisos correctos:
+
+\`\`\`bash
+cat ssh-config.entry >> ~/.ssh/config
+chmod 600 ~/.ssh/config
+\`\`\`
+
+3. Probar la conexión con el alias antes de continuar:
+
+\`\`\`bash
+ssh servidor-lab
+\`\`\`
+
+4. En el servidor, aplicar el hardening:
+
+\`\`\`bash
+bash hardening-servidor.sh
+\`\`\`
+
+Salida esperada del paso de validación:
+
+\`\`\`
+sshd: /etc/ssh/sshd_config line 58: Deprecated option ...(si aplica)
+sshd: configuration file OK
+\`\`\`
+
+5. Verificación final: la llave debe seguir funcionando y la contraseña debe ser rechazada:
+
+\`\`\`bash
+ssh servidor-lab
+ssh -o PasswordAuthentication=yes -o PubkeyAuthentication=no ubuntu@192.168.1.50
+\`\`\`
+
+El segundo comando debe fallar con \`Permission denied (publickey)\`.
+
+6. Atender el incidente de "no puedo entrar a web-prod" con el diagnóstico sistemático:
+
+\`\`\`bash
+bash diagnostico.sh
+\`\`\`
+
+7. Interpretar el resultado más común de este tipo de incidente: \`nc -zv web-prod 22\` reporta \`Connection refused\` pero \`ping\` funciona. Confirmar la causa exacta en el servidor:
+
+\`\`\`bash
+sudo systemctl status sshd
+sudo ss -tlnp | grep :22
+\`\`\`
+
+Si \`sshd\` no aparece en \`ss -tlnp\`, el servicio no está escuchando — la causa más probable es que \`sshd\` está detenido o falló al arrancar tras un cambio de configuración no validado.
+
+### 📋 Lo que debes recordar
+
+* La llave privada nunca sale de la máquina donde se generó; solo la pública se distribuye con \`ssh-copy-id\`.
+* Ed25519 es la elección por defecto para llaves nuevas; RSA solo se mantiene por compatibilidad con sistemas legacy.
+* \`sshd -t\` antes de cualquier \`reload\` o \`restart\` es innegociable: valida la sintaxis sin arriesgar el acceso al servidor.
+* \`systemctl reload sshd\`, no \`restart\`, para aplicar cambios de configuración sin cortar las sesiones ya activas.
+* \`PasswordAuthentication no\` + \`PermitRootLogin no\` es la tríada mínima de hardening antes de exponer un servidor.
+* Ante un fallo de conexión, diagnosticar de abajo hacia arriba: red (\`ping\`) → puerto (\`nc -zv\`) → protocolo (\`ssh -vvv\`) → estado del servicio (\`systemctl status\`) → configuración (\`sshd -T\`) → permisos y llaves en el servidor.
+* \`~/.ssh/config\` con alias reutilizables es el punto de partida natural para que herramientas como Ansible usen las mismas credenciales sin reescribir parámetros de conexión.
+
+### 🧪 Autoevaluación
+
+1. ¿Por qué se ejecuta \`sudo sshd -t\` antes de \`systemctl reload sshd\` y qué riesgo evita concretamente?
+2. \`nc -zv web-prod 22\` reporta \`Connection refused\`, pero \`ping web-prod\` responde con éxito. ¿Qué conclusión inicial es correcta y qué comando confirmarías en el servidor?
+3. En el proyecto, ¿por qué se usa \`systemctl reload sshd\` en vez de \`systemctl restart sshd\` al aplicar el hardening?
 
 ---
 
-### 📋 Tabla resumen de comandos del Nivel 9
-
-| Comando | Función |
-| --- | --- |
-| \`ssh-keygen -t ed25519\` | Generar par de llaves Ed25519 |
-| \`ssh-keygen -l -f ~/.ssh/id_ed25519\` | Ver fingerprint de una llave |
-| \`ssh-keygen -R <IP>\` | Eliminar entrada de known_hosts |
-| \`ssh-copy-id -i ~/.ssh/id_ed25519.pub user@host\` | Instalar llave pública en servidor |
-| \`eval "$(ssh-agent -s)"\` | Iniciar ssh-agent |
-| \`ssh-add ~/.ssh/id_ed25519\` | Añadir llave al agente |
-| \`ssh-add -l\` | Listar llaves cargadas en el agente |
-| \`ssh -v user@host\` | Conexión con verbose nivel 1 |
-| \`ssh -vvv user@host\` | Conexión con verbose máximo |
-| \`ssh -J bastion user@privado\` | Salto por bastión manual |
-| \`scp archivo host:/ruta\` | Copiar archivo al servidor |
-| \`scp -r host:/ruta ./local\` | Descargar directorio del servidor |
-| \`sftp host\` | Sesión interactiva de transferencia |
-| \`nc -zv host 22\` | Verificar que el puerto SSH está abierto |
-| \`sudo sshd -t\` | Validar sintaxis de sshd_config |
-| \`sudo sshd -T\` | Ver configuración efectiva del daemon |
-| \`sudo systemctl reload sshd\` | Recargar config sin cortar sesiones |
-| \`sudo journalctl -u sshd -f\` | Ver logs SSH en tiempo real |
-| \`~/.ssh/config\` | Alias y perfiles de conexión |
-| \`/etc/ssh/sshd_config\` | Configuración del daemon SSH |
-
-### 🎯 Reglas de oro
-
-1. **La llave privada NUNCA sale de tu máquina.**
-2. **Ed25519 para todo lo nuevo.** RSA solo por compatibilidad legacy.
-3. **Passphrase + ssh-agent** = seguridad sin fricción.
-4. **PasswordAuthentication no + PermitRootLogin no** = tríada mínima de hardening.
-5. **sshd -t antes de cualquier cambio.** reload nunca restart.
-6. **~/.ssh/config desde el día 1.** Ansible lo agradecerá.
-7. **ProxyJump para redes privadas.** No expongas servidores internos a Internet.
-8. **Backup de sshd_config antes de editar.** Una sesión SSH extra de emergencia siempre abierta.
+1. \`sshd -t\` valida la sintaxis del archivo de configuración sin aplicar ningún cambio. Evita el riesgo de que un error tipográfico en \`sshd_config\` impida que el servicio arranque correctamente la próxima vez que se recargue o reinicie, lo que dejaría al servidor sin acceso SSH — un problema grave si no hay acceso por consola alternativa.
+2. La conclusión correcta es que la capa de red funciona (el host responde a \`ping\`), pero nada está escuchando en el puerto 22, o un firewall lo está bloqueando activamente con un rechazo explícito. En el servidor se confirma con \`sudo systemctl status sshd\` y \`sudo ss -tlnp | grep :22\`: si \`sshd\` no aparece escuchando, el servicio está detenido o falló al iniciar.
+3. \`reload\` le pide a \`sshd\` releer su configuración sin terminar el proceso principal, por lo que las sesiones SSH ya activas (incluida la que se está usando para hacer el cambio) no se cortan. \`restart\` mata y recrea el proceso, lo cual puede cortar la sesión actual del administrador si algo sale mal, dejándolo sin forma de revertir el cambio.
 `
 
 export default content

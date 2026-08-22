@@ -5,21 +5,24 @@ colors:
   primary: "#03624C"
   primary-hover: "#02483A"
   primary-soft: "#E6F2EC"
-  neutral-bg: "#F6F9F7"
+  neutral-bg: "#FAF7EF"
   neutral-surface: "#FFFFFF"
   neutral-fg: "#0C1F18"
-  neutral-muted: "#374940"
-  neutral-border: "#B5C9BE"
+  neutral-muted: "#4A4130"
+  neutral-border: "#E4DCC7"
   success: "#03624C"
-  warning: "#8A5A00"
+  warning: "#B45309"
   code-bg: "#030F0F"
   code-fg: "#DCECE4"
   dark-bg: "#030F0F"
   dark-surface: "#0A1613"
   dark-fg: "#DCECE4"
+  dark-muted: "#B4CCC0"
   dark-border: "rgba(255,255,255,0.1)"
   dark-primary: "#00DF82"
   dark-primary-ink: "#7DF5BC"
+  dark-warning: "#FBBF24"
+  dark-code-bg: "#020A09"
 typography:
   display:
     fontFamily: "'IBM Plex Sans', -apple-system, system-ui, sans-serif"
@@ -116,16 +119,16 @@ Paleta de terminal disciplinada (Ansible): neutros verde-tinta en papel y superf
 - **Verde brillante #00DF82** (modo oscuro): mismo rol de acento sobre fondo #030F0F, con tinta mint #7DF5BC para texto sobre acento-soft.
 
 ### Neutral
-- **Papel** (#F6F9F7): fondo del modo claro; casi blanco con un susurro verde.
+- **Papel crema** (#FAF7EF): fondo del modo claro; blanco cálido con un susurro de pergamino, no blanco frío.
 - **Superficie** (#FFFFFF): tarjetas, nav, strips; blanco puro sobre el papel.
 - **Tinta** (#0C1F18): texto principal; casi negro con matiz verde.
-- **Muted** (#374940): texto secundario, kickers, metadatos. Ligeramente más oscuro que el papel para garantizar ≥4.5:1 también sobre las zonas oscuras del vídeo de fondo en modo claro.
-- **Borde** (#B5C9BE): separadores y bordes; en oscuro, blanco al 10%.
-- **Terminal** (#030F0F): fondo de bloques de código, presentes en ambos temas.
+- **Muted** (#4A4130 en claro, #B4CCC0 en oscuro): texto secundario, kickers, metadatos. Calibrado para garantizar ≥4.5:1 también sobre las zonas oscuras del vídeo de fondo.
+- **Borde** (#E4DCC7 en claro, blanco al 10% en oscuro): separadores y bordes.
+- **Terminal** (#030F0F en claro, #020A09 en oscuro): fondo de bloques de código, presentes en ambos temas.
 
 ### Semantic
 - **Verde Éxito** (#03624C en claro, #00DF82 en oscuro): checks de objetivos, resultados esperados, botón "Copiado", barras de progreso.
-- **Ámbar Aviso** (#8A5A00 en claro, #FBBF24 en oscuro): tarjetas de errores comunes, advertencias.
+- **Ámbar Aviso** (#B45309 en claro, #FBBF24 en oscuro): tarjetas de errores comunes, advertencias.
 
 ### Named Rules
 **La Regla del Código Oscuro.** Los bloques de código son siempre el elemento más oscuro de la pantalla, en ambos temas. Esa inversión deliberada es lo que ancla la identidad de "terminal en el papel".
@@ -159,7 +162,7 @@ El espaciado obedece a una regla simple: más espacio sobre un encabezado que de
 El sistema es **plano por defecto** — no hay sombras en reposo. La profundidad se comunica por capas:
 
 1. **Vídeo de fondo fijo** — un `<video id="bg-video">` en `index.html` reproduce en bucle el server room (Cloudinary `277097.mp4`, 1920×1080 @30fps, ~18s) con `autoplay muted loop playsinline`, `object-fit: cover`, `pointer-events: none` y `z-index: -2`, fijo detrás de todo el contenido. Lleva `poster="/linux-bg.jpg"` y el mismo JPG como `background` CSS: si el vídeo no carga o el usuario tiene `prefers-reduced-motion`, se ve la foto estática (en ese caso `#bg-video` se oculta y `body::before` restaura el JPG bajo el tinte).
-2. **Tinte por tema** — `body::before` (`z-index: -1`) pinta un **foco radial concentrado en ambos temas**, fuerte en la columna de lectura (donde vive el texto) y cayendo rápido hacia los bordes para que el vídeo se vea vivo en los márgenes. En claro, blanco 0.48 → 0.12: el centro mantiene ≥4.5:1 para `--muted` (#374940) incluso en el tramo más oscuro del bucle (luma 112, segundos 15–17). En oscuro, velo casi-negro 0.70 → 0.42: el centro compensa el tramo más brillante (luma 178, inicio del bucle) y los bordes siguen oscureciendo lo justo para el texto claro. Los tintes se midieron contra la luma real del vídeo en 7 puntos del bucle.
+2. **Tinte por tema** — `body::before` (`z-index: -1`) pinta un **foco radial concentrado en ambos temas**, fuerte en la columna de lectura (donde vive el texto) y cayendo rápido hacia los bordes para que el vídeo se vea vivo en los márgenes. En claro, blanco 0.48 → 0.12: el centro mantiene ≥4.5:1 para `--muted` (#4A4130) incluso en el tramo más oscuro del bucle (luma 112, segundos 15–17). En oscuro, velo casi-negro 0.70 → 0.42: el centro compensa el tramo más brillante (luma 178, inicio del bucle) y los bordes siguen oscureciendo lo justo para el texto claro. Los tintes se midieron contra la luma real del vídeo en 7 puntos del bucle.
 3. **Vidrio esmerilado** sobre esas capas — superficies de lectura con `background: color-mix(in oklab, var(--surface) 45–50%, transparent)` + `backdrop-filter: blur(16–24px)`. El bloque de código sigue siendo el pozo oscuro sólido (`--code-bg`), el único elemento sin vidrio, y los intro de ejemplo (`.example-intro`, texto muted sobre fondo crudo) llevan su propia tira de vidrio para leer sobre las zonas oscuras del rack.
 
 La respuesta de elevación se mantiene en hover: `translateY(-1px a -2px)` con `--ease-out`, gated detrás de `@media (hover: hover) and (pointer: fine)`. El nav sticky usa `blur(20px)` con superficie al 60%.

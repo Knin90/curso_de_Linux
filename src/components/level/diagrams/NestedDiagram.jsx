@@ -94,6 +94,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
                 />
               )}
               <g className="dg-node">
+              <g className="dg-node-hover">
                 <rect x={x} y={y} width={w} height={ITEM_H} rx="8" className={it.focal ? 'dg-box-focal' : 'dg-box'} />
                 {it.icon && <Icon name={it.icon} x={x + 12} y={y + ITEM_H / 2 - 11} size={22} className={it.focal ? 'dg-icon-focal' : 'dg-icon'} />}
                 <text x={x + (it.icon ? 44 : 14)} y={y + ITEM_H / 2 - 3} className={it.focal ? 'dg-name-focal' : 'dg-name'} style={{ fontSize: 12.5 }}>
@@ -105,6 +106,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
                   </text>
                 )}
               </g>
+              </g>
             </g>
           )
         })}
@@ -115,6 +117,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
           return (
             <g key={`l${i}`} style={{ '--i': items.length + 1 + i }}>
               <g className="dg-node">
+              <g className="dg-node-hover">
                 <rect x={20} y={y} width={leftW} height={ITEM_H} rx="8" className="dg-box" />
                 {e.icon && <Icon name={e.icon} x={32} y={y + ITEM_H / 2 - 11} size={22} className="dg-icon" />}
                 <text x={20 + (e.icon ? 44 : 14)} y={y + ITEM_H / 2 - (e.meta ? 3 : -4)} className="dg-name" style={{ fontSize: 12.5 }}>
@@ -125,6 +128,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
                     {e.meta}
                   </text>
                 )}
+              </g>
               </g>
               <line
                 x1={20 + leftW}
@@ -153,6 +157,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
                 markerEnd="url(#dg-nested-arrow)"
               />
               <g className="dg-node">
+              <g className="dg-node-hover">
                 <rect x={x} y={y} width={rightW} height={ITEM_H} rx="8" className="dg-box" />
                 {e.icon && <Icon name={e.icon} x={x + 12} y={y + ITEM_H / 2 - 11} size={22} className="dg-icon" />}
                 <text x={x + (e.icon ? 44 : 14)} y={y + ITEM_H / 2 - (e.meta ? 3 : -4)} className="dg-name" style={{ fontSize: 12.5 }}>
@@ -163,6 +168,7 @@ export default function NestedDiagram({ container, items, external = [] }) {
                     {e.meta}
                   </text>
                 )}
+              </g>
               </g>
             </g>
           )

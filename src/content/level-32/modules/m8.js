@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: cluster HA completo con HAProxy y keepalived
+## Módulo 8 — Proyecto real: cluster HA completo con HAProxy y keepalived
 
 ### 🎯 Objetivos de aprendizaje
 * Configurar HAProxy como balanceador de carga con health checks y página de estadísticas

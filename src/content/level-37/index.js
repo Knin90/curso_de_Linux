@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Fallos de servicio: leer journalctl y systemctl status como profesional' },
   { id: 6, title: 'Fallos de red y DNS: aislar la capa que falla' },
   { id: 7, title: 'Fallos de arranque: rescate desde GRUB e initramfs' },
-  { id: 8, title: 'Laboratorio integrador: incidente multicausa simulado' },
+  { id: 8, title: 'Caso real: incidente multicausa en producción' },
 ]

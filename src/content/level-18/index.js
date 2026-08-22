@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Servidor DNS autoritativo con bind9' },
   { id: 6, title: 'Servidor DNS recursivo con unbound' },
   { id: 7, title: 'DNSSEC: firma y validación de zonas' },
-  { id: 8, title: 'Laboratorio: diagnóstico y resolución de problemas DNS' },
+  { id: 8, title: 'Proyecto real: diagnóstico y resolución de problemas DNS en producción' },
 ]

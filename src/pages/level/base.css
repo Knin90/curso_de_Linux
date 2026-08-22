@@ -1,0 +1,101 @@
+/* ============================================================
+   Level page — diseño aplicado por el usuario (scoped .level-page)
+   ============================================================ */
+
+.level-page {
+  /* Paleta Ansible: #03624C (verde profundo) · #030F0F (dark) · #00DF82 (acento) */
+  --bg:        #FAF7EF;
+  --surface:   #FFFFFF;
+  --fg:        #0C1F18;
+  --muted:     #4A4130;
+  --border:    #E4DCC7;
+  --accent:    #03624C;
+  --accent-ink: #01382A;
+  --accent-soft: #EAF1E5;
+  --warn:      #B45309;
+  --warn-soft: #FDF0E1;
+  --ok:        #03624C;
+  --ok-soft:   #EAF1E5;
+  --code-bg:   #030F0F;
+  --code-fg:   #DCECE4;
+  --code-mut:  #8FA89C;
+
+  --font-display: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-body:    'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius: 12px;
+  --nav-h: 60px;
+
+  /* Emil Kowalski: curvas custom — los easings por defecto son demasiado débiles */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  color-scheme: light;
+  background: transparent; /* el fondo lo pone .bg-fx + tinte de body::before */
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* -------- Modo oscuro (paleta Ansible: #030F0F / #00DF82 / #03624C) -------- */
+[data-theme="dark"] .level-page {
+  color-scheme: dark;
+  --bg:         #030F0F;
+  --surface:    #0A1613;
+  --fg:         #DCECE4;
+  --muted:      #B4CCC0;
+  --border:     rgba(255,255,255,0.1);
+  --accent:     #00DF82;
+  --accent-ink: #7DF5BC;
+  --accent-soft: rgba(0,223,130,0.12);
+  --warn:       #FBBF24;
+  --warn-soft:  rgba(251,191,36,0.1);
+  --ok:         #00DF82;
+  --ok-soft:    rgba(0,223,130,0.12);
+  --code-bg:    #020A09;
+  --code-fg:    #DCECE4;
+  --code-mut:   #6E8A7E;
+}
+
+/* Transiciones suaves al cambiar de tema (specificity 0, no pisan transiciones propias) */
+:where(
+  .level-page .nav,
+  .level-page .chip,
+  .level-page .nav-level,
+  .level-page .card,
+  .level-page .card-analogy,
+  .level-page .card-warn,
+  .level-page .card-result,
+  .level-page .next-level,
+  .level-page .footer,
+  .level-page .tbl-wrap,
+  .level-page .code-block,
+  .level-page .note,
+  .level-page .fnode,
+  .level-page .module-num,
+  .level-page .def-row,
+  .level-page .list-steps li
+) {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.level-page *,
+.level-page *::before,
+.level-page *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.level-page ::selection { background: var(--accent-soft); }
+.level-page img { max-width: 100%; display: block; }
+
+.level-page .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.level-page a { color: var(--fg); }
+

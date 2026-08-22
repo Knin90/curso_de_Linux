@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio integrador: incidente multicausa simulado
+## Módulo 8 — Caso real: incidente multicausa en producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -8,11 +8,25 @@ const content = `
 * Reconocer cómo un problema resuelto a medias puede enmascarar un segundo problema subyacente.
 * Redactar un post-mortem completo a partir de un incidente resuelto paso a paso.
 
-### ❓ El escenario
+### ❓ El problema real
 
 Son las 03:14 AM. Una alerta despierta al administrador de guardia: **"api.produccion.local: 5xx errors > 50%"**. Los usuarios reportan que la aplicación "no carga" de forma intermitente. El administrador de guardia no tiene más contexto que esto. A continuación se reconstruye el diagnóstico completo, paso a paso, aplicando exactamente el framework del Módulo 1.
 
 Este incidente combina **tres causas encadenadas**: un log sin rotar que agotó el disco, lo cual provocó que un servicio de base de datos fallara al escribir, lo cual a su vez saturó el pool de conexiones de la aplicación. Resolver solo la primera causa no habría sido suficiente.
+
+### 📖 Estructura del caso
+
+Evidencia disponible al iniciar la investigación, en el orden en que se va recolectando durante el diagnóstico:
+
+\`\`\`
+Evidencia del incidente
+├── curl -I http://localhost/health       ← confirma el síntoma (502)
+├── journalctl --since "4 hours ago"      ← cambios recientes en el sistema
+├── systemctl status nginx / myapp        ← estado de cada capa del servicio
+├── /var/log/myapp/debug.log              ← 36GB, causa raíz de nivel 1
+├── /etc/logrotate.d/myapp                ← ausente, causa raíz de nivel 2
+└── ss -tnp | grep :5432                  ← pool de conexiones saturado
+\`\`\`
 
 ### 📖 Paso 1 y 2 — Recolectar información e identificar síntomas (sin tocar nada aún)
 
@@ -31,7 +45,7 @@ uptime
 
 Síntoma confirmado: la API responde 502 de forma intermitente. Un 502 significa que el proxy (nginx) está activo, pero el backend detrás no responde correctamente — esto ya apunta la investigación hacia la capa de aplicación/backend, no hacia la red externa.
 
-### 📖 Paso 3 y 4 — Hipótesis y verificación, capa por capa
+### 📖 Paso 3 y 4 — Hipótesis y comprobación, capa por capa
 
 **Hipótesis 1: ¿nginx está caído?**
 
@@ -130,7 +144,7 @@ curl -I http://localhost/health
 # HTTP/1.1 200 OK   ← síntoma resuelto
 \`\`\`
 
-### 📖 Paso 6, 7 y 8 — Corrección definitiva, verificación y documentación
+### 📖 Paso 6, 7 y 8 — Corrección definitiva, comprobación final y documentación
 
 **Correcciones aplicadas (mínimas, sobre la causa raíz, no solo el síntoma):**
 

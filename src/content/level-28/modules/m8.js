@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: containerizar una aplicación real
+## Módulo 8 — Proyecto real: containerizar una aplicación real
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -46,8 +46,6 @@ app.get('/health', async (req, res) => {
 app.listen(3000, () => console.log('API listening on :3000'))
 \`\`\`
 
----
-
 ### 📖 FASE 1 — Containerización básica (imagen ingenua)
 
 \`\`\`dockerfile
@@ -75,8 +73,6 @@ docker run myapi:v1 id
 - Corre como root dentro del contenedor.
 - Sin \`.dockerignore\`: \`node_modules\` local, \`.git\`, \`.env\` viajan al daemon.
 - \`npm install\` reinstala todo en cada build aunque \`package.json\` no haya cambiado.
-
----
 
 ### 📖 FASE 2 — Imagen optimizada con multi-stage
 
@@ -140,8 +136,6 @@ docker run myapi:v2 id
 docker image history myapi:v2
 \`\`\`
 
----
-
 ### 📖 FASE 3 — Red personalizada y PostgreSQL
 
 Conectar la API a PostgreSQL mediante una red bridge personalizada con resolución DNS.
@@ -201,8 +195,6 @@ docker exec api psql postgresql://apiuser:supersecret@postgres:5432/apidb -c "SE
 # PostgreSQL 15.x on x86_64-pc-linux-musl
 \`\`\`
 
----
-
 ### 📖 FASE 4 — Hardening de seguridad
 
 Aplicar el principio de mínimo privilegio al contenedor de la API.
@@ -258,9 +250,7 @@ docker exec api touch /tmp/test.txt
 # sin error  ← correcto
 \`\`\`
 
----
-
-### 📖 FASE 5 — Verificación y diagnóstico
+### 📖 FASE 5 — Estado y diagnóstico
 
 \`\`\`bash
 # Estado general de los contenedores

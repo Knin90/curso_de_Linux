@@ -1,201 +1,167 @@
 const content = `
-## Módulo 8 — Laboratorio integrador: disco nuevo, disco perdido y disco lleno
+## Módulo 8 — Proyecto real: provisionar un volumen de backups en un servidor de base de datos
 
 ### 🎯 Objetivos de aprendizaje
 
-* Ejecutar el flujo completo de preparación de un disco nuevo para producción.
-* Diagnosticar y recuperar un disco que "desapareció" tras un reinicio.
-* Localizar y liberar espacio en un servidor al límite.
+* Ejecutar el flujo completo de preparación de un disco nuevo: partición GPT, formateo, montaje y persistencia.
+* Configurar \`/etc/fstab\` con UUID de forma segura, sin arriesgar un arranque roto.
+* Diagnosticar y recuperar un punto de montaje que "desapareció" tras un reinicio.
 
-### 🏢 Escenario general
+### ❓ El problema real
 
-Eres el administrador de un servidor de base de datos. Hoy tienes tres tareas:
+Eres el administrador de un servidor de base de datos en producción. Acaban de agregar un disco de 100 GB (\`/dev/sdb\`) exclusivamente para guardar backups nocturnos. Debes dejarlo particionado, formateado y montado en \`/srv/backups\`, de forma que sobreviva a reinicios. Un compañero, mientras tanto, te avisa de un problema en otro servidor: montó un disco similar a mano ayer con \`mount\`, el servidor se reinició esta madrugada por una actualización de kernel, y ahora \`/mnt/datos\` aparece vacío. Debes resolver ambos casos con el mismo procedimiento disciplinado.
 
-1. Preparar un disco nuevo de 100 GB para almacenar backups.
-2. Resolver por qué \`/mnt/datos\` está vacío tras el reinicio de anoche.
-3. Liberar espacio en \`/\` que está al 97%.
+### 📖 Estructura del proyecto
 
----
+\`\`\`
+provision-disco-backups/
+├── provisionar.sh
+├── diagnostico-montaje-perdido.sh
+└── fstab.entry
+\`\`\`
 
-### 🧪 Laboratorio 1: Flujo completo de disco nuevo
+### 📖 provisionar.sh — flujo completo de disco nuevo
 
 \`\`\`bash
-# Paso 1: Verificar que el disco existe
+#!/bin/bash
+set -euo pipefail
+
+echo "[1] Verificando que el disco existe..."
 lsblk -f
-# sdb aparece sin FSTYPE ni MOUNTPOINTS
+# sdb debe aparecer sin FSTYPE ni MOUNTPOINTS
 
-# Paso 2: Crear tabla GPT y una partición que ocupe todo el disco
-sudo fdisk /dev/sdb
-# g → n → Enter → Enter → Enter → w
-
-# Verificar
+echo "[2] Creando tabla GPT y partición completa..."
+# Interactivo: sudo fdisk /dev/sdb  →  g → n → Enter → Enter → Enter → w
 sudo partprobe /dev/sdb
 lsblk /dev/sdb
 
-# Paso 3: Formatear con ext4 y asignar etiqueta
+echo "[3] Formateando con ext4 y asignando etiqueta..."
 sudo mkfs.ext4 -L RESPALDOS /dev/sdb1
-
-# Verificar: debe mostrar FSTYPE=ext4 y LABEL=RESPALDOS
 lsblk -f /dev/sdb
 
-# Paso 4: Crear punto de montaje
+echo "[4] Creando punto de montaje..."
 sudo mkdir -p /srv/backups
 
-# Paso 5: Montar temporalmente y verificar
+echo "[5] Montando temporalmente para verificar..."
 sudo mount /dev/sdb1 /srv/backups
 findmnt /srv/backups
 
-# Paso 6: Obtener UUID para fstab
+echo "[6] Obteniendo UUID para fstab..."
 sudo blkid /dev/sdb1
-# Copiar el UUID exacto
+\`\`\`
 
-# Paso 7: Configurar fstab para persistencia
+Los pasos [2] a [6] son la mitad "temporal" del trabajo: prueban que el disco funciona, pero no sobreviven a un reinicio hasta que se registran en \`fstab\`.
+
+### 📖 fstab.entry — línea a añadir a /etc/fstab
+
+\`\`\`text
+# Respaldos nocturnos de la base de datos — agregado 2024-01-15
+UUID=4a3f9c2e-1234-4b8a-9abc-987654321def /srv/backups ext4 defaults,noatime 0 2
+\`\`\`
+
+Usar siempre \`UUID=\`, nunca \`/dev/sdb1\` directamente: el nombre del dispositivo puede cambiar entre reinicios si se agregan o quitan discos, pero el UUID es fijo al filesystem.
+
+### 📖 diagnostico-montaje-perdido.sh — recuperación del caso reportado
+
+\`\`\`bash
+#!/bin/bash
+# Diagnóstico de abajo hacia arriba para /mnt/datos vacío tras reinicio
+
+echo "Capa 1: ¿el disco físico existe?"
+lsblk
+
+echo "Capa 2: ¿tiene partición?"
+sudo fdisk -l /dev/sdb
+
+echo "Capa 3: ¿tiene filesystem?"
+lsblk -f /dev/sdb
+
+echo "Capa 4: ¿está registrado en fstab?"
+grep "/mnt/datos" /etc/fstab || echo "NO ENCONTRADO: esta es la causa raíz"
+\`\`\`
+
+Si las capas 1 a 3 son correctas pero la capa 4 falla, el diagnóstico es claro: el disco y el filesystem están intactos, pero el montaje se hizo con \`mount\` manual, que nunca se guarda en disco ni sobrevive a un reinicio.
+
+### 📖 Secuencia de ejecución
+
+1. Copiar de seguridad de \`/etc/fstab\` antes de tocar nada, en ambos servidores:
+
+\`\`\`bash
 sudo cp /etc/fstab /etc/fstab.bak
-sudo nano /etc/fstab
-# Añadir:
-# UUID=<tu-uuid> /srv/backups ext4 defaults,noatime 0 2
+\`\`\`
 
-# Paso 8: Validar sin reiniciar (OBLIGATORIO)
-sudo umount /srv/backups    # desmontar primero para que mount -a lo remonte
+2. En el servidor de base de datos, ejecutar el flujo completo de aprovisionamiento:
+
+\`\`\`bash
+bash provisionar.sh
+\`\`\`
+
+Salida esperada del último paso:
+
+\`\`\`
+/dev/sdb1: LABEL="RESPALDOS" UUID="4a3f9c2e-1234-4b8a-9abc-987654321def" TYPE="ext4"
+\`\`\`
+
+3. Agregar la línea de \`fstab.entry\` al final de \`/etc/fstab\`, sustituyendo el UUID real:
+
+\`\`\`bash
+echo "UUID=4a3f9c2e-1234-4b8a-9abc-987654321def /srv/backups ext4 defaults,noatime 0 2" | sudo tee -a /etc/fstab
+\`\`\`
+
+4. Validar sin reiniciar — este paso es obligatorio, nunca reiniciar a ciegas confiando en un fstab sin probar:
+
+\`\`\`bash
+sudo umount /srv/backups
 sudo mount -a
-# Si no hay error: éxito
+\`\`\`
 
-# Paso 9: Verificación final
+Si \`mount -a\` no produce ningún error, el fstab es válido.
+
+5. Verificación final del disco de producción:
+
+\`\`\`bash
 findmnt /srv/backups
 df -h /srv/backups
-echo "OK" > /srv/backups/test.txt && cat /srv/backups/test.txt
+echo "OK" | sudo tee /srv/backups/test.txt && cat /srv/backups/test.txt
 \`\`\`
 
----
-
-### 🧪 Laboratorio 2: El disco que desapareció
-
-Ayer montaste \`/dev/sdb1\` en \`/mnt/datos\` con \`mount\`. El servidor se reinició. Ahora \`/mnt/datos\` está vacío.
+6. Diagnosticar el servidor con \`/mnt/datos\` vacío:
 
 \`\`\`bash
-# Árbol de diagnóstico: de abajo hacia arriba
-
-# Capa 1: ¿El disco físico existe?
-lsblk
-# ¿Aparece sdb? Si no → problema de hardware o cloud (verificar consola)
-
-# Capa 2: ¿Tiene partición?
-sudo fdisk -l /dev/sdb
-# ¿Aparece sdb1? Si no → se perdió la tabla de particiones
-
-# Capa 3: ¿Tiene filesystem?
-lsblk -f /dev/sdb
-# ¿Tiene FSTYPE? Si no → nunca fue formateado o fue formateado accidentalmente
-
-# Capa 4: ¿Está en fstab?
-grep "/mnt/datos" /etc/fstab
-# Si no está → aquí está el problema. El admin usó mount manual que no persiste.
-
-# Solución: añadir a fstab
-sudo blkid /dev/sdb1    # obtener UUID
-sudo nano /etc/fstab    # añadir la línea
-sudo mount -a           # validar
-findmnt /mnt/datos      # verificar que está montado
+bash diagnostico-montaje-perdido.sh
 \`\`\`
 
----
+Salida esperada: las capas 1-3 confirman que el disco y el filesystem existen; la capa 4 revela \`NO ENCONTRADO: esta es la causa raíz\`.
 
-### 🧪 Laboratorio 3: El disco lleno
-
-\`df -h\` muestra \`/\` al 97%. La aplicación ya empieza a fallar al escribir logs.
+7. Reparar el segundo servidor con el mismo procedimiento disciplinado que en el paso 3:
 
 \`\`\`bash
-# Paso 1: Confirmar cuál filesystem está lleno
-df -h
-# Filesystem      Size  Used Avail Use% Mounted on
-# /dev/sda1        49G  47G   500M  97% /
-
-# Paso 2: Localizar el mayor consumidor
-sudo du -h --max-depth=2 / 2>/dev/null | sort -rh | head -15
-
-# Escenario A: /var/log ocupa 30 GB
-ls -lhS /var/log/
-# → Ver si hay logs sin rotar o muy grandes
-
-# Limpiar logs antiguos de journald
-sudo journalctl --disk-usage
-sudo journalctl --vacuum-time=3d
-
-# Limpiar logs de aplicación (con precaución)
-sudo find /var/log -name "*.gz" -mtime +7 -delete
-sudo find /var/log -name "*.log.*" -mtime +7 -delete
-
-# Paso 3: Verificar archivos > 1 GB
-sudo find / -type f -size +1G 2>/dev/null | xargs ls -lh
-
-# Paso 4: Verificar espacio fantasma (archivos borrados y abiertos)
-sudo lsof +L1
-# Si aparece un archivo borrado grande:
-# Opción A: reiniciar el proceso → systemctl restart servicio
-# Opción B: truncar sin reiniciar:
-#   sudo truncate -s 0 /proc/<PID>/fd/<FD>
-
-# Paso 5: Limpiar caché de paquetes
-sudo apt clean             # Debian
-sudo dnf clean all         # RHEL
-
-# Paso 6: Limpiar archivos temporales antiguos
-sudo find /tmp -type f -mtime +1 -delete
-sudo find /var/tmp -type f -mtime +7 -delete
-
-# Paso 7: Verificar resultado
-df -h /
+sudo blkid /dev/sdb1
+echo "UUID=<uuid-obtenido> /mnt/datos ext4 defaults 0 2" | sudo tee -a /etc/fstab
+sudo mount -a
+findmnt /mnt/datos
 \`\`\`
+
+### 📋 Lo que debes recordar
+
+* El flujo de un disco nuevo siempre sigue el mismo orden: verificar → particionar → formatear → punto de montaje → montar temporal → obtener UUID → fstab → validar → verificar.
+* \`mount\` sin editar \`fstab\` es temporal por diseño: sobrevive hasta el próximo reinicio y nada más.
+* Siempre usar \`UUID=\` en \`fstab\`, nunca la ruta \`/dev/sdX\`, que puede reasignarse.
+* \`sudo mount -a\` después de editar \`fstab\` es el paso de validación obligatorio: si hay un error de sintaxis, aparece aquí, no en el próximo reinicio cuando ya sea tarde.
+* Backup de \`/etc/fstab\` antes de cualquier edición: un \`fstab\` roto puede impedir que el sistema arranque normalmente.
+* Ante un punto de montaje vacío tras reinicio, diagnosticar siempre de abajo hacia arriba: disco → partición → filesystem → fstab.
+
+### 🧪 Autoevaluación
+
+1. ¿Por qué se usa \`UUID=\` en \`/etc/fstab\` en lugar de \`/dev/sdb1\` directamente?
+2. Después de editar \`/etc/fstab\` a mano, ¿qué comando debe ejecutarse antes de reiniciar el servidor, y qué demuestra si tiene éxito?
+3. Un compañero montó un disco con \`sudo mount /dev/sdb1 /mnt/datos\` y todo funcionó. Una semana después, tras un reinicio de rutina, \`/mnt/datos\` aparece vacío pero el disco sigue apareciendo en \`lsblk\`. ¿Cuál es la causa más probable?
 
 ---
 
-### 🧪 Laboratorio 4: Diagnóstico de inodos
-
-\`\`\`bash
-# Verificar si el problema son los inodos (no los bloques)
-df -i
-
-# Si /var está al 100% de inodos:
-# Encontrar el directorio con más archivos
-sudo find /var -xdev -printf '%h\n' 2>/dev/null | sort | uniq -c | sort -rn | head -10
-
-# Caso típico: millones de sesiones PHP
-ls /var/lib/php/sessions/ | wc -l
-sudo find /var/lib/php/sessions -type f -mtime +1 -delete
-
-# Verificar después
-df -i /var
-\`\`\`
-
----
-
-### 📋 Tabla resumen de herramientas del Nivel 7
-
-| Herramienta | Función |
-| --- | --- |
-| \`lsblk\` | Ver discos, particiones y montajes en árbol |
-| \`lsblk -f\` | Agregar FSTYPE, UUID, LABEL y uso |
-| \`fdisk\` | Crear/gestionar tablas de particiones (soporta GPT) |
-| \`gdisk\` | Herramienta exclusiva para GPT |
-| \`partprobe\` | Forzar re-lectura de tabla de particiones por el kernel |
-| \`mkfs.ext4\` | Formatear partición con ext4 |
-| \`mkfs.xfs\` | Formatear partición con xfs |
-| \`e2label\` | Ver/cambiar etiqueta de ext4 |
-| \`xfs_admin\` | Ver/cambiar etiqueta de xfs |
-| \`tune2fs -l\` | Información completa de un filesystem ext4 |
-| \`fsck.ext4\` | Verificar/reparar ext4 (desmontado) |
-| \`xfs_repair\` | Verificar/reparar xfs (desmontado) |
-| \`mount\` | Montar filesystem temporalmente |
-| \`umount\` | Desmontar filesystem |
-| \`findmnt\` | Ver montajes activos en jerarquía |
-| \`blkid\` | Obtener UUID, LABEL y tipo de filesystem |
-| \`/etc/fstab\` | Configurar montajes persistentes |
-| \`mount -a\` | Validar fstab sin reiniciar |
-| \`df -h\` | Espacio disponible por filesystem |
-| \`df -i\` | Inodos disponibles por filesystem |
-| \`du -sh\` | Tamaño de un directorio |
-| \`du -h \| sort -rh\` | Localizar directorio más grande |
-| \`find -size +100M\` | Encontrar archivos grandes |
-| \`lsof +L1\` | Detectar archivos borrados con descriptores abiertos |
+1. El nombre del dispositivo (\`/dev/sdb1\`) depende del orden en que el kernel detecta los discos, que puede cambiar si se agregan, quitan o reordenan discos en el servidor. El UUID se genera al formatear el filesystem y es único y estable, así que \`fstab\` sigue apuntando al disco correcto sin importar cómo se renombren los dispositivos.
+2. \`sudo mount -a\`, que vuelve a montar todo lo definido en \`fstab\` sin necesidad de reiniciar. Si no produce ningún error, la sintaxis y las referencias (UUID, punto de montaje, tipo de filesystem) son válidas, y el sistema arrancará correctamente la próxima vez.
+3. El disco y el filesystem están intactos (por eso \`lsblk\` lo muestra), pero el montaje se hizo con \`mount\` manual sin agregar la entrada correspondiente en \`/etc/fstab\`. Ese tipo de montaje es temporal y no sobrevive a un reinicio; la solución es obtener el UUID con \`blkid\` y añadir la línea correcta a \`fstab\`.
 `
+
 export default content

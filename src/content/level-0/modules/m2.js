@@ -15,6 +15,10 @@ Muchas decisiones de diseño que hoy parecen "así es como funciona la terminal"
 
 La historia de Linux es como la historia de un idioma vivo. **Unix** es el latín: una lengua original de la que derivan muchas otras (BSD, System V, y conceptualmente Linux). **GNU** es como un diccionario y una gramática completos, escritos desde cero para ser libres de usar por cualquiera, a los que solo les faltaba una pieza central. **Linus Torvalds**, en 1991, escribió esa pieza que faltaba: el kernel. Fue como completar un idioma al que ya le sobraba vocabulario pero le faltaba un verbo fundamental.
 
+\`\`\`diagram
+{"type":"side-by-side","gapLabels":["+","+","="],"columns":[{"title":"Unix","icon":"server","rows":["Es el latín","Sistema original de los 70s"]},{"title":"GNU","icon":"package","rows":["Diccionario y gramática","Herramientas libres, sin kernel propio"]},{"title":"Kernel","icon":"chip","rows":["El verbo que faltaba","Escrito por Linus en 1991"]},{"title":"Linux","icon":"terminal","focal":true,"rows":["Idioma completo","GNU + kernel Linux"]}]}
+\`\`\`
+
 ### 📖 Explicación técnica
 
 * **Unix (1969)**: sistema operativo creado en los Bell Labs de AT&T por Ken Thompson y Dennis Ritchie. Introdujo ideas que siguen vigentes: sistema de archivos jerárquico, "todo es un archivo", procesos, tuberías (\`|\`) para encadenar programas pequeños y especializados.

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Montaje temporal y el VFS' },
   { id: 6, title: '/etc/fstab: UUID, LABEL y persistencia' },
   { id: 7, title: 'Diagnóstico de espacio: df, du, inodos y archivos fantasma' },
-  { id: 8, title: 'Laboratorio integrador: disco nuevo, disco perdido y disco lleno' },
+  { id: 8, title: 'Proyecto real: provisionar un volumen de backups en un servidor de base de datos' },
 ]

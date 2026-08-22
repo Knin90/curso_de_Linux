@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Indicadores de compromiso: ¿cómo saber si fui comprometido?' },
   { id: 6, title: 'Respuesta a incidentes: playbook y contención' },
   { id: 7, title: 'Análisis forense básico en Linux: evidencia sin destruirla' },
-  { id: 8, title: 'Laboratorio: detectar y responder a un ataque simulado' },
+  { id: 8, title: 'Proyecto real: detectar y responder a un ataque simulado' },
 ]

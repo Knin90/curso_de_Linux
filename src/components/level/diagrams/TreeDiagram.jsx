@@ -13,10 +13,10 @@ import { Icon } from './icons'
      (recursivo; profundidad recomendada ≤ 3 por presupuesto de complejidad)
    ============================================================ */
 
-const NODE_H = 60
-const H_GAP = 24
-const ROW_H = 96
-const CHAR_W = 6.3
+const NODE_H = 78
+const H_GAP = 28
+const ROW_H = 118
+const CHAR_W = 7.8
 
 // Ancho del nodo según su propio texto (nombre o meta, el que sea más
 // largo), para que ningún label se desborde de su caja.
@@ -135,6 +135,7 @@ export default function TreeDiagram({ root, children = [] }) {
         {/* nodes */}
         {positioned.map((n, i) => (
           <g key={i} style={{ '--i': i }} className="dg-node">
+          <g className="dg-node-hover">
             <rect
               x={n.x}
               y={n.y}
@@ -145,28 +146,29 @@ export default function TreeDiagram({ root, children = [] }) {
             />
             {n.icon ? (
               <>
-                <Icon name={n.icon} x={n.x + 12} y={n.y + NODE_H / 2 - 11} size={22} className={n.focal ? 'dg-icon-focal' : 'dg-icon'} />
-                <text x={n.x + 44} y={n.y + NODE_H / 2 - 3} className={n.focal ? 'dg-name-focal' : 'dg-name'} style={{ fontSize: 12.5 }}>
+                <Icon name={n.icon} x={n.x + 15} y={n.y + NODE_H / 2 - 14} size={28} className={n.focal ? 'dg-icon-focal' : 'dg-icon'} />
+                <text x={n.x + 55} y={n.y + NODE_H / 2 - 5} className={n.focal ? 'dg-name-focal' : 'dg-name'} style={{ fontSize: 16.5 }}>
                   {n.name}
                 </text>
                 {n.meta && (
-                  <text x={n.x + 44} y={n.y + NODE_H / 2 + 14} className="dg-meta" style={{ fontSize: 9 }}>
+                  <text x={n.x + 55} y={n.y + NODE_H / 2 + 17} className="dg-meta" style={{ fontSize: 12 }}>
                     {n.meta}
                   </text>
                 )}
               </>
             ) : (
               <>
-                <text x={n.x + n.w / 2} y={n.y + (n.meta ? NODE_H / 2 - 3 : NODE_H / 2 + 4)} textAnchor="middle" className={n.focal ? 'dg-name-focal' : 'dg-name'} style={{ fontSize: 12.5 }}>
+                <text x={n.x + n.w / 2} y={n.y + (n.meta ? NODE_H / 2 - 5 : NODE_H / 2 + 6)} textAnchor="middle" className={n.focal ? 'dg-name-focal' : 'dg-name'} style={{ fontSize: 16.5 }}>
                   {n.name}
                 </text>
                 {n.meta && (
-                  <text x={n.x + n.w / 2} y={n.y + NODE_H / 2 + 14} textAnchor="middle" className="dg-meta" style={{ fontSize: 9 }}>
+                  <text x={n.x + n.w / 2} y={n.y + NODE_H / 2 + 17} textAnchor="middle" className="dg-meta" style={{ fontSize: 12 }}>
                     {n.meta}
                   </text>
                 )}
               </>
             )}
+          </g>
           </g>
         ))}
       </svg>

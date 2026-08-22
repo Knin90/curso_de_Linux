@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'SSL/TLS en nginx: certificados, HTTPS y configuración segura' },
   { id: 6, title: 'Compresión, caché de cliente y optimización de rendimiento' },
   { id: 7, title: 'Rate limiting, limit_conn y protección contra abuso' },
-  { id: 8, title: 'Laboratorio: servidor web nginx de producción completo' },
+  { id: 8, title: 'Proyecto real: servidor web nginx de producción completo' },
 ]

@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: sistema de backup completo con restauración verificada
+## Módulo 8 — Proyecto real: sistema de backup completo con restauración verificada
 
 ### 🎯 Objetivos de aprendizaje
 * Construir desde cero un sistema de backup completo con BorgBackup, PostgreSQL y configuración de aplicación
@@ -307,7 +307,7 @@ crontab -e
 # 0 * * * * /usr/local/bin/backup-freshness-check.sh >> /var/log/backup/freshness.log 2>&1
 \`\`\`
 
-### 📖 Paso 5 — Script de verificación de integridad
+### 📖 Paso 5 — Script de comprobación de integridad
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -444,8 +444,6 @@ Guarda este archivo en Git (no en el mismo servidor — si el servidor cae, pier
 
 ## Responsable: _________________ | Backup: _________________
 ## ETA estimada: 45-90 minutos
-
----
 
 ## PASO 1 — Verificar que el fallo es real (5 min)
 \`\`\`bash
@@ -612,7 +610,7 @@ fi
 }
 \`\`\`
 
-### 📖 Verificación final del sistema completo
+### 📖 Estado final del sistema completo
 
 \`\`\`bash
 # Estado de todos los timers de backup

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Grafana: dashboards, datasources y paneles' },
   { id: 6, title: 'Recording rules y optimización de Prometheus' },
   { id: 7, title: 'Monitoreo de aplicaciones: métricas custom y client libraries' },
-  { id: 8, title: 'Laboratorio: stack de monitoreo completo Prometheus/Grafana' },
+  { id: 8, title: 'Proyecto real: stack de monitoreo completo Prometheus/Grafana' },
 ]

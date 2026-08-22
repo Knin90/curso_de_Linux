@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Automatización de backups con cron y systemd timers' },
   { id: 6, title: 'Testing de restauración: el paso crítico que todos omiten' },
   { id: 7, title: 'Disaster Recovery: planificación, runbooks y failover' },
-  { id: 8, title: 'Laboratorio: sistema de backup completo con restauración verificada' },
+  { id: 8, title: 'Proyecto real: sistema de backup completo con restauración verificada' },
 ]

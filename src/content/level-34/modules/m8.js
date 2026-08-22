@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: Redis como capa de caché para aplicación web
+## Módulo 8 — Proyecto real: Redis como capa de caché para aplicación web
 
 ### 🎯 Objetivos de aprendizaje
 * Instalar y configurar Redis con parámetros de producción: límite de memoria, política de evicción, autenticación

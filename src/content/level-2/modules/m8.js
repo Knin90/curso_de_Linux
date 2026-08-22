@@ -1,121 +1,159 @@
 const content = `
-## Módulo 8 — Laboratorio integrador: Diagnóstico y reparación
+## Módulo 8 — Proyecto real: runbook de incidentes de arranque
 
 ### 🎯 Objetivos de aprendizaje
 
-* Diagnosticar y reparar fallos comunes de montaje de disco.
-* Realizar la técnica de **Chroot desde un Live USB** para reparar un sistema inaccesible o un gestor GRUB destruido.
+* Diagnosticar y reparar fallos comunes de montaje de disco (\`/etc/fstab\` corrupto).
+* Reparar un cargador GRUB destruido usando \`chroot\` desde un Live USB.
+* Dejar evidencia escrita (runbook) de cada incidente para el equipo de guardia.
 
-### 🧪 Escenario 1: Reparar un archivo \`/etc/fstab\` corrupto
+### ❓ El problema real
 
-**Síntoma:** El sistema arranca pero se detiene en seco mostrando el mensaje \`Emergency mode\` debido a una ruta de disco inexistente en \`/etc/fstab\`.
+Eres el administrador de guardia de un equipo pequeño de operaciones. Dos servidores dejan de arrancar la misma semana: uno se queda en \`Emergency mode\` por un \`/etc/fstab\` corrupto, y otro pierde por completo el sector de arranque y muestra \`grub rescue>\`. El equipo no tiene un procedimiento escrito para estos casos, así que se te pide construir un runbook de incidentes de arranque: scripts reproducibles para cada escenario, más un informe posterior (\`postmortem.md\`) que documente qué pasó y cómo se resolvió, para que la próxima persona de guardia no tenga que improvisar.
 
-\`\`\`diagram
-{"type":"flow-stack","layers":[{"icon":"alert","name":"Fallo de arranque"},{"name":"Ingresar clave Root"},{"icon":"log","name":"journalctl -xb | grep -i failed"},{"name":"mount -o remount,rw /"},{"icon":"file","name":"Corregir error en /etc/fstab","focal":true},{"icon":"sync","name":"systemctl reboot"}],"edges":[{"label":"detecta"},{"label":"revisa logs"},{"label":"remonta rw"},{"label":"edita"},{"label":"reinicia"}]}
+### 📖 Estructura del proyecto
+
+\`\`\`
+incident-boot-recovery/
+├── diagnostico.sh
+├── reparar-fstab.sh
+├── reparar-grub-chroot.sh
+└── postmortem.md
 \`\`\`
 
-#### Procedimiento de reparación:
-
-1. Ingresa a la consola de mantenimiento introduciendo la clave de root.
-2. Localiza el punto de montaje fallido:
+### 📖 diagnostico.sh — primeros pasos al llegar a un servidor que no arranca
 
 \`\`\`bash
-journalctl -xb | grep -i "failed"
+#!/bin/bash
+# Ejecutar desde la consola de mantenimiento (modo emergencia) o desde un Live USB.
+set -euo pipefail
+
+echo "== Revisando el journal en busca de fallos =="
+journalctl -xb | grep -i "failed" || echo "Sin coincidencias de 'failed'"
+
+echo "== Estado de montajes actuales =="
+mount | grep " / "
 \`\`\`
 
-3. Vuelve a montar el sistema de archivos raíz con permisos de escritura:
+### 📖 reparar-fstab.sh — incidente 1: \`/etc/fstab\` corrupto
+
+**Síntoma:** el sistema arranca pero se detiene en \`Emergency mode\` porque \`/etc/fstab\` referencia un disco inexistente.
 
 \`\`\`bash
+#!/bin/bash
+# Se ejecuta desde la consola de mantenimiento, tras entrar con la clave de root.
+set -euo pipefail
+
+# 1. Remontar la raíz con permisos de escritura (la consola de emergencia monta en solo lectura)
 mount -o remount,rw /
-\`\`\`
 
-4. Edita el archivo de montaje de discos:
-
-\`\`\`bash
+# 2. Abrir el archivo de montajes para localizar y corregir/comentar la línea defectuosa
 nano /etc/fstab
-\`\`\`
 
-5. Comenta (coloca \`#\` al inicio) o corrige la línea del disco defectuoso.
-6. Reinicia el servidor:
-
-\`\`\`bash
+# 3. Reiniciar una vez corregido
 systemctl reboot
 \`\`\`
 
-### 🧪 Escenario 2: Reinstalación de GRUB dañado utilizando Chroot desde un Live USB
+### 📖 reparar-grub-chroot.sh — incidente 2: GRUB destruido
 
-**Síntoma:** El disco principal perdió el sector de arranque y el equipo muestra el mensaje \`grub rescue>\` o un error indicando que no hay dispositivo de arranque.
-
-\`\`\`diagram
-{"type":"flow-stack","layers":[{"icon":"terminal","name":"Preparar el entorno chroot","meta":"1. Iniciar Live USB · 2. Montar raíz en /mnt · 3. Enlazar /dev, /proc, /sys · 4. chroot /mnt"},{"icon":"disk","name":"Operar dentro del disco dañado","meta":"grub-install /dev/sda · update-grub","focal":true}],"edges":[{"label":"chroot /mnt"}]}
-\`\`\`
-
-#### Guía paso a paso:
-
-1. Inicia el equipo utilizando una distribución en modo **Live USB**.
-2. Abre la consola de comandos del sistema Live.
-3. Identifica la partición del disco duro donde reside el sistema operativo instalado:
+**Síntoma:** el disco perdió el sector de arranque; el equipo muestra \`grub rescue>\` o "no bootable device".
 
 \`\`\`bash
+#!/bin/bash
+# Se ejecuta desde una sesión Live USB (no desde el disco dañado).
+set -euo pipefail
+
+# 1. Identificar la partición raíz del sistema dañado
 sudo lsblk
-# En este ejemplo: /dev/sda2 es la raíz (/), y /dev/sda1 es la partición EFI
-\`\`\`
+# En este incidente: /dev/sda2 es la raíz (/), /dev/sda1 es la partición EFI
 
-4. Monta el directorio raíz dañado en el punto de montaje \`/mnt\` de la sesión Live:
-
-\`\`\`bash
+# 2. Montar el sistema dañado en /mnt
 sudo mount /dev/sda2 /mnt
-sudo mount /dev/sda1 /mnt/boot/efi   # Únicamente en sistemas UEFI
-\`\`\`
+sudo mount /dev/sda1 /mnt/boot/efi   # solo en sistemas UEFI
 
-5. Realiza el montaje vinculante (*bind mount*) de los sistemas de archivos especiales del kernel:
+# 3. Enlazar los sistemas de archivos especiales del kernel
+for dir in /dev /dev/pts /proc /sys /run; do
+  sudo mount --bind "\$dir" "/mnt\$dir"
+done
 
-\`\`\`bash
-for dir in /dev /dev/pts /proc /sys /run; do sudo mount --bind $dir /mnt$dir; done
-\`\`\`
-
-6. Realiza el cambio de raíz para ingresar al sistema del disco duro:
-
-\`\`\`bash
-sudo chroot /mnt
-\`\`\`
-
-7. Reinstala y compila la configuración del cargador de arranque:
-
-\`\`\`bash
-# En distribuciones Debian / Ubuntu:
+# 4. Cambiar la raíz al sistema dañado
+sudo chroot /mnt <<'CHROOT'
+# Debian / Ubuntu:
 grub-install /dev/sda
 update-grub
 
-# En distribuciones RHEL / Fedora:
-grub2-install /dev/sda
-grub2-mkconfig -o /boot/grub2/grub.cfg
-\`\`\`
+# RHEL / Fedora (usar en su lugar si aplica):
+# grub2-install /dev/sda
+# grub2-mkconfig -o /boot/grub2/grub.cfg
+CHROOT
 
-8. Sal del entorno chroot, desmonta las unidades y reinicia:
-
-\`\`\`bash
-exit
+# 5. Salir, desmontar y reiniciar
+sudo umount -R /mnt
 sudo reboot
 \`\`\`
 
+### 📖 postmortem.md — informe posterior al incidente
+
+\`\`\`text
+Incidente:      Fallo doble de arranque (fstab corrupto + GRUB destruido)
+Servidores:     srv-web-01, srv-db-02
+Detección:      journalctl -xb | grep -i failed
+Causa raíz 1:   entrada obsoleta en /etc/fstab tras retirar un disco de datos
+Causa raíz 2:   escritura accidental en el sector de arranque durante un
+                reparticionado manual sin respaldo previo
+Resolución:     ver diagnostico.sh, reparar-fstab.sh, reparar-grub-chroot.sh
+Tiempo total:   38 minutos
+Seguimiento:    agregar validación de fstab al pipeline de aprovisionamiento
+                antes de retirar cualquier disco
+\`\`\`
+
+### 📖 Secuencia de ejecución
+
+1. Al recibir la alerta de arranque fallido, ejecuta \`diagnostico.sh\` para confirmar si el journal reporta un fallo de montaje.
+2. Si el fallo es \`/etc/fstab\`, sigue \`reparar-fstab.sh\` paso a paso desde la consola de mantenimiento.
+
+Salida esperada al finalizar la reparación de fstab:
+
+\`\`\`
+== Revisando el journal en busca de fallos ==
+systemd[1]: Failed to mount /mnt/datos.
+== Estado de montajes actuales ==
+/dev/sda2 on / type ext4 (rw,relatime)
+\`\`\`
+
+3. Si el fallo es de GRUB, arranca el servidor desde un Live USB y sigue \`reparar-grub-chroot.sh\`.
+
+Salida esperada tras \`grub-install\` y \`update-grub\` dentro del chroot:
+
+\`\`\`
+Installing for x86_64-efi platform.
+Installation finished. No error reported.
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-6.5.0-14-generic
+Found initrd image: /boot/initrd.img-6.5.0-14-generic
+done
+\`\`\`
+
+4. Redacta \`postmortem.md\` con la causa raíz y el tiempo de resolución, y archívalo con el resto de incidentes del equipo.
+
 ### 📋 Lo que debes recordar
 
-* **Qué hace:** Proporciona los procedimientos para recuperar sistemas Linux inaccesibles mediante entornos Live o consolas de emergencia.
-* **Técnica clave:** El proceso **Chroot** permite reparar un sistema operativo dañado operando desde un sistema independiente cargado en USB.
-* **Comando indispensable:** \`mount --bind\` para proyectar recursos virtuales de hardware (\`/dev\`, \`/proc\`, \`/sys\`) al interior del entorno \`chroot\`.
+* **Qué hace:** documenta procedimientos reproducibles para recuperar sistemas Linux que no arrancan, en lugar de improvisar cada vez.
+* **Técnica clave:** \`chroot\` permite reparar un sistema dañado operando desde un entorno independiente (Live USB) que monta ese disco como raíz temporal.
+* **Comando indispensable:** \`mount --bind\` proyecta \`/dev\`, \`/proc\` y \`/sys\` del sistema Live dentro del \`chroot\`, sin lo cual \`grub-install\` no puede ver el hardware real.
+* Un incidente sin \`postmortem.md\` es un incidente que se va a repetir.
 
-### 🧪 Autoevaluación rápida
+### 🧪 Autoevaluación
 
-1. ¿Para qué se utiliza la opción \`--bind\` del comando \`mount\` al preparar un entorno \`chroot\`?
-2. Si el sistema se bloquea por un error en \`/etc/fstab\`, ¿por qué no es posible editar directamente ese archivo en el primer intento?
-3. ¿Cuál es el propósito del comando \`chroot\` en una tarea de rescate de servidor?
+1. ¿Para qué se usa la opción \`--bind\` del comando \`mount\` al preparar un entorno \`chroot\`?
+2. Si el sistema se bloquea por un error en \`/etc/fstab\`, ¿por qué no se puede editar directamente ese archivo en el primer intento?
+3. ¿Cuál es el propósito de \`chroot\` en una tarea de rescate como la del incidente 2?
 
 ---
 
-1. Para conectar los directorios del kernel del sistema activo (\`/dev\`, \`/proc\`, \`/sys\`) al interior del directorio montado en \`/mnt\`, permitiendo que los comandos del Chroot puedan interactuar con el hardware.
-2. Porque el sistema de emergencia monta la partición raíz en modo **solo lectura** (\`ro\`). Debe re-montarse primero en modo \`rw\`.
-3. Cambiar la raíz del sistema operativo activo (en este caso el Live USB) por la estructura de archivos montada del disco duro dañado.
+1. Conecta los directorios del kernel del sistema activo (\`/dev\`, \`/proc\`, \`/sys\`) dentro del directorio montado en \`/mnt\`, para que los comandos ejecutados en el \`chroot\` puedan interactuar con el hardware real.
+2. Porque la consola de emergencia monta la partición raíz en modo **solo lectura** (\`ro\`); debe remontarse primero en modo \`rw\` con \`mount -o remount,rw /\`.
+3. Cambiar la raíz del sistema operativo activo (el Live USB) por la estructura de archivos montada del disco dañado, para poder reinstalar GRUB como si se estuviera ejecutando dentro del propio sistema afectado.
 `
 
 export default content

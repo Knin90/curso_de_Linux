@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Cuotas de disco: edquota, quota, repquota y gestión de almacenamiento' },
   { id: 6, title: 'ACLs avanzadas: setfacl, getfacl y casos de uso en producción' },
   { id: 7, title: 'SSSD y autenticación centralizada: LDAP y Active Directory' },
-  { id: 8, title: 'Laboratorio: gestión empresarial de usuarios en producción' },
+  { id: 8, title: 'Proyecto real: onboarding de usuarios para TechCorp' },
 ]

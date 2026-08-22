@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'WSL — Windows Subsystem for Linux' },
   { id: 6, title: 'Live USB' },
   { id: 7, title: 'Dual Boot' },
-  { id: 8, title: 'Laboratorio integrador: instalación real' },
+  { id: 8, title: 'Proyecto real: runbook de instalación para una flota de 3 servidores' },
 ]

@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Targets: equivalente moderno a runlevels' },
   { id: 6, title: 'journalctl: logs y auditoría centralizada' },
   { id: 7, title: 'Diagnóstico y troubleshooting de servicios' },
-  { id: 8, title: 'Laboratorio integrador: despliegue profesional de un servicio' },
+  { id: 8, title: 'Proyecto real: monitoreo de salud con systemd para una flota de servidores' },
 ]

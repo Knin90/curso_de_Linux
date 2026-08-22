@@ -15,6 +15,10 @@ Un recién llegado a Linux suele quedar paralizado ante la cantidad de distribuc
 
 Piensa en las distribuciones como **familias de idiomas**. Así como el español, el italiano y el francés derivan del latín y comparten gramática y vocabulario reconocibles entre sí, distribuciones como Ubuntu, Linux Mint y Pop!_OS derivan de Debian y comparten su gestor de paquetes y buena parte de su estructura interna. Aprender "el idioma base" de una familia te permite entender, con pequeños ajustes, a casi todos sus "dialectos".
 
+\`\`\`diagram
+{"type":"tree","root":{"name":"Debian","meta":"El idioma base","icon":"server"},"children":[{"name":"Ubuntu","meta":"Dialecto popular","icon":"desktop","edgeLabel":"deriva"},{"name":"Linux Mint","meta":"Dialecto amigable","icon":"desktop","edgeLabel":"deriva"},{"name":"Pop!_OS","meta":"Dialecto dev/gamer","icon":"desktop","edgeLabel":"deriva"}]}
+\`\`\`
+
 ### 📖 Explicación técnica
 
 Las tres grandes familias que dominan el ecosistema de escritorio y servidor:

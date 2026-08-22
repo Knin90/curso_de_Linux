@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Examen final integrador y criterio de certificación
+## Módulo 8 — Caso real: examen final integrador y criterio de certificación
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -10,6 +10,16 @@ const content = `
 ### ❓ El problema real
 
 En producción los incidentes reales rara vez tienen una sola causa. Este examen final presenta un escenario extenso donde una alerta inicial simple esconde una cadena de causas relacionadas con redes, almacenamiento, systemd y un script de automatización defectuoso — exactamente el tipo de incidente que un administrador junior enfrenta en su primer mes de trabajo real.
+
+### 📖 Estructura del caso
+
+\`\`\`
+Examen final integrador
+├── Escenario integrador          ← incidente multicausa a resolver
+├── Checklist de competencias     ← 14 ítems, fundamentos → automatización
+├── Criterio de aprobación        ← tabla de niveles de certificación
+└── Autoevaluación final          ← 3 preguntas de cierre
+\`\`\`
 
 ### 📖 Escenario integrador — "El viernes de la caída en cascada"
 
@@ -115,7 +125,7 @@ El script nunca tuvo permiso de ejecución desde que fue desplegado hace más de
 1. Agregar monitoreo de espacio en disco con alerta temprana (80%/90%) para no depender de la caída del servicio como señal.
 2. Agregar logging explícito y verificación de código de salida al script de limpieza (o migrarlo a un systemd timer con \`OnFailure=\` para alertar si falla), de forma que un fallo silencioso de cron nunca vuelva a pasar desapercibido.
 
-### 📋 Checklist final — Qué debe saber hacer un egresado del curso
+### 📖 Checklist final — Qué debe saber hacer un egresado del curso
 
 * Navegar y manipular el filesystem, procesos, usuarios y permisos con criterio de menor privilegio.
 * Diagnosticar problemas de red por capas, desde resolución DNS hasta firewall y aplicación.
@@ -132,7 +142,7 @@ El script nunca tuvo permiso de ejecución desde que fue desplegado hace más de
 * Resolver incidentes multicausa siguiendo una cadena de diagnóstico completa, no soluciones parciales.
 * Comunicar un diagnóstico técnico de forma clara: síntoma, causa raíz, corrección inmediata, corrección de fondo.
 
-### 📋 Criterio de aprobación final del curso
+### 📖 Criterio de aprobación final del curso
 
 | Nivel de dominio | Descripción | Resultado |
 |---|---|---|
@@ -141,6 +151,13 @@ El script nunca tuvo permiso de ejecución desde que fue desplegado hace más de
 | Certificado — Profesional | "Sólido" en al menos 5 de los 7 módulos de evaluación, resuelve el escenario integrador de este módulo de forma autónoma y completa | Preparado para roles de administración Linux en producción |
 
 **Regla de cierre:** ningún nivel de certificación se otorga si hubo un fallo eliminatorio en seguridad (desactivar SELinux/AppArmor/firewall como solución, deshabilitar autenticación SSH sin verificación previa, loguear secretos, actuar sobre datos en riesgo sin verificación) en cualquiera de los 7 módulos, sin importar el puntaje del resto.
+
+### 📋 Lo que debes recordar
+
+* Un incidente real rara vez tiene una sola causa: "el disco se llenó" es el síntoma final, no la causa raíz completa.
+* Cada nivel de certificación exige superar los módulos de evaluación sin fallos eliminatorios de seguridad, sin importar el puntaje del resto.
+* El checklist de competencias es una herramienta de autodiagnóstico honesto, no una puntuación perfecta: identificar un área débil es un resultado válido y esperado.
+* Un diagnóstico completo siempre distingue el síntoma superficial de la causa raíz que lo generó, y documenta corrección inmediata y corrección de fondo por separado.
 
 ### 🧪 Autoevaluación final
 

@@ -1,25 +1,31 @@
 const content = `
-## Módulo 8 — Laboratorio integrado: sistema de automatización completo
+## Módulo 8 — Proyecto real: sistema de automatización para un servidor de producción
 
 ### 🎯 Objetivos de aprendizaje
 
-* Diseñar un sistema de automatización completo para un servidor de producción.
-* Combinar cron, systemd timers y at según el caso de uso correcto.
-* Implementar monitoreo de los propios jobs de automatización.
-* Auditar y limpiar un sistema con jobs heredados y desorganizados.
+* Diseñar un sistema de automatización completo combinando cron, systemd timers y at según el caso de uso correcto.
+* Implementar monitoreo de los propios jobs de automatización, no solo de la aplicación.
+* Auditar y limpiar un servidor con tareas heredadas y desorganizadas.
 
-### 📖 El escenario
+### ❓ El problema real
 
-Servidor web de producción con:
-- nginx + aplicación Node.js
-- PostgreSQL
-- Necesidades de backup, monitoreo, mantenimiento y reporting
+Heredaste la administración de un servidor con nginx, una aplicación Node.js y PostgreSQL. Nadie documentó qué tareas automáticas existen: hay crontabs de al menos dos usuarios, archivos sueltos en \`/etc/cron.d/\`, y sospechas de que algún backup lleva semanas fallando en silencio. Antes de agregar nada nuevo, necesitas auditar todo lo que ya corre, diseñar un plan de automatización con la herramienta correcta para cada tarea, y dejar un mecanismo para saber si un job deja de ejecutarse.
 
-Objetivo: diseñar el sistema de automatización completo.
+### 📖 Estructura del proyecto
 
-### 📖 Paso 1: auditar los jobs existentes
+\`\`\`
+automatizacion-produccion/
+├── audit-cron.sh
+├── cron.d/
+│   └── app-backups
+├── systemd/
+│   ├── healthcheck.service
+│   └── healthcheck.timer
+├── healthcheck.sh
+└── check-jobs.sh
+\`\`\`
 
-Antes de añadir nada nuevo, auditar el estado actual:
+### 📖 audit-cron.sh — inventario completo de tareas programadas
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -65,7 +71,7 @@ echo "--- Trabajos at pendientes ---"
 atq 2>/dev/null || echo "(atd no disponible)"
 \`\`\`
 
-### 📖 Paso 2: diseño del sistema de automatización
+### 📖 Plan de automatización — qué herramienta para cada tarea
 
 \`\`\`text
 TAREA                    HERRAMIENTA  FRECUENCIA    JUSTIFICACIÓN
@@ -80,15 +86,10 @@ Reporte semanal          systemd      Lunes 9am     Necesita env variables
 Restart nocturno nginx   at           Una vez       Ventana de mantenimiento
 \`\`\`
 
-### 📖 Paso 3: implementar los jobs principales
-
-**Backup con lock y notificación:**
-
-\`\`\`bash
-sudo nano /etc/cron.d/app-backups
-\`\`\`
+### 📖 cron.d/app-backups — backup con lock y sin solapamiento
 
 \`\`\`text
+# /etc/cron.d/app-backups
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 MAILTO=""
@@ -100,10 +101,10 @@ MAILTO=""
 30 2 * * * root  flock -n /var/lock/backup-files.lock /usr/local/bin/backup-files.sh >> /var/log/backup-files.log 2>&1
 \`\`\`
 
-**Health check como systemd timer:**
+### 📖 systemd/healthcheck.service y healthcheck.timer
 
-\`\`\`bash
-sudo tee /etc/systemd/system/healthcheck.service << 'EOF'
+\`\`\`ini
+# /etc/systemd/system/healthcheck.service
 [Unit]
 Description=Health check de la aplicación
 After=network.target
@@ -114,9 +115,10 @@ User=nobody
 ExecStart=/usr/local/bin/healthcheck.sh
 StandardOutput=journal
 StandardError=journal
-EOF
+\`\`\`
 
-sudo tee /etc/systemd/system/healthcheck.timer << 'EOF'
+\`\`\`ini
+# /etc/systemd/system/healthcheck.timer
 [Unit]
 Description=Health check cada 5 minutos
 
@@ -126,16 +128,11 @@ Persistent=false
 
 [Install]
 WantedBy=timers.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now healthcheck.timer
 \`\`\`
 
-### 📖 Paso 4: script de healthcheck completo
+### 📖 healthcheck.sh — verificación con alerta tras fallos consecutivos
 
 \`\`\`bash
-sudo tee /usr/local/bin/healthcheck.sh << 'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -181,11 +178,9 @@ else
     # Reset contador de fallos
     rm -f "$ALERT_FILE"
 fi
-SCRIPT
-chmod +x /usr/local/bin/healthcheck.sh
 \`\`\`
 
-### 📖 Paso 5: monitorear el sistema de automatización
+### 📖 check-jobs.sh — monitorear el propio sistema de automatización
 
 \`\`\`bash
 #!/usr/bin/env bash
@@ -217,35 +212,89 @@ echo "--- Locks activos ---"
 lsof /var/lock/*.lock 2>/dev/null | grep -v COMMAND || echo "(ninguno)"
 \`\`\`
 
-### 📖 Checklist de producción
+### 📖 Secuencia de ejecución
 
-\`\`\`text
-ANTES DE PONER EN PRODUCCIÓN UN JOB PROGRAMADO:
+**Paso 1: auditar antes de tocar nada**
 
-□ ¿Tiene lock? (para prevenir ejecuciones simultáneas)
-□ ¿Tiene timeout? (para prevenir que se cuelgue)
-□ ¿Tiene logging? (para poder auditar qué pasó)
-□ ¿Tiene notificación de fallo? (para enterarte si falla)
-□ ¿Es idempotente? (¿qué pasa si corre dos veces seguidas?)
-□ ¿Qué pasa si falla a mitad? ¿deja el sistema en estado inconsistente?
-□ ¿El usuario bajo el que corre tiene los permisos necesarios?
-□ ¿Se probó la ejecución manual antes de activar en cron?
-□ ¿Está documentado en el README o wiki del sistema?
-□ ¿Hay monitoreo de que el job se ejecuta con la frecuencia esperada?
+\`\`\`bash
+chmod +x audit-cron.sh
+./audit-cron.sh > /tmp/auditoria-$(date +%Y%m%d).txt
+less /tmp/auditoria-$(date +%Y%m%d).txt
 \`\`\`
 
-### 🧪 Ejercicio de cierre
+Encuentras un backup en \`/etc/cron.d/\` sin \`flock\`, apuntando a un script que ya no existe — la causa del "backup fallando en silencio".
 
-Implementa en tu servidor el sistema completo:
+**Paso 2: instalar el backup con lock**
 
-1. Instalar el script de auditoría y ejecutarlo
-2. Crear \`/etc/cron.d/lab-backup\` con un backup simulado (\`echo "backup OK" >> /tmp/backup.log\`) que corra cada minuto y use flock
-3. Crear el systemd timer de healthcheck con el script básico (verificar nginx y disco)
-4. Ejecutar \`watch -n 5 'tail -5 /tmp/backup.log'\` y verificar que el backup corre cada minuto
-5. Verificar con \`journalctl -u healthcheck.service -f\` que el timer funciona
-6. Comprobar que no hay dos instancias simultáneas del backup
+\`\`\`bash
+sudo cp cron.d/app-backups /etc/cron.d/app-backups
+sudo chmod 644 /etc/cron.d/app-backups
+\`\`\`
 
-Este ejercicio consolida: cron con lock, systemd timer con journald, y monitoreo de los propios jobs de automatización.
+**Paso 3: instalar el health check como systemd timer**
+
+\`\`\`bash
+sudo cp healthcheck.sh /usr/local/bin/healthcheck.sh
+sudo chmod +x /usr/local/bin/healthcheck.sh
+sudo cp systemd/healthcheck.service /etc/systemd/system/healthcheck.service
+sudo cp systemd/healthcheck.timer /etc/systemd/system/healthcheck.timer
+sudo systemctl daemon-reload
+sudo systemctl enable --now healthcheck.timer
+systemctl list-timers healthcheck.timer
+\`\`\`
+
+Salida esperada:
+
+\`\`\`
+NEXT                        LEFT      LAST  PASSED  UNIT                ACTIVATES
+Tue 2024-05-14 09:05:00 UTC 3min left n/a   n/a      healthcheck.timer   healthcheck.service
+\`\`\`
+
+**Paso 4: verificar que todo corre cuando debe**
+
+\`\`\`bash
+chmod +x check-jobs.sh
+./check-jobs.sh
+\`\`\`
+
+\`\`\`
+=== Estado de automatización: Tue May 14 09:10:02 UTC 2024 ===
+
+--- Últimos backups ---
+backup-db.log: última actividad 2024-05-14 02:00:03
+backup-files.log: última actividad 2024-05-14 02:30:05
+
+--- Timers systemd ---
+NEXT                        LEFT      LAST                         PASSED    UNIT
+Tue 2024-05-14 09:15:00 UTC 4min left Tue 2024-05-14 09:10:00 UTC  2s ago    healthcheck.timer
+
+--- Fallos recientes en jobs ---
+Errores healthcheck (24h): 0
+Errores backup (24h): 0
+
+--- Locks activos ---
+(ninguno)
+\`\`\`
+
+### 📋 Lo que debes recordar
+
+* \`flock -n\` en el propio cron previene que dos instancias del mismo job corran a la vez si una se cuelga.
+* Un job programado sin logging ni notificación de fallo puede llevar semanas fallando "en silencio" — como el que encontraste en la auditoría.
+* systemd timers son preferibles a cron cuando el job necesita dependencias de servicio (\`After=\`) o logs integrados en \`journalctl\`.
+* Monitorear la automatización requiere verificar la última ejecución, no solo que el timer/cron exista.
+* Auditar antes de automatizar: nunca agregues un job nuevo sin saber qué ya está corriendo.
+
+### 🧪 Autoevaluación
+
+1. \`check-jobs.sh\` muestra que \`backup-db.log\` no tiene actividad desde hace 3 días, pero el cron sigue en \`/etc/cron.d/app-backups\`. ¿Qué dos comandos usarías primero para diagnosticar por qué dejó de correr?
+2. ¿Por qué el health check se implementó como systemd timer en lugar de una entrada de cron?
+3. El script \`backup-db.sh\` no usa \`flock\`. Si tarda más de 24 horas en completarse un día (por ejemplo, una base de datos muy grande), ¿qué puede pasar al día siguiente a las 2am?
+
+---
+
+1. \`journalctl -u healthcheck.service --since "3 days ago"\` (o revisar directamente \`grep CRON /var/log/syslog\`) para ver si cron intentó ejecutarlo, y \`sudo crontab -l\` / \`cat /etc/cron.d/app-backups\` para confirmar que la ruta del script y el usuario configurado (\`postgres\`) siguen siendo correctos.
+2. Porque necesita \`After=network.target\` para no ejecutarse antes de que la red esté lista, y porque sus fallos quedan integrados en \`journalctl -u healthcheck.service\`, lo que unifica logs de aplicación y de automatización en un solo lugar — cron por sí solo no ofrece ninguna de las dos cosas.
+3. Sin \`flock\`, cron lanzaría una segunda instancia de \`backup-db.sh\` mientras la primera sigue corriendo: dos \`pg_dump\` simultáneos compitiendo por I/O, el riesgo de un backup corrupto a medio escribir, y consumo doble de recursos justo cuando el sistema ya está bajo carga.
 `
 
 export default content

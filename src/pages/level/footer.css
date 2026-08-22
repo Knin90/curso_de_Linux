@@ -1,0 +1,28 @@
+/* ---------- Footer ---------- */
+.level-page .footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+.level-page .footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.level-page .footer a {
+  color: var(--fg);
+  text-decoration: none;
+  display: inline-block;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.15s ease, transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .footer a:hover { border-color: var(--fg); }
+}
+.level-page .footer a:active { transform: translateY(1px); }

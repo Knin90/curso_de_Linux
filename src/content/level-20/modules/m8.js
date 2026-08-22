@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: arquitectura proxy inverso completa
+## Módulo 8 — Proyecto real: arquitectura de proxy inverso completa para producción
 
 ### 🎯 Objetivos de aprendizaje
 
@@ -12,7 +12,7 @@ const content = `
 
 Es hora de construir la configuración completa. La arquitectura objetivo: tres instancias de una API Node.js, nginx como proxy inverso con SSL, caché para endpoints de solo lectura, soporte WebSocket para notificaciones, y headers de seguridad correctos. Esta es la configuración que usarías en producción real.
 
-### 📖 Arquitectura objetivo
+### 📖 Estructura del proyecto (arquitectura objetivo)
 
 \`\`\`diagram
 {"type":"tree","root":{"name":"nginx","meta":"HTTPS :443 · SSL termination, cache, headers, rate limiting","icon":"gateway","focal":true},"children":[{"name":"backend1:3001","meta":"Node.js API","edgeLabel":"HTTP interno","icon":"server"},{"name":"backend2:3002","meta":"Node.js API","icon":"server"},{"name":"backend3:3003","meta":"Node.js API — backup","icon":"server","standby":true}]}

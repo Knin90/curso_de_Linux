@@ -1,208 +1,179 @@
 const content = `
-## Módulo 8 — Laboratorio integrador: ciclo completo de software en producción
+## Módulo 8 — Proyecto real: despliegue verificado de nginx en un servidor nuevo
 
 ### 🎯 Objetivos de aprendizaje
 
 * Ejecutar el ciclo completo de gestión de software como lo haría un administrador en producción.
-* Verificar firmas, consultar orígenes, gestionar dependencias y limpiar el sistema.
+* Verificar firmas, consultar orígenes, gestionar dependencias y limpiar el sistema después de instalar.
 * Aplicar el mismo flujo tanto en Debian/Ubuntu como en RHEL/Fedora.
 
-### 🏢 Escenario: configuración de un servidor web nuevo
+### ❓ El problema real
 
-Tienes un servidor recién instalado. El objetivo es instalar nginx desde su repositorio oficial, verificar la instalación, consultar los archivos que introdujo, y dejar el sistema limpio.
+Te entregan un servidor recién instalado (el mismo tipo de máquina del Nivel 1) y te piden dejarlo listo para recibir tráfico web. La política de la empresa exige instalar nginx desde su repositorio oficial —no desde el repositorio genérico de la distro, que trae una versión más vieja— y dejar evidencia de que el paquete instalado corresponde exactamente a ese origen, con sus dependencias resueltas y el sistema limpio de residuos de la instalación.
 
----
+### 📖 Estructura del proyecto
 
-### 🧪 Fase 1: Estado inicial del sistema
-
-\`\`\`bash
-# ¿Cuántos paquetes hay instalados?
-dpkg -l | grep "^ii" | wc -l          # Debian
-rpm -qa | wc -l                        # RHEL
-
-# ¿Cuánto espacio ocupa la caché de paquetes?
-du -sh /var/cache/apt/archives/        # Debian
-du -sh /var/cache/dnf/                 # RHEL
-
-# ¿Está nginx instalado?
-dpkg -s nginx 2>&1 | grep Status      # Debian
-rpm -qi nginx 2>&1 | head -5          # RHEL
+\`\`\`
+deploy-nginx/
+├── 01-estado-inicial.sh
+├── 02-preparar-repo-nginx.sh
+├── 03-instalar-y-verificar.sh
+├── 04-limpieza.sh
+└── historial.md
 \`\`\`
 
----
-
-### 🧪 Fase 2: Actualizar índices y revisar antes de instalar
+### 📖 01-estado-inicial.sh — línea base antes de tocar nada
 
 \`\`\`bash
-# Debian/Ubuntu
-sudo apt update
-apt list --upgradable 2>/dev/null | wc -l   # ¿cuántas actualizaciones disponibles?
+#!/bin/bash
+set -euo pipefail
 
-# RHEL/Fedora
-sudo dnf check-update
+echo "== Paquetes instalados =="
+dpkg -l | grep "^ii" | wc -l          # Debian/Ubuntu
+# rpm -qa | wc -l                     # RHEL/Fedora (usar en su lugar si aplica)
+
+echo "== Espacio ocupado por la caché de paquetes =="
+du -sh /var/cache/apt/archives/       # Debian/Ubuntu
+# du -sh /var/cache/dnf/               # RHEL/Fedora
+
+echo "== ¿nginx ya está instalado? =="
+dpkg -s nginx 2>&1 | grep Status || echo "no instalado"   # Debian/Ubuntu
+# rpm -qi nginx 2>&1 | head -5                              # RHEL/Fedora
 \`\`\`
 
----
-
-### 🧪 Fase 3: Añadir repositorio oficial de nginx (método moderno)
-
-#### Debian/Ubuntu:
+### 📖 02-preparar-repo-nginx.sh — repositorio oficial, no el de la distro
 
 \`\`\`bash
-# Descargar clave GPG
-curl -fsSL https://nginx.org/keys/nginx_signing.key \
-  | sudo gpg --dearmor \
-  -o /usr/share/keyrings/nginx.gpg
+#!/bin/bash
+set -euo pipefail
 
-# Verificar que la clave se guardó correctamente
-ls -lh /usr/share/keyrings/nginx.gpg
+## --- Debian / Ubuntu ---
+# Descargar y guardar la clave GPG del repositorio oficial de nginx
+curl -fsSL https://nginx.org/keys/nginx_signing.key \\
+  | sudo gpg --dearmor -o /usr/share/keyrings/nginx.gpg
 
-# Añadir repositorio con referencia signed-by
-CODENAME=$(lsb_release -cs)
-echo "deb [signed-by=/usr/share/keyrings/nginx.gpg] \\
-  http://nginx.org/packages/ubuntu \${CODENAME} nginx" \\
+# Registrar el repositorio con referencia explícita a esa clave (signed-by)
+CODENAME=\$(lsb_release -cs)
+echo "deb [signed-by=/usr/share/keyrings/nginx.gpg] http://nginx.org/packages/ubuntu \${CODENAME} nginx" \\
   | sudo tee /etc/apt/sources.list.d/nginx.list
 
-# Actualizar e instalar
 sudo apt update
-sudo apt install -y nginx
+
+## --- RHEL / Fedora (usar en su lugar si aplica) ---
+# sudo tee /etc/yum.repos.d/nginx.repo <<'EOF'
+# [nginx-stable]
+# name=nginx stable repo
+# baseurl=http://nginx.org/packages/centos/\$releasever/\$basearch/
+# gpgcheck=1
+# enabled=1
+# gpgkey=https://nginx.org/keys/nginx_signing.key
+# EOF
 \`\`\`
 
-#### RHEL/Fedora:
+### 📖 03-instalar-y-verificar.sh — instalar y probar que vino del repo correcto
 
 \`\`\`bash
-# Crear archivo de repositorio
-sudo tee /etc/yum.repos.d/nginx.repo <<'EOF'
-[nginx-stable]
-name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://nginx.org/keys/nginx_signing.key
-EOF
+#!/bin/bash
+set -euo pipefail
 
-# Instalar
-sudo dnf install -y nginx
+sudo apt install -y nginx           # Debian/Ubuntu
+# sudo dnf install -y nginx          # RHEL/Fedora
+
+echo "== ¿De qué repositorio se instaló? =="
+apt policy nginx                    # Debian/Ubuntu — muestra el origen
+# dnf info nginx | grep "From repo"  # RHEL/Fedora
+
+echo "== Archivos que instaló el paquete =="
+dpkg -L nginx                       # Debian/Ubuntu
+# rpm -ql nginx                     # RHEL/Fedora
+
+echo "== Árbol de dependencias =="
+apt depends nginx                   # Debian/Ubuntu
+# rpm -qR nginx                     # RHEL/Fedora
 \`\`\`
 
----
-
-### 🧪 Fase 4: Verificar la instalación
+### 📖 04-limpieza.sh — dejar el sistema sin residuos de la instalación
 
 \`\`\`bash
-# ¿Desde qué repositorio se instaló?
-apt policy nginx                       # Debian — muestra el origen
-dnf info nginx | grep "From repo"     # RHEL
+#!/bin/bash
+set -euo pipefail
 
-# ¿Qué archivos instaló el paquete?
-dpkg -L nginx                          # Debian
-rpm -ql nginx                          # RHEL
+sudo apt autoremove -y              # Debian/Ubuntu — dependencias huérfanas
+sudo apt clean                      # limpia toda la caché de .deb descargados
+sudo apt autoclean                  # limpia solo versiones antiguas en caché
 
-# ¿A qué paquete pertenece el ejecutable principal?
-dpkg -S $(which nginx)                 # Debian
-rpm -qf $(which nginx)                 # RHEL
+# sudo dnf autoremove -y             # RHEL/Fedora
+# sudo dnf clean all                 # RHEL/Fedora
 
-# Ver información completa instalada
-dpkg -s nginx                          # Debian
-rpm -qi nginx                          # RHEL
-\`\`\`
-
----
-
-### 🧪 Fase 5: Inspeccionar dependencias
-
-\`\`\`bash
-# Ver el árbol de dependencias de nginx
-apt depends nginx                      # Debian
-rpm -qR nginx                          # RHEL
-
-# Confirmar que las dependencias están instaladas
-apt depends nginx | awk '{print $2}' | xargs dpkg -s 2>/dev/null | grep "^Status"
-\`\`\`
-
----
-
-### 🧪 Fase 6: Eliminar y limpiar
-
-\`\`\`bash
-# Debian: eliminar nginx y su configuración
-sudo apt purge nginx nginx-common
-sudo apt autoremove
-
-# Confirmar que desapareció
-dpkg -s nginx 2>&1 | grep Status
-
-# RHEL: eliminar nginx
-sudo dnf remove nginx
-sudo dnf autoremove
-
-# Verificar
-rpm -qi nginx 2>&1 | head -3
-\`\`\`
-
----
-
-### 🧪 Fase 7: Limpiar caché y verificar espacio
-
-\`\`\`bash
-# Debian
-sudo apt clean
-sudo apt autoclean
-du -sh /var/cache/apt/archives/
-
-# RHEL
-sudo dnf clean all
-du -sh /var/cache/dnf/
-
-# Ver espacio recuperado
+echo "== Espacio en disco tras la limpieza =="
 df -h /
 \`\`\`
 
----
+### 📖 historial.md — evidencia de lo que se hizo
 
-### 🧪 Fase 8: Revisar el historial de lo que hiciste
-
-\`\`\`bash
-# Debian: últimas 20 operaciones
-tail -30 /var/log/apt/history.log
-
-# RHEL: historial de DNF
-dnf history
-dnf history info 1    # detalle de la primera transacción de esta sesión
+\`\`\`text
+Servidor:        srv-web-01
+Paquete:         nginx (repositorio oficial nginx.org, no el de Ubuntu)
+Clave GPG:       verificada, guardada en /usr/share/keyrings/nginx.gpg
+Comando:         tail -30 /var/log/apt/history.log
+Resultado:       instalación confirmada, sin dependencias rotas
+Limpieza:        apt autoremove + apt clean ejecutados tras verificar
 \`\`\`
 
+### 📖 Secuencia de ejecución
+
+1. Ejecuta \`01-estado-inicial.sh\` y guarda la salida como línea base.
+2. Ejecuta \`02-preparar-repo-nginx.sh\` para registrar el repositorio oficial con su clave GPG.
+
+Salida esperada de \`apt update\` tras registrar el repo:
+
+\`\`\`
+Get:1 http://nginx.org/packages/ubuntu jammy InRelease [2,553 B]
+Get:2 http://nginx.org/packages/ubuntu jammy/nginx amd64 Packages [1,102 B]
+Fetched 3,655 B in 1s
+Reading package lists... Done
+\`\`\`
+
+3. Ejecuta \`03-instalar-y-verificar.sh\`.
+
+Salida esperada de \`apt policy nginx\` (confirma el origen correcto):
+
+\`\`\`
+nginx:
+  Installed: 1.25.3-1~jammy
+  Candidate: 1.25.3-1~jammy
+  Version table:
+ *** 1.25.3-1~jammy 500
+        500 http://nginx.org/packages/ubuntu jammy/nginx amd64 Packages
+        100 /var/lib/dpkg/status
+\`\`\`
+
+4. Ejecuta \`04-limpieza.sh\` y compara el espacio en disco contra la línea base del paso 1.
+5. Registra el resultado en \`historial.md\` y revisa el log real del sistema para confirmar la traza de la operación:
+
+\`\`\`bash
+tail -30 /var/log/apt/history.log
+\`\`\`
+
+### 📋 Lo que debes recordar
+
+* \`apt policy\` (o \`dnf info ... | grep "From repo"\`) es el comando que confirma que un paquete vino del repositorio esperado, no de uno genérico.
+* Registrar un repositorio de terceros siempre implica verificar su clave GPG (\`signed-by\`) — instalar sin verificar la firma es aceptar código sin garantía de origen.
+* \`dpkg -L\` / \`rpm -ql\` muestran exactamente qué archivos trajo un paquete al sistema, útil para auditar cambios.
+* \`apt autoremove\` + \`apt clean\` después de instalar evita que la caché de paquetes crezca sin control en servidores de producción.
+* El historial (\`/var/log/apt/history.log\` o \`dnf history\`) es la fuente de verdad de lo que realmente se ejecutó, más confiable que la memoria del administrador.
+
+### 🧪 Autoevaluación
+
+1. ¿Por qué se prefiere registrar el repositorio oficial de nginx en lugar de instalar la versión que trae por defecto el repositorio de la distro?
+2. Si \`apt policy nginx\` muestra que el paquete instalado NO proviene de \`nginx.org\`, ¿qué paso del proyecto se saltó o hizo mal el administrador?
+3. ¿Qué diferencia hay entre \`apt clean\` y \`apt autoclean\`?
+
 ---
 
-### 📋 Tabla resumen de herramientas del Nivel 5
-
-| Herramienta | Sistema | Función |
-| --- | --- | --- |
-| \`apt update\` | Debian | Actualizar índices de repositorios |
-| \`apt upgrade\` | Debian | Actualizar paquetes instalados |
-| \`apt install\` | Debian | Instalar paquete |
-| \`apt remove\` | Debian | Eliminar paquete (conserva config) |
-| \`apt purge\` | Debian | Eliminar paquete y configuración |
-| \`apt autoremove\` | Debian | Eliminar dependencias huérfanas |
-| \`apt clean\` | Debian | Limpiar toda la caché |
-| \`apt autoclean\` | Debian | Limpiar versiones antiguas de caché |
-| \`apt policy\` | Debian | Ver origen y versión disponible |
-| \`apt show\` | Debian | Información del paquete |
-| \`apt depends\` | Debian | Ver árbol de dependencias |
-| \`dpkg -i\` | Debian | Instalar \`.deb\` local |
-| \`dpkg -l\` | Debian | Listar paquetes instalados |
-| \`dpkg -L\` | Debian | Archivos instalados por un paquete |
-| \`dpkg -S\` | Debian | Paquete dueño de un archivo |
-| \`dpkg -s\` | Debian | Estado e info del paquete |
-| \`dnf check-update\` | RHEL | Ver actualizaciones disponibles |
-| \`dnf install\` | RHEL | Instalar paquete |
-| \`dnf remove\` | RHEL | Eliminar paquete |
-| \`dnf upgrade\` | RHEL | Actualizar paquetes |
-| \`dnf info\` | RHEL | Información del paquete |
-| \`dnf history\` | RHEL | Historial de transacciones |
-| \`dnf clean all\` | RHEL | Limpiar caché |
-| \`rpm -qi\` | RHEL | Info del paquete instalado |
-| \`rpm -ql\` | RHEL | Archivos del paquete |
-| \`rpm -qf\` | RHEL | Paquete dueño de un archivo |
-| \`rpm -V\` | RHEL | Verificar integridad de archivos |
+1. Porque el repositorio de la distro suele traer una versión más antigua de nginx (fijada al ciclo de release de la distro), mientras que el repositorio oficial de nginx.org ofrece la versión estable más reciente con parches de seguridad al día.
+2. Que \`apt update\` se ejecutó sin haber registrado antes el archivo \`/etc/apt/sources.list.d/nginx.list\` (o lo registró apuntando al repo equivocado), por lo que \`apt install\` resolvió el paquete contra el repositorio genérico de la distro en vez del oficial.
+3. \`apt clean\` elimina TODA la caché de paquetes \`.deb\` descargados; \`apt autoclean\` elimina solo las versiones que ya no se pueden volver a descargar (paquetes obsoletos que ya no están en los repositorios), conservando los que sí siguen disponibles.
 `
+
 export default content

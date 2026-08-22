@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'CI/CD fundamentos: pipelines, stages y artifacts' },
   { id: 6, title: 'GitHub Actions: workflows para deploy en Linux' },
   { id: 7, title: 'Versionado semántico, tags y gestión de releases' },
-  { id: 8, title: 'Laboratorio: pipeline CI/CD completo para servidor Linux' },
+  { id: 8, title: 'Proyecto real: pipeline CI/CD completo para servidor Linux' },
 ]

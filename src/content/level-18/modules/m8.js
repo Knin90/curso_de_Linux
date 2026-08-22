@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: diagnóstico y resolución de problemas DNS
+## Módulo 8 — Proyecto real: diagnóstico y resolución de problemas DNS en producción
 
 ### 🎯 Objetivos de aprendizaje
 * Diagnosticar fallos de resolución DNS usando \`dig\`, \`resolvectl\` y logs de BIND9
@@ -16,6 +16,15 @@ El equipo de operaciones recibe tres tickets simultáneos:
 3. **Ticket #3:** "El servicio interno api.corp.internal no resuelve desde las laptops de los desarrolladores, pero sí desde los servidores."
 
 Cada problema tiene una causa diferente. El diagnóstico sistemático es clave.
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+empresa.com/
+├── /etc/bind/zones/empresa.com.zone       ← zona autoritativa (TTL, MX, SPF)
+├── /etc/systemd/resolved.conf             ← split-horizon para .internal
+└── /var/log/named/named.log               ← log de recargas y queries de BIND9
+\`\`\`
 
 ### 📖 Escenario 1 — Sitio web sin resolver tras migración de dominio
 
@@ -333,7 +342,7 @@ dig google.com A +short
 # 142.250.80.46
 \`\`\`
 
-### 📖 Verificación final del servidor BIND9
+### 📖 Estado final del servidor BIND9
 
 \`\`\`bash
 # Verificar configuración completa de BIND9

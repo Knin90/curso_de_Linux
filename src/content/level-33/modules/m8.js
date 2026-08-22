@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: PostgreSQL de producción completo
+## Módulo 8 — Proyecto real: PostgreSQL de producción completo
 
 ### 🎯 Objetivos de aprendizaje
 * Instalar y configurar PostgreSQL con parámetros de memoria ajustados a producción
@@ -656,7 +656,7 @@ WHERE n_dead_tup > 10000
 ORDER BY n_dead_tup DESC;
 \`\`\`
 
-### 📖 Verificación final del sistema completo
+### 📖 Estado final del sistema completo
 
 \`\`\`bash
 #!/bin/bash

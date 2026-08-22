@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'Pipes, redirección y procesamiento de streams' },
   { id: 6, title: 'sed: edición de streams de texto' },
   { id: 7, title: 'awk: procesamiento de datos estructurados' },
-  { id: 8, title: 'Laboratorio: scripts de producción reales' },
+  { id: 8, title: 'Proyecto real: kit de scripts de producción para un equipo pequeño' },
 ]

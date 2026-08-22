@@ -15,5 +15,5 @@ export const modules = [
   { id: 5, title: 'WebSocket y conexiones de larga duración' },
   { id: 6, title: 'Headers de proxy: X-Forwarded-For y seguridad' },
   { id: 7, title: 'Terminación SSL y re-cifrado backend' },
-  { id: 8, title: 'Laboratorio: arquitectura proxy inverso completa' },
+  { id: 8, title: 'Proyecto real: arquitectura de proxy inverso completa para producción' },
 ]

@@ -1,5 +1,5 @@
 const content = `
-## Módulo 8 — Laboratorio: gestión completa de PKI
+## Módulo 8 — Proyecto real: gestión completa de PKI
 
 ### 🎯 Objetivos de aprendizaje
 * Construir una jerarquía PKI de tres niveles (Root CA → Intermediate CA → Certificado de servidor)
@@ -15,6 +15,32 @@ La empresa necesita asegurar su API interna \`api.empresa.internal\` con TLS y a
 - TLS válido sin advertencias de seguridad (cadena de confianza completa)
 - Solo los clientes con certificado emitido por la CA corporativa pueden acceder
 - La Root CA no debe usarse directamente para firmar certificados (práctica segura: si la Intermediate CA se compromete, se puede revocar sin tocar la Root CA)
+
+### 📖 Estructura del proyecto
+
+\`\`\`
+/root/pki/
+├── root-ca/
+│   ├── root-ca.key
+│   └── root-ca.crt
+├── intermediate-ca/
+│   ├── intermediate-ca.key
+│   ├── intermediate-ca.csr
+│   ├── intermediate-ca.ext
+│   └── intermediate-ca.crt
+├── server/
+│   ├── server.key
+│   ├── server-san.ext
+│   ├── server.csr
+│   ├── server.crt
+│   └── fullchain.crt
+└── client/
+    ├── client.key
+    ├── client.csr
+    └── client.crt
+
+/etc/nginx/sites-available/api.empresa.internal
+\`\`\`
 
 ### 📖 Paso 1 — Crear la Root CA
 
