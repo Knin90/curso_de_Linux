@@ -1,0 +1,148 @@
+/* ---------- Examen final de nivel ---------- */
+/* Revelado progresivo: cada pregunta (y el banner de resultado al enviar)
+   se agrega al DOM recién cuando corresponde mostrarla — la animación es
+   una entrada simple en el propio mount, sin depender de ningún observer
+   de scroll (esos solo miran lo que ya existe al montar la página). */
+@keyframes exam-item-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.level-page .exam-banner {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  animation: exam-item-in 380ms var(--ease-out) both;
+}
+.level-page .exam-retry {
+  margin-top: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .exam-retry:hover { background: var(--accent-ink); }
+}
+.level-page .exam-retry:active { transform: scale(0.97); }
+
+.level-page .exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.level-page .exam-question {
+  background: color-mix(in oklab, var(--surface) 45%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: border-color 0.2s ease;
+  animation: exam-item-in 380ms var(--ease-out) both;
+}
+.level-page .exam-question.exam-correct { border-color: color-mix(in oklab, var(--ok) 45%, var(--border)); }
+.level-page .exam-question.exam-incorrect { border-color: color-mix(in oklab, var(--warn) 45%, var(--border)); }
+
+.level-page .exam-q-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.level-page .exam-q-text {
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--fg);
+  margin-bottom: 14px;
+}
+.level-page .exam-options {
+  display: grid;
+  gap: 8px;
+}
+.level-page .exam-option {
+  text-align: left;
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: color-mix(in oklab, var(--bg) 40%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .exam-option:not(:disabled):hover { border-color: var(--accent); }
+}
+.level-page .exam-option:not(:disabled):active { transform: scale(0.99); }
+.level-page .exam-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.level-page .exam-option:disabled { cursor: default; }
+.level-page .exam-option.correct {
+  border-color: color-mix(in oklab, var(--ok) 55%, var(--border));
+  background: color-mix(in oklab, var(--ok-soft) 80%, transparent);
+}
+.level-page .exam-option.incorrect {
+  border-color: color-mix(in oklab, var(--warn) 55%, var(--border));
+  background: color-mix(in oklab, var(--warn-soft) 80%, transparent);
+}
+
+.level-page .exam-submit-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  margin-top: 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.level-page .exam-progress {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.level-page .exam-submit {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 160ms var(--ease-out), opacity 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .level-page .exam-submit:not(:disabled):hover { background: var(--accent-ink); }
+}
+.level-page .exam-submit:not(:disabled):active { transform: scale(0.97); }
+.level-page .exam-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.level-page .exam-locked-notice {
+  margin-bottom: 20px;
+}

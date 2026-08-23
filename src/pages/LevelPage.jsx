@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getLevel, levels, stages } from '../registry'
 import { contentRegistry } from '../content/contentRegistry'
 import ThemeToggle from '../components/ThemeToggle'
@@ -17,6 +17,8 @@ const stateLevelRef = { current: null }
 
 export default function LevelPage() {
   const { levelId } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   useScrollMemory()
   const pageRef = useRef(null)
   useRevealOnScroll(pageRef)
@@ -30,6 +32,15 @@ export default function LevelPage() {
   const { count, total, isDone } = useLevelProgress(levelId, moduleIds)
   const pct = total ? Math.round((count / total) * 100) : 0
   const allDone = total > 0 && count >= total
+  // Gate del examen: usa moduleCount del registro (nunca un literal como 8,
+  // ya que el nivel 0 tiene moduleCount: 4), no modules.length de contentRegistry.
+  const moduleCount = level?.moduleCount ?? total
+  const examUnlocked = moduleCount > 0 && count >= moduleCount
+
+  // Notice de "examen bloqueado" tras un redirect desde /examen — se limpia
+  // sola para no persistir en remounts o navegación hacia atrás.
+  const examLocked = Boolean(location.state?.examLocked)
+  const dismissExamNotice = () => navigate(location.pathname, { replace: true, state: null })
 
   // % de lectura por módulo (od-reading), releído al montar o cambiar de nivel.
   const [reading, setReading] = useState(() => readLevelReading(levelId))
@@ -150,14 +161,35 @@ export default function LevelPage() {
 
         {/* ---------- MÓDULOS ---------- */}
         <section className="container" id="modulos">
+          {examLocked && (
+            <div className="card-warn exam-locked-notice" data-reveal>
+              <p>
+                Completá todos los módulos antes de rendir el examen.{' '}
+                <button
+                  type="button"
+                  onClick={dismissExamNotice}
+                  style={{ background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+                >
+                  Entendido
+                </button>
+              </p>
+            </div>
+          )}
           <div className="level-modules-head" data-reveal>
             <div>
               <span className="kicker">Contenido del nivel</span>
               <h2 className="level-modules-title">Módulos</h2>
             </div>
-            <Link className="level-cta" to={startTo}>
-              {ctaLabel} <span className="btn-arrow" aria-hidden="true">→</span>
-            </Link>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {examUnlocked && (
+                <Link className="level-cta" to={`/nivel/${level.id}/examen`}>
+                  Rendir examen final <span className="btn-arrow" aria-hidden="true">→</span>
+                </Link>
+              )}
+              <Link className="level-cta" to={startTo}>
+                {ctaLabel} <span className="btn-arrow" aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
           <div className="level-modules">
             {modules.map((m, idx) => (

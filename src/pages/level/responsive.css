@@ -25,6 +25,12 @@
     opacity: 1;
     transform: none;
   }
+  .level-page .exam-question,
+  .level-page .exam-banner {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
   .level-page .flow .fnode,
   .level-page .flow .fedge,
   .level-page .list-steps li,

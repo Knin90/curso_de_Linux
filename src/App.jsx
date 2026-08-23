@@ -6,6 +6,7 @@ import Home from './pages/Home'
 // se cargan bajo demanda; la landing queda con el chunk ligero.
 const LevelPage = lazy(() => import('./pages/LevelPage'))
 const ModulePage = lazy(() => import('./pages/ModulePage'))
+const ExamPage = lazy(() => import('./pages/ExamPage'))
 
 function PageFallback() {
   return (
@@ -43,6 +44,14 @@ export default function App() {
         element={
           <Suspense fallback={<PageFallback />}>
             <ModulePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="nivel/:levelId/examen"
+        element={
+          <Suspense fallback={<PageFallback />}>
+            <ExamPage />
           </Suspense>
         }
       />
