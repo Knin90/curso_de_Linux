@@ -43,6 +43,14 @@ ls -la /etc/systemd/system/multi-user.target.wants/ | grep nginx
 # lrwxrwxrwx ... nginx.service → /usr/lib/systemd/system/nginx.service
 \`\`\`
 
+### 🧱 Visualízalo: el interruptor y la clavija
+
+El interruptor de cada motor es \`start\`/\`stop\`: actúa ahora, pero vive en la RAM. La clavija en el tambor (\`multi-user.target\`) es el enlace que crea \`enable\`. Reinicia con la manivela y mira qué servicios vuelven a girar.
+
+\`\`\`anatomy
+{ "src": "systemd-enable", "title": "enable frente a start" }
+\`\`\`
+
 ### 💻 Los comandos de persistencia
 
 \`\`\`bash

@@ -33,6 +33,14 @@ En Unix/Linux, **todo es un archivo**. Cuando la Shell ejecuta un comando, abre 
 * **\`2>&1\` o \`&>\` (Redirigir stdout + stderr):** Une la salida de error con la salida estándar.
 * **\`|\` (Pipe / Tubería):** Conecta la salida estándar (FD 1) del comando izquierdo con la entrada estándar (FD 0) del comando derecho.
 
+### 🧱 Visualízalo: tres bocas y dos desviadores
+
+El proceso solo escribe por sus bocas 1 (stdout) y 2 (stderr). Es la shell quien decide adónde va cada una antes de arrancarlo. Gira los desviadores y observa cómo cambia el comando.
+
+\`\`\`anatomy
+{ "src": "redireccion", "title": "Descriptores 0, 1 y 2 y redirección" }
+\`\`\`
+
 ### 💻 Ejemplos prácticos
 
 #### 1. Buscar archivos ocultando todos los mensajes de "Permiso Denegado":

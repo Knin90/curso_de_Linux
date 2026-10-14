@@ -51,7 +51,9 @@ export default function AnatomyFigure({ code }) {
 
   return (
     <figure className="b module-figure anatomy-figure">
+      {/* key: un iframe diferido (loading=lazy) no siempre navega si cambia su src */}
       <iframe
+        key={file}
         ref={frame}
         src={file}
         title={spec.title || 'Figura interactiva'}
