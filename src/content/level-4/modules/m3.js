@@ -55,6 +55,14 @@ Esta es la diferencia que más confunde a los administradores nuevos:
         └──── User:   7 = rwx
 \`\`\`
 
+### 🧱 Visualízalo: cada bit es un bloque
+
+Cada permiso vale lo que mide: \`r\` es un bloque de altura 4, \`w\` de altura 2 y \`x\` de altura 1. Mete o saca bloques de cada columna (u, g, o) y observa cómo la altura de la pila **es** el dígito octal.
+
+\`\`\`anatomy
+{ "src": "permisos-octal", "title": "Permisos en octal: bloques patrón r=4, w=2, x=1" }
+\`\`\`
+
 ### 💻 Leer permisos en la práctica
 
 \`\`\`bash

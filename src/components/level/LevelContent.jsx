@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CodeBlock from './CodeBlock'
 import FlowDiagram, { looksLikeFlow } from './FlowDiagram'
 import DiagramRenderer, { isDiagramBlock } from './diagrams'
+import AnatomyFigure, { isAnatomyBlock } from './AnatomyFigure'
 import Inline from './InlineText'
 import useReveal from '../../hooks/useReveal'
 
@@ -308,6 +309,9 @@ function renderBlock(b, key) {
     case 'code':
       if (isDiagramBlock(b.lang)) {
         return <DiagramRenderer key={key} code={b.code} />
+      }
+      if (isAnatomyBlock(b.lang)) {
+        return <AnatomyFigure key={key} code={b.code} />
       }
       if (b.lang === 'text' && looksLikeFlow(b.code)) {
         return <FlowDiagram key={key} code={b.code} />

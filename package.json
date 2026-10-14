@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "audit:exports": "node scripts/audit-exports.mjs"
+    "audit:exports": "node scripts/audit-exports.mjs",
+    "figuras": "node figuras/permisos-octal/build.mjs && node figuras/permisos-octal/build.mjs --light"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -43,6 +43,14 @@
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+.level-page .anatomy-figure iframe {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color-scheme: normal;
+}
 .level-page .module-figure figcaption {
   margin-top: 8px;
   font-size: 12.5px;
